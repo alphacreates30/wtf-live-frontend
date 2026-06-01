@@ -1,0 +1,87 @@
+.auction-room { max-width: 1200px; }
+
+.ar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.ar-badges { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.ar-viewers { font-size: 12px; color: var(--text-muted); }
+.ar-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+.ar-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 8px; }
+.ar-host { font-size: 13px; color: var(--text-muted); }
+
+.ar-timer {
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+.ar-timer.urgent { border-color: var(--red); }
+.ar-timer.urgent .ar-timer-value { color: var(--red); }
+.ar-timer-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.ar-timer-value { font-size: 32px; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
+
+.ar-image { width: 100%; max-height: 400px; overflow: hidden; border-radius: var(--radius); margin-bottom: 24px; }
+.ar-image img { width: 100%; height: 100%; object-fit: cover; }
+
+.ar-body {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .ar-body { grid-template-columns: 1fr; }
+}
+
+.ar-left { display: flex; flex-direction: column; gap: 16px; }
+
+/* Bid panel */
+.ar-bid-panel {}
+.ar-current-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.ar-current-bid { font-size: 42px; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+.ar-leading { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+.ar-bid-form { display: flex; flex-direction: column; gap: 10px; }
+.ar-bid-btn { width: 100%; padding: 14px; font-size: 16px; }
+.ar-ended-msg { margin-top: 12px; font-size: 14px; color: var(--text-muted); }
+
+/* Host panel */
+.ar-host-panel {}
+.ar-host-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.ar-host-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ar-host-btns button { font-size: 13px; padding: 8px 14px; }
+
+/* Bids */
+.ar-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.ar-empty { color: var(--text-muted); font-size: 13px; }
+.ar-bid-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.ar-bid-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.ar-bid-item.top .ar-bid-user { color: var(--accent); }
+.ar-bid-item.top .ar-bid-amount { color: var(--accent); font-weight: 800; }
+.ar-bid-user { color: var(--text-muted); }
+.ar-bid-amount { font-weight: 700; }
+
+/* Chat */
+.ar-chat { display: flex; flex-direction: column; height: 600px; padding: 16px; }
+.ar-chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-right: 4px; }
+.ar-chat-messages::-webkit-scrollbar { width: 4px; }
+.ar-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.ar-chat-msg { font-size: 13px; line-height: 1.4; }
+.ar-chat-msg.system { color: var(--text-muted); font-style: italic; }
+.ar-chat-msg.host .ar-chat-name { color: var(--accent); }
+.ar-chat-name { font-weight: 700; margin-right: 6px; }
+.ar-chat-name.host { color: var(--accent); }
+.ar-chat-name.bidder { color: var(--green); }
+
+.ar-chat-form { display: flex; gap: 8px; }
+.ar-chat-form input { flex: 1; }
+.ar-chat-send { padding: 10px 14px; font-size: 16px; flex-shrink: 0; }

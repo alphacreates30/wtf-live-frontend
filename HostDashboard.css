@@ -1,0 +1,28 @@
+.host-title { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.host-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+
+.host-body {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .host-body { grid-template-columns: 1fr; }
+}
+
+.host-section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+.host-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+textarea { resize: vertical; }
+.host-submit { padding: 12px; font-size: 15px; width: 100%; }
+
+.host-auctions {}
+.host-auction-list { display: flex; flex-direction: column; gap: 12px; }
+.host-auction-item {}
+.host-auction-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.host-auction-category { font-size: 11px; color: var(--text-muted); }
+.host-auction-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.host-auction-stats { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; flex-wrap: wrap; }
+.host-go-btn { font-size: 13px; padding: 7px 14px; }
