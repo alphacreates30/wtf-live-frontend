@@ -32,4 +32,20 @@ export const api = {
 
   getBids: (id) => request(`/auction/${id}/bids`),
   getChat: (id) => request(`/auction/${id}/chat`),
+
+  // Profile
+  getMyProfile: () => request('/profile'),
+  saveProfile: (data) =>
+    request('/profile', { method: 'POST', body: JSON.stringify(data) }),
+  getProfile: (userId) => request(`/profile/${userId}`),
+
+  // Stripe
+  createSetupIntent: () => request('/create-setup-intent', { method: 'POST' }),
+  savePaymentMethod: (payment_method_id, customer_id) =>
+    request('/save-payment-method', { method: 'POST', body: JSON.stringify({ payment_method_id, customer_id }) }),
+
+  // Admin
+  getAdminBuyers: () => request('/admin/buyers'),
+  updateBuyerStatus: (userId, status) =>
+    request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 }
