@@ -22,9 +22,16 @@ export default function Navbar() {
         {token ? (
           <>
             <span className="navbar-user">@{username}</span>
-            <Link to="/host" className={`navbar-link ${location.pathname === '/host' ? 'active' : ''}`}>
-              Host
-            </Link>
+            {username === 'whatthefind' && (
+              <>
+                <Link to="/host" className={`navbar-link ${location.pathname === '/host' ? 'active' : ''}`}>
+                  Host
+                </Link>
+                <Link to="/admin/buyers" className={`navbar-link ${location.pathname === '/admin/buyers' ? 'active' : ''}`}>
+                  Buyers
+                </Link>
+              </>
+            )}
             <button className="btn-ghost navbar-btn" onClick={logout}>Log out</button>
           </>
         ) : (
