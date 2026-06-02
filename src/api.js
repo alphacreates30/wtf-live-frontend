@@ -48,4 +48,13 @@ export const api = {
   getAdminBuyers: () => request('/admin/buyers'),
   updateBuyerStatus: (userId, status) =>
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  getAdminOrders: () => request('/admin/orders'),
+  generateLabel: (order_ids) =>
+    request('/admin/orders/label', { method: 'POST', body: JSON.stringify({ order_ids }) }),
+  groupOrders: (order_ids) =>
+    request('/admin/orders/group', { method: 'POST', body: JSON.stringify({ order_ids }) }),
+  ungroupOrder: (id) =>
+    request(`/admin/orders/${id}/ungroup`, { method: 'POST' }),
+  updateOrderStatus: (id, status) =>
+    request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 }
