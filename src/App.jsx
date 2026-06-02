@@ -7,6 +7,7 @@ import AuctionRoom from './pages/AuctionRoom'
 import HostDashboard from './pages/HostDashboard'
 import ProfileSetup from './pages/ProfileSetup'
 import AdminBuyers from './pages/AdminBuyers'
+import AdminOrders from './pages/AdminOrders'
 import { api } from './api'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -44,7 +45,7 @@ function ProfileGate({ children }) {
   if (!token) return children
 
   if (profileStatus === 'loading') {
-    return <div className="page"><p style={{ color: 'var(--text-muted)', padding: '2rem' }}>Checking profileâ¦</p></div>
+    return <div className="page"><p style={{ color: 'var(--text-muted)', padding: '2rem' }}>Checking profileÃ¢ÂÂ¦</p></div>
   }
 
   if (profileStatus === 'no_profile') {
@@ -54,7 +55,7 @@ function ProfileGate({ children }) {
   if (profileStatus === 'pending') {
     return (
       <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>â³</div>
+        <div style={{ fontSize: '3rem' }}>Ã¢ÂÂ³</div>
         <h2>Pending Approval</h2>
         <p style={{ color: 'var(--text-muted)' }}>
           Your profile is under review. You'll be able to access auctions once approved by the WhatTheFind team.
@@ -66,7 +67,7 @@ function ProfileGate({ children }) {
   if (profileStatus === 'rejected') {
     return (
       <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>â</div>
+        <div style={{ fontSize: '3rem' }}>Ã¢ÂÂ</div>
         <h2>Application Not Approved</h2>
         <p style={{ color: 'var(--text-muted)' }}>
           Your buyer application was not approved. Please contact WhatTheFind for more information.
@@ -78,7 +79,7 @@ function ProfileGate({ children }) {
   if (profileStatus === 'blocked') {
     return (
       <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>ð«</div>
+        <div style={{ fontSize: '3rem' }}>Ã°ÂÂÂ«</div>
         <h2>Account Suspended</h2>
         <p style={{ color: 'var(--text-muted)' }}>Your account has been suspended. Please contact WhatTheFind.</p>
       </div>
@@ -125,6 +126,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminBuyers />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
             </AdminRoute>
           }
         />
