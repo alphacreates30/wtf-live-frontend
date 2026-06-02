@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import './Listings.css'
 
+const ADMIN_USERNAME = 'whatthefind'
+
 function timeLeft(endsAt) {
   const diff = new Date(endsAt) - Date.now()
   if (diff <= 0) return 'Ended'
@@ -68,6 +70,9 @@ export default function Listings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const username = localStorage.getItem('wtf_username')
+  const isAdmin = username === ADMIN_USERNAME
+
   useEffect(() => {
     async function load() {
       setLoading(true)
@@ -94,9 +99,11 @@ export default function Listings() {
           <h1 className="listings-title">Auctions</h1>
           <p className="listings-sub">Bid on unique finds in real time</p>
         </div>
-        <Link to="/host">
-          <button className="btn-primary">+ Host an Auction</button>
-        </Link>
+        {isAdmin && (
+          <Link to="/host">
+            <button className="btn-primary">+ Host an Auction</button>
+          </Link>
+        )}
       </div>
 
       <div className="listings-filters">
@@ -116,7 +123,9 @@ export default function Listings() {
       {!loading && !error && auctions.length === 0 && (
         <div className="listings-empty">
           <p>No {filter === 'all' ? '' : filter} auctions yet.</p>
-          <Link to="/host"><button className="btn-primary" style={{ marginTop: 12 }}>Start one</button></Link>
+          {isAdmin && (
+            <Link to="/host"><button className="btn-primary" style={{ marginTop: 12 }}>Start one</button></Link>
+          )}
         </div>
       )}
 
