@@ -74,11 +74,15 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
       let tracks
       try {
         tracks = await createLocalTracks({
-          audio: true,
+          audio: { echoCancellation: true, noiseSuppression: true },
           video: { facingMode: 'environment' },
         })
       } catch {
-        tracks = await createLocalTracks({ audio: true, video: true })
+        try {
+          tracks = await createLocalTracks({ audio: true, video: true })
+        } catch {
+          tracks = await createLocalTracks({ audio: true, video: false })
+        }
       }
       setLocalTracks(tracks)
       for (const track of tracks) {
@@ -116,7 +120,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
   }, [isConnected, room])
 
   if (!isConnected && !error) {
-    return <div className="livestream-loading">Connecting to streamâ¦</div>
+    return <div className="livestream-loading">Connecting to streamÃ¢ÂÂ¦</div>
   }
 
   if (error && !isConnected) {
@@ -153,9 +157,9 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         <div className="livestream-controls">
           {error && <p className="error-msg">{error}</p>}
           {!isLive ? (
-            <button className="btn-live" onClick={goLive}>ð´ Go Live</button>
+            <button className="btn-live" onClick={goLive}>Ã°ÂÂÂ´ Go Live</button>
           ) : (
-            <button className="btn-stop" onClick={stopLive}>â  End Stream</button>
+            <button className="btn-stop" onClick={stopLive}>Ã¢ÂÂ  End Stream</button>
           )}
         </div>
       )}
