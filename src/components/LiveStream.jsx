@@ -39,7 +39,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         setParticipants(room.remoteParticipants.size + 1)
       } catch (err) {
         console.error('LiveKit connect error:', err)
-        setError('Could not connect to stream. Please check your connection and reload.')
+        setError('Connection failed: ' + (err.message || err.toString()))
       }
     }
 
@@ -116,7 +116,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
   }, [isConnected, room])
 
   if (!isConnected && !error) {
-    return <div className="livestream-loading">Connecting to stream…</div>
+    return <div className="livestream-loading">Connecting to streamâ¦</div>
   }
 
   if (error && !isConnected) {
@@ -153,9 +153,9 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         <div className="livestream-controls">
           {error && <p className="error-msg">{error}</p>}
           {!isLive ? (
-            <button className="btn-live" onClick={goLive}>🔴 Go Live</button>
+            <button className="btn-live" onClick={goLive}>ð´ Go Live</button>
           ) : (
-            <button className="btn-stop" onClick={stopLive}>■ End Stream</button>
+            <button className="btn-stop" onClick={stopLive}>â  End Stream</button>
           )}
         </div>
       )}
