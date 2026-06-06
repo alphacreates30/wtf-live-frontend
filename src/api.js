@@ -65,6 +65,7 @@ export const api = {
   getAdminBuyers: () => request('/admin/buyers'),
   updateBuyerStatus: (userId, status) =>
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  deleteAuction: (id) => request(`/auction/${id}`, { method: 'DELETE' }),
   getAdminOrders: () => request('/admin/orders'),
   generateLabel: (order_ids) =>
     request('/admin/orders/label', { method: 'POST', body: JSON.stringify({ order_ids }) }),
