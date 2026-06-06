@@ -60,7 +60,7 @@ export default function AuctionRoom() {
       setAccessError({ code: 'blocked', message })
     })
 
-    // Another user was blocked â hide their messages
+    // Another user was blocked  hide their messages
     socket.on('messages_flagged', ({ username: flaggedUsername }) => {
       setFlaggedUsers(prev => new Set([...prev, flaggedUsername]))
     })
@@ -100,7 +100,7 @@ export default function AuctionRoom() {
       setAuction(prev => prev ? { ...prev, status: 'ended' } : prev)
       setChat(prev => [...prev, {
         id: 'ended', type: 'system',
-        text: `ð Auction ended! Winner: @${winner} with $${final_bid}`,
+        text: `Auction ended! Winner: @${winner} with $${final_bid}`,
         created_at: new Date().toISOString()
       }])
     })
@@ -117,7 +117,7 @@ export default function AuctionRoom() {
       setBlockingUser(null)
       setChat(prev => [...prev, {
         id: 'block-' + targetUsername, type: 'system',
-        text: `ð« @${targetUsername} has been removed from this auction.`,
+        text: ` @${targetUsername} has been removed from this auction.`,
         created_at: new Date().toISOString()
       }])
     })
@@ -183,11 +183,11 @@ export default function AuctionRoom() {
 
   // Access denied screen (not approved, blocked, etc.)
   if (accessError) {
-    const icons = { pending: 'â³', blocked: 'ð«', no_profile: 'ð', payment_failed: 'ð³' }
+    const icons = { pending: '...', blocked: '...', no_profile: '...', payment_failed: '...' }
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
         <div className="card" style={{ textAlign: 'center', maxWidth: 420, padding: '2.5rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>{icons[accessError.code] || 'ð'}</div>
+          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>{icons[accessError.code] || '...'}</div>
           <h2 style={{ marginBottom: '0.5rem' }}>
             {accessError.code === 'pending' ? 'Approval Required' :
              accessError.code === 'blocked' ? 'Removed from Auction' :
@@ -195,7 +195,7 @@ export default function AuctionRoom() {
           </h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{accessError.message}</p>
           {accessError.code === 'no_profile' && (
-            <button className="btn-primary" onClick={() => navigate('/profile-setup')}>Complete Profile â</button>
+            <button className="btn-primary" onClick={() => navigate('/profile-setup')}>Complete Profile </button>
           )}
           {accessError.code === 'pending' && (
             <button className="btn-ghost" onClick={() => navigate('/')}>Browse Auctions</button>
@@ -208,7 +208,7 @@ export default function AuctionRoom() {
     )
   }
 
-  if (!auction) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading auctionâ¦</p></div>
+  if (!auction) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading auction...</p></div>
 
   const isHost = username === auction.host_username
   const isLive = auction.status === 'live'
@@ -226,7 +226,7 @@ export default function AuctionRoom() {
           <div className="ar-badges">
             <span className={`badge badge-${auction.status}`}>{auction.status}</span>
             {auction.category && <span className="auction-category">{auction.category}</span>}
-            <span className="ar-viewers">ð {viewers} watching</span>
+            <span className="ar-viewers"> {viewers} watching</span>
           </div>
           <h1 className="ar-title">{auction.title}</h1>
           {auction.description && <p className="ar-desc">{auction.description}</p>}
@@ -268,14 +268,14 @@ export default function AuctionRoom() {
                 />
                 {bidError && <p className="error-msg">{bidError}</p>}
                 <button type="submit" className="btn-primary ar-bid-btn" disabled={bidLoading}>
-                  {bidLoading ? 'Placingâ¦' : token ? `Bid $${bidAmount || 'â'}` : 'Log in to bid'}
+                  {bidLoading ? 'Placing...' : token ? `Bid ${bidAmount || '?'}` : 'Log in to bid'}
                 </button>
               </form>
             )}
 
             {isEnded && (
               <div className="ar-ended-msg">
-                ð Auction ended{auction.leading_bidder ? ` â @${auction.leading_bidder} won with $${auction.current_bid.toLocaleString()}` : ''}
+                Auction ended{auction.leading_bidder ? `  @${auction.leading_bidder} won${auction.current_bid.toLocaleString()}` : ''}
               </div>
             )}
           </div>
@@ -286,18 +286,18 @@ export default function AuctionRoom() {
               <h3 className="ar-host-title">Host Controls</h3>
               <div className="ar-host-btns">
                 {auction.status === 'upcoming' && (
-                  <button className="btn-green" onClick={() => hostAction('start_auction')}>â¶ Start Now</button>
+                  <button className="btn-green" onClick={() => hostAction('start_auction')}>Start Now</button>
                 )}
                 {isLive && (
                   <>
                     <button className="btn-ghost" onClick={() => hostAction('extend_auction', { extraSeconds: 300 })}>+5 min</button>
                     <button className="btn-ghost" onClick={() => hostAction('extend_auction', { extraSeconds: 600 })}>+10 min</button>
-                    <button className="btn-danger" onClick={() => { if (confirm('End auction now?')) hostAction('end_auction') }}>â  End Auction</button>
+                    <button className="btn-danger" onClick={() => { if (confirm('End auction now?')) hostAction('end_auction') }}>End Auction</button>
                   </>
                 )}
               </div>
 
-              {/* Live viewer block panel â only visible to admin/host */}
+              {/* Live viewer block panel  only visible to admin/host */}
               {isLive && chatUsers.length > 0 && (
                 <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border, #333)', paddingTop: '0.75rem' }}>
                   <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Active viewers</p>
@@ -307,15 +307,15 @@ export default function AuctionRoom() {
                         <span style={{ fontSize: '0.82rem' }}>@{u}</span>
                         <button
                           onClick={() => {
-                            // We need the userId for this username â we'll use username as the key
+                            // We need the userId for this username  we'll use username as the key
                             // The backend accepts targetUsername for chat flagging; targetUserId for profile block
                             // For simplicity here we pass username and look up on the server
-                            blockUser(u, u) // passing username as id placeholder â see note below
+                            blockUser(u, u) // passing username as id placeholder  see note below
                           }}
                           disabled={blockingUser === u || flaggedUsers.has(u)}
                           style={{ fontSize: '0.72rem', padding: '2px 8px', background: flaggedUsers.has(u) ? '#333' : '#2a001a', color: flaggedUsers.has(u) ? '#666' : '#cc44ff', border: '1px solid currentColor', borderRadius: '4px', cursor: 'pointer' }}
                         >
-                          {blockingUser === u ? 'â¦' : flaggedUsers.has(u) ? 'Blocked' : 'ð« Block'}
+                          {blockingUser === u ? '...' : flaggedUsers.has(u) ? 'Blocked' : 'Block'}
                         </button>
                       </div>
                     ))}
@@ -364,13 +364,13 @@ export default function AuctionRoom() {
           <form onSubmit={sendChat} className="ar-chat-form">
             <input
               type="text"
-              placeholder={token ? 'Say somethingâ¦' : 'Log in to chat'}
+              placeholder={token ? 'Say something...' : 'Log in to chat'}
               value={chatText}
               onChange={e => setChatText(e.target.value)}
               disabled={!token}
               maxLength={200}
             />
-            <button type="submit" className="btn-primary ar-chat-send" disabled={!token}>â</button>
+            <button type="submit" className="btn-primary ar-chat-send" disabled={!token}>Send</button>
           </form>
         </div>
         <ItemQueue
