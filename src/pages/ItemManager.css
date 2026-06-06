@@ -1,0 +1,26 @@
+.item-manager { margin-top: 1.5rem; }
+.im-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+.im-empty { color: var(--text-muted, #888); font-size: 0.9rem; margin-bottom: 1rem; }
+.im-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+.im-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-card, #1a1a1a); border-radius: 6px; border: 1px solid var(--border, #333); position: relative; }
+.im-item.active { border-color: #E05C1A; background: #E05C1A11; }
+.im-item.sold { opacity: 0.5; }
+.im-pos { font-weight: 700; color: var(--text-muted, #888); font-size: 0.85rem; min-width: 20px; }
+.im-img { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; }
+.im-info { flex: 1; min-width: 0; }
+.im-name { font-weight: 600; font-size: 0.9rem; }
+.im-meta { font-size: 0.8rem; color: var(--text-muted, #888); margin-top: 2px; }
+.im-prebids { color: #E05C1A; }
+.im-actions { display: flex; gap: 0.3rem; }
+.im-btn { background: var(--bg, #111); border: 1px solid var(--border, #333); color: var(--text, #fff); border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.85rem; }
+.im-btn:hover { border-color: #E05C1A; }
+.im-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.im-del { color: #f87171; border-color: #f87171; }
+.im-status-badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 10px; background: #333; color: #888; text-transform: uppercase; position: absolute; top: 4px; right: 4px; }
+.im-status-badge.active { background: #E05C1A22; color: #E05C1A; }
+.im-status-badge.sold { background: #22222; color: #555; }
+.im-form { background: var(--bg-card, #1a1a1a); border-radius: 8px; padding: 1rem; border: 1px solid var(--border, #333); }
+.im-form h4 { margin: 0 0 0.75rem; font-size: 0.95rem; }
+.im-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+.im-form input { width: 100%; padding: 0.5rem 0.75rem; background: var(--bg, #111); border: 1px solid var(--border, #333); border-radius: 6px; color: var(--text, #fff); font-size: 0.9rem; margin-bottom: 0.5rem; box-sizing: border-box; }
+.im-form button { width: 100%; margin-top: 0.25rem; }
