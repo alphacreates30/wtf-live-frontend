@@ -135,7 +135,8 @@ export default function HostDashboard() {
                   <span>Current bid: <strong>${a.current_bid.toLocaleString()}</strong></span>
                   {a.leading_bidder && <span>Leader: <strong>@{a.leading_bidder}</strong></span>}
                 </div>
-                <Link to={`/auction/${a.id}`}>
+                <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)} style={{marginRight:'0.5rem'}}>{selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}</button>
+<Link to={`/auction/${a.id}`}>
                   <button className="btn-ghost host-go-btn">
                     {a.status === 'live' ? 'Ã°ÂÂÂ´ Open Room' : 'View Ã¢ÂÂ'}
                   </button>
