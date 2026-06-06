@@ -118,7 +118,7 @@ export default function Listings() {
         ))}
       </div>
 
-      {loading && <p className="listings-status">Loading auctions…</p>}
+      {loading && <p className="listings-status">Loading auctions...</p>}
       {error && <p className="error-msg">{error}</p>}
       {!loading && !error && auctions.length === 0 && (
         <div className="listings-empty">
