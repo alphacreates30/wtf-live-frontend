@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
+import ItemManager from './ItemManager'
 import './HostDashboard.css'
 
 const EMPTY_FORM = {
@@ -25,6 +26,7 @@ export default function HostDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [selectedAuction, setSelectedAuction] = useState(null)
 
   async function loadAuctions() {
     try {
@@ -54,7 +56,7 @@ export default function HostDashboard() {
         starts_at: form.starts_at || undefined,
         ends_at: new Date(form.ends_at).toISOString(),
       })
-      setSuccess('Auction created!')
+      const newId = data.id; setSuccess('Auction created!'); setSelectedAuction(data)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(30) })
       await loadAuctions()
     } catch (err) {
@@ -79,11 +81,11 @@ export default function HostDashboard() {
           <form onSubmit={handleSubmit} className="host-form">
             <div className="form-group">
               <label>Title *</label>
-              <input name="title" value={form.title} onChange={handleChange} placeholder="1:6 Custom Figure…" required />
+              <input name="title" value={form.title} onChange={handleChange} placeholder="1:6 Custom Figureâ¦" required />
             </div>
             <div className="form-group">
               <label>Description</label>
-              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this item…" rows={3} />
+              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this itemâ¦" rows={3} />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -97,7 +99,7 @@ export default function HostDashboard() {
             </div>
             <div className="form-group">
               <label>Image URL</label>
-              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://…" />
+              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://â¦" />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -110,9 +112,9 @@ export default function HostDashboard() {
               </div>
             </div>
             {error && <p className="error-msg">{error}</p>}
-            {success && <p className="success-msg">✓ {success}</p>}
+            {success && <p className="success-msg">â {success}</p>}
             <button type="submit" className="btn-primary host-submit" disabled={loading}>
-              {loading ? 'Creating…' : 'Create Auction'}
+              {loading ? 'Creatingâ¦' : 'Create Auction'}
             </button>
           </form>
         </div>
@@ -135,13 +137,19 @@ export default function HostDashboard() {
                 </div>
                 <Link to={`/auction/${a.id}`}>
                   <button className="btn-ghost host-go-btn">
-                    {a.status === 'live' ? '🔴 Open Room' : 'View →'}
+                    {a.status === 'live' ? 'ð´ Open Room' : 'View â'}
                   </button>
                 </Link>
               </div>
             ))}
           </div>
         </div>
+        {selectedAuction && (
+          <div className="card" style={{marginTop: '1.5rem'}}>
+            <h2 style={{marginBottom: 0}}>{selectedAuction.title} — Items</h2>
+            <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status} />
+          </div>
+        )}
       </div>
     </div>
   )
