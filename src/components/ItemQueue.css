@@ -1,0 +1,36 @@
+.item-queue { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border, #333); }
+.iq-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.iq-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
+.iq-next { font-size: 0.85rem; padding: 0.4rem 0.9rem; }
+.iq-active { background: #E05C1A18; border: 1px solid #E05C1A; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center; }
+.iq-active-label { font-size: 0.7rem; font-weight: 700; color: #E05C1A; letter-spacing: 1px; margin-bottom: 0.5rem; }
+.iq-active-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; margin-bottom: 0.5rem; }
+.iq-active-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+.iq-active-desc { font-size: 0.85rem; color: var(--text-muted, #888); margin-bottom: 0.5rem; }
+.iq-active-bid { font-size: 0.9rem; color: #E05C1A; font-weight: 600; }
+.iq-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.iq-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--bg-card, #1a1a1a); border-radius: 6px; border: 1px solid var(--border, #333); }
+.iq-active { border-color: #E05C1A; }
+.iq-sold { opacity: 0.45; }
+.iq-num { font-size: 0.8rem; color: var(--text-muted, #888); min-width: 18px; }
+.iq-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+.iq-info { flex: 1; min-width: 0; }
+.iq-title { font-size: 0.9rem; font-weight: 600; }
+.iq-details { font-size: 0.78rem; color: var(--text-muted, #888); margin-top: 2px; }
+.iq-prebid-info { color: #E05C1A; }
+.iq-my-prebid { font-size: 0.75rem; color: #34d399; margin-top: 3px; display: flex; align-items: center; gap: 0.5rem; }
+.iq-cancel-prebid { font-size: 0.7rem; color: #f87171; background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+.iq-prebid-btn { font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap; }
+.iq-badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 10px; text-transform: uppercase; white-space: nowrap; }
+.iq-badge-active { background: #E05C1A22; color: #E05C1A; }
+.iq-badge-sold { background: #1a1a1a; color: #555; border: 1px solid #333; }
+.iq-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+.iq-modal { background: var(--bg-card, #1a1a1a); border: 1px solid var(--border, #333); border-radius: 10px; padding: 1.5rem; width: 100%; max-width: 400px; }
+.iq-modal h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+.iq-modal-sub { font-size: 0.85rem; color: var(--text-muted, #888); margin-bottom: 1rem; }
+.iq-modal-info { font-size: 0.85rem; color: #E05C1A; margin-bottom: 1rem; }
+.iq-modal-input-wrap { display: flex; align-items: center; border: 1px solid var(--border, #333); border-radius: 6px; overflow: hidden; margin-bottom: 1rem; }
+.iq-dollar { padding: 0 0.75rem; color: var(--text-muted, #888); background: var(--bg, #111); border-right: 1px solid var(--border, #333); }
+.iq-modal-input { flex: 1; padding: 0.6rem 0.75rem; background: var(--bg, #111); border: none; color: var(--text, #fff); font-size: 1rem; outline: none; }
+.iq-modal-btns { display: flex; gap: 0.75rem; }
+.iq-modal-btns button { flex: 1; }
