@@ -5,13 +5,7 @@ import ItemManager from './ItemManager'
 import './HostDashboard.css'
 
 const EMPTY_FORM = {
-  title: '',
-  description: '',
-  image_url: '',
-  category: '',
-  starting_bid: '',
-  starts_at: '',
-  ends_at: '',
+  title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
 }
 
 function dateTimeLocal(offsetMinutes = 30) {
@@ -56,7 +50,8 @@ export default function HostDashboard() {
         starts_at: form.starts_at || undefined,
         ends_at: new Date(form.ends_at).toISOString(),
       })
-      setSuccess('Auction created!'); setSelectedAuction(data)
+      setSuccess('Auction created!')
+      setSelectedAuction(data)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(30) })
       await loadAuctions()
     } catch (err) {
@@ -73,19 +68,17 @@ export default function HostDashboard() {
     <div className="page host-page">
       <h1 className="host-title">Host Dashboard</h1>
       <p className="host-sub">Logged in as <strong>@{username}</strong></p>
-
       <div className="host-body">
-        {/* Create form */}
         <div className="card host-form-card">
           <h2 className="host-section-title">Create Auction</h2>
           <form onSubmit={handleSubmit} className="host-form">
             <div className="form-group">
               <label>Title *</label>
-              <input name="title" value={form.title} onChange={handleChange} placeholder="1:6 Custom FigureÃ¢ÂÂ¦" required />
+              <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. 1:6 Custom Figure" required />
             </div>
             <div className="form-group">
               <label>Description</label>
-              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this itemÃ¢ÂÂ¦" rows={3} />
+              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this item" rows={3} />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -99,7 +92,7 @@ export default function HostDashboard() {
             </div>
             <div className="form-group">
               <label>Image URL</label>
-              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://Ã¢ÂÂ¦" />
+              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://..." />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -112,14 +105,12 @@ export default function HostDashboard() {
               </div>
             </div>
             {error && <p className="error-msg">{error}</p>}
-            {success && <p className="success-msg">Ã¢ÂÂ {success}</p>}
+            {success && <p className="success-msg">{success}</p>}
             <button type="submit" className="btn-primary host-submit" disabled={loading}>
-              {loading ? 'CreatingÃ¢ÂÂ¦' : 'Create Auction'}
+              {loading ? 'Creating...' : 'Create Auction'}
             </button>
           </form>
         </div>
-
-        {/* My auctions */}
         <div className="host-auctions">
           <h2 className="host-section-title">My Auctions</h2>
           {sorted.length === 0 && <p className="ar-empty">No auctions yet. Create your first one!</p>}
@@ -135,19 +126,23 @@ export default function HostDashboard() {
                   <span>Current bid: <strong>${a.current_bid.toLocaleString()}</strong></span>
                   {a.leading_bidder && <span>Leader: <strong>@{a.leading_bidder}</strong></span>}
                 </div>
-                <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)} style={{marginRight:'0.5rem'}}>{selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}</button>
-<Link to={`/auction/${a.id}`}>
-                  <button className="btn-ghost host-go-btn">
-                    {a.status === 'live' ? 'Ã°ÂÂÂ´ Open Room' : 'View Ã¢ÂÂ'}
+                <div style={{display:'flex',gap:'0.5rem',marginTop:'0.5rem'}}>
+                  <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)}>
+                    {selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}
                   </button>
-                </Link>
+                  <Link to={`/auction/${a.id}`}>
+                    <button className="btn-ghost host-go-btn">
+                      {a.status === 'live' ? 'Open Room' : 'View'}
+                    </button>
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
         </div>
         {selectedAuction && (
           <div className="card" style={{marginTop: '1.5rem'}}>
-            <h2 style={{marginBottom: 0}}>{selectedAuction.title} â Items</h2>
+            <h2 style={{marginBottom: 0}}>{selectedAuction.title} - Items</h2>
             <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status} />
           </div>
         )}
