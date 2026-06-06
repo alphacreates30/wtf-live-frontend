@@ -61,6 +61,11 @@ export default function HostDashboard() {
     }
   }
 
+  async function deleteAuction(auctionId) {
+    if (!confirm('Delete this auction permanently?')) return;
+    try { await api.deleteAuction(auctionId); await loadAuctions(); } catch (err) { alert(err.message); }
+  }
+
   const statusOrder = { live: 0, upcoming: 1, ended: 2 }
   const sorted = [...auctions].sort((a, b) => (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3))
 
@@ -127,6 +132,7 @@ export default function HostDashboard() {
                   {a.leading_bidder && <span>Leader: <strong>@{a.leading_bidder}</strong></span>}
                 </div>
                 <div style={{display:'flex',gap:'0.5rem',marginTop:'0.5rem'}}>
+                  {a.status === 'ended' && <button className="btn-danger" style={{fontSize:'0.75rem',padding:'0.3rem 0.6rem'}} onClick={() => deleteAuction(a.id)}>Delete</button>}
                   <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)}>
                     {selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}
                   </button>
