@@ -47,7 +47,7 @@ export default function HostDashboard() {
     setSuccess('')
     setLoading(true)
     try {
-      await api.createAuction({
+      const data = await api.createAuction({
         title: form.title,
         description: form.description || undefined,
         image_url: form.image_url || undefined,
@@ -56,7 +56,7 @@ export default function HostDashboard() {
         starts_at: form.starts_at || undefined,
         ends_at: new Date(form.ends_at).toISOString(),
       })
-      const newId = data.id; setSuccess('Auction created!'); setSelectedAuction(data)
+      setSuccess('Auction created!'); setSelectedAuction(data)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(30) })
       await loadAuctions()
     } catch (err) {
@@ -81,11 +81,11 @@ export default function HostDashboard() {
           <form onSubmit={handleSubmit} className="host-form">
             <div className="form-group">
               <label>Title *</label>
-              <input name="title" value={form.title} onChange={handleChange} placeholder="1:6 Custom Figureâ¦" required />
+              <input name="title" value={form.title} onChange={handleChange} placeholder="1:6 Custom FigureÃ¢ÂÂ¦" required />
             </div>
             <div className="form-group">
               <label>Description</label>
-              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this itemâ¦" rows={3} />
+              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Tell bidders about this itemÃ¢ÂÂ¦" rows={3} />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -99,7 +99,7 @@ export default function HostDashboard() {
             </div>
             <div className="form-group">
               <label>Image URL</label>
-              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://â¦" />
+              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://Ã¢ÂÂ¦" />
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -112,9 +112,9 @@ export default function HostDashboard() {
               </div>
             </div>
             {error && <p className="error-msg">{error}</p>}
-            {success && <p className="success-msg">â {success}</p>}
+            {success && <p className="success-msg">Ã¢ÂÂ {success}</p>}
             <button type="submit" className="btn-primary host-submit" disabled={loading}>
-              {loading ? 'Creatingâ¦' : 'Create Auction'}
+              {loading ? 'CreatingÃ¢ÂÂ¦' : 'Create Auction'}
             </button>
           </form>
         </div>
@@ -137,7 +137,7 @@ export default function HostDashboard() {
                 </div>
                 <Link to={`/auction/${a.id}`}>
                   <button className="btn-ghost host-go-btn">
-                    {a.status === 'live' ? 'ð´ Open Room' : 'View â'}
+                    {a.status === 'live' ? 'Ã°ÂÂÂ´ Open Room' : 'View Ã¢ÂÂ'}
                   </button>
                 </Link>
               </div>
@@ -146,7 +146,7 @@ export default function HostDashboard() {
         </div>
         {selectedAuction && (
           <div className="card" style={{marginTop: '1.5rem'}}>
-            <h2 style={{marginBottom: 0}}>{selectedAuction.title} — Items</h2>
+            <h2 style={{marginBottom: 0}}>{selectedAuction.title} â Items</h2>
             <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status} />
           </div>
         )}
