@@ -126,7 +126,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
   }, [isConnected, room])
 
   if (!isConnected && !error) {
-    return <div className="livestream-loading">Connecting to streamÃÂ¢ÃÂÃÂ¦</div>
+    return <div className="livestream-loading">Connecting to streamÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦</div>
   }
 
   if (error && !isConnected) {
@@ -163,9 +163,9 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         <div className="livestream-controls">
           {error && <p className="error-msg">{error}</p>}
           {!isLive ? (
-            <button className="btn-live" onClick={goLive}>ÃÂ°ÃÂÃÂÃÂ´ Go Live</button>
+            <button className="btn-live" onClick={goLive}>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ´ Go Live</button>
           ) : (
-            <button className="btn-stop" onClick={stopLive}>ÃÂ¢ÃÂÃÂ  End Stream</button>
+            <button className="btn-stop" onClick={stopLive}>ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ  End Stream</button>
           )}
         </div>
       )}
