@@ -44,6 +44,23 @@ export const api = {
   savePaymentMethod: (payment_method_id, customer_id) =>
     request('/save-payment-method', { method: 'POST', body: JSON.stringify({ payment_method_id, customer_id }) }),
 
+  // Auction Items
+  getAuctionItems: (auctionId) => request(`/auction/${auctionId}/items`),
+  createAuctionItem: (auctionId, data) =>
+    request(`/auction/${auctionId}/items`, { method: 'POST', body: JSON.stringify(data) }),
+  updateAuctionItem: (auctionId, itemId, data) =>
+    request(`/auction/${auctionId}/items/${itemId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteAuctionItem: (auctionId, itemId) =>
+    request(`/auction/${auctionId}/items/${itemId}`, { method: 'DELETE' }),
+
+  // Pre-bids
+  placePrebid: (auctionId, itemId, max_amount) =>
+    request(`/auction/${auctionId}/items/${itemId}/prebid`, { method: 'POST', body: JSON.stringify({ max_amount }) }),
+  getMyPrebid: (auctionId, itemId) =>
+    request(`/auction/${auctionId}/items/${itemId}/prebid`),
+  cancelPrebid: (auctionId, itemId) =>
+    request(`/auction/${auctionId}/items/${itemId}/prebid`, { method: 'DELETE' }),
+
   // Admin
   getAdminBuyers: () => request('/admin/buyers'),
   updateBuyerStatus: (userId, status) =>
