@@ -56,6 +56,9 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         track.attach(hostVideoRef.current)
         setIsLive(true)
       }
+      if (track.kind === Track.Kind.Audio) {
+        track.attach()
+      }
     })
     room.on(RoomEvent.TrackUnsubscribed, (track) => {
       if (track.kind === Track.Kind.Video) {
@@ -115,12 +118,15 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
           publication.track.attach(hostVideoRef.current)
           setIsLive(true)
         }
+        if (publication.track && publication.kind === Track.Kind.Audio) {
+          publication.track.attach()
+        }
       }
     }
   }, [isConnected, room])
 
   if (!isConnected && !error) {
-    return <div className="livestream-loading">Connecting to streamÃ¢ÂÂ¦</div>
+    return <div className="livestream-loading">Connecting to streamÃÂ¢ÃÂÃÂ¦</div>
   }
 
   if (error && !isConnected) {
@@ -157,9 +163,9 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
         <div className="livestream-controls">
           {error && <p className="error-msg">{error}</p>}
           {!isLive ? (
-            <button className="btn-live" onClick={goLive}>Ã°ÂÂÂ´ Go Live</button>
+            <button className="btn-live" onClick={goLive}>ÃÂ°ÃÂÃÂÃÂ´ Go Live</button>
           ) : (
-            <button className="btn-stop" onClick={stopLive}>Ã¢ÂÂ  End Stream</button>
+            <button className="btn-stop" onClick={stopLive}>ÃÂ¢ÃÂÃÂ  End Stream</button>
           )}
         </div>
       )}
