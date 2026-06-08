@@ -10,6 +10,8 @@ export default function ItemQueue({ auctionId, isHost, token }) {
   const [myPrebids, setMyPrebids] = useState({}) // itemId -> max_amount
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [itemTimeLeft, setItemTimeLeft] = useState(null)
+  const [nextItemTimer, setNextItemTimer] = useState(60)
   const username = localStorage.getItem('wtf_username')
 
   useEffect(() => {
@@ -19,15 +21,21 @@ export default function ItemQueue({ auctionId, isHost, token }) {
   useEffect(() => {
     const socket = getSocket()
     if (!socket) return
-    socket.on('item_activated', ({ item }) => {
+    socket.on('item_activated', ({ item, timer_seconds }) => {
       setActiveItem(item)
+      setItemTimeLeft(timer_seconds || 60)
       setItems(prev => prev.map(i => i.id === item.id ? item : i.status === 'active' ? {...i, status: 'sold'} : i))
+    })
+    socket.on('item_timer_tick', ({ seconds }) => {
+      setItemTimeLeft(seconds)
     })
     socket.on('items_finished', () => {
       setActiveItem(null)
+      setItemTimeLeft(null)
     })
     return () => {
       socket.off('item_activated')
+      socket.off('item_timer_tick')
       socket.off('items_finished')
     }
   }, [auctionId])
@@ -53,7 +61,7 @@ export default function ItemQueue({ auctionId, isHost, token }) {
   async function handleNextItem() {
     const socket = getSocket()
     if (!socket || !token) return
-    socket.emit('next_item', { auctionId, token })
+    socket.emit('next_item', { auctionId, token, timerSeconds: nextItemTimer })
   }
 
   async function handlePrebid(e) {
@@ -87,15 +95,31 @@ export default function ItemQueue({ auctionId, isHost, token }) {
       <div className="iq-header">
         <h3>Items in this Show</h3>
         {isHost && (
-          <button className="btn-primary iq-next" onClick={handleNextItem}>
-            {activeItem ? 'Next Item →' : 'Start First Item →'}
-          </button>
+          <div className="iq-host-controls">
+            <select value={nextItemTimer} onChange={e => setNextItemTimer(Number(e.target.value))} className="iq-timer-select">
+              <option value={30}>30s</option>
+              <option value={60}>1m</option>
+              <option value={90}>90s</option>
+              <option value={120}>2m</option>
+              <option value={180}>3m</option>
+            </select>
+            <button className="btn-primary iq-next" onClick={handleNextItem}>
+              {activeItem ? 'Next Item →' : 'Start First Item →'}
+            </button>
+          </div>
         )}
       </div>
 
       {activeItem && (
         <div className="iq-active">
-          <div className="iq-active-label">NOW SELLING</div>
+          <div className="iq-active-label-row">
+            <div className="iq-active-label">NOW SELLING</div>
+            {itemTimeLeft !== null && (
+              <div className={`iq-item-timer${itemTimeLeft <= 10 ? ' urgent' : ''}`}>
+                {itemTimeLeft > 0 ? `${itemTimeLeft}s` : "Time's up!"}
+              </div>
+            )}
+          </div>
           {activeItem.image_url && <img src={activeItem.image_url} alt={activeItem.title} className="iq-active-img" />}
           <div className="iq-active-title">{activeItem.title}</div>
           {activeItem.description && <div className="iq-active-desc">{activeItem.description}</div>}
