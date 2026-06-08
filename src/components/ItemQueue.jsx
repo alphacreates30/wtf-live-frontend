@@ -11,7 +11,7 @@ export default function ItemQueue({ auctionId, isHost, token }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [itemTimeLeft, setItemTimeLeft] = useState(null)
-  const [nextItemTimer, setNextItemTimer] = useState(60)
+  const [nextItemTimer, setNextItemTimer] = useState(30)
   const username = localStorage.getItem('wtf_username')
 
   useEffect(() => {
@@ -97,11 +97,9 @@ export default function ItemQueue({ auctionId, isHost, token }) {
         {isHost && (
           <div className="iq-host-controls">
             <select value={nextItemTimer} onChange={e => setNextItemTimer(Number(e.target.value))} className="iq-timer-select">
+              <option value={10}>10s</option>
+              <option value={15}>15s</option>
               <option value={30}>30s</option>
-              <option value={60}>1m</option>
-              <option value={90}>90s</option>
-              <option value={120}>2m</option>
-              <option value={180}>3m</option>
             </select>
             <button className="btn-primary iq-next" onClick={handleNextItem}>
               {activeItem ? 'Next Item →' : 'Start First Item →'}
