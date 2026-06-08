@@ -141,8 +141,8 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
   return (
     <div className="livestream">
       <div className="livestream-video">
-        {isHost && isLive && (
-          <video ref={localPreviewRef} className="livestream-feed" autoPlay muted playsInline />
+        {isHost && (
+          <video ref={localPreviewRef} className="livestream-feed" autoPlay muted playsInline style={{ display: isLive ? 'block' : 'none' }} />
         )}
         {!isHost && (
           <video ref={hostVideoRef} className="livestream-feed" autoPlay playsInline />
