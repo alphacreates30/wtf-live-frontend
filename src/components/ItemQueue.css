@@ -34,3 +34,11 @@
 .iq-modal-input { flex: 1; padding: 0.6rem 0.75rem; background: var(--bg, #111); border: none; color: var(--text, #fff); font-size: 1rem; outline: none; }
 .iq-modal-btns { display: flex; gap: 0.75rem; }
 .iq-modal-btns button { flex: 1; }
+
+.iq-active-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.iq-active-label-row .iq-active-label { margin-bottom: 0; }
+.iq-item-timer { font-size: 1rem; font-weight: 700; color: #E05C1A; background: rgba(224,92,26,0.15); padding: 2px 12px; border-radius: 20px; }
+.iq-item-timer.urgent { color: #ff4444; background: rgba(255,68,68,0.15); animation: iq-pulse 0.6s ease-in-out infinite; }
+@keyframes iq-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.iq-host-controls { display: flex; align-items: center; gap: 0.5rem; }
+.iq-timer-select { padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid var(--border, #333); background: var(--bg-card, #1a1a1a); color: var(--text, #fff); font-size: 0.8rem; cursor: pointer; }
