@@ -33,6 +33,7 @@ export default function AuctionRoom() {
   const [chatText, setChatText] = useState('')
   const [bidError, setBidError] = useState('')
   const [bidLoading, setBidLoading] = useState(false)
+  const [activeItem, setActiveItem] = useState(null)
   const [livekitToken, setLivekitToken] = useState(null)
   const [livekitUrl] = useState(import.meta.env.VITE_LIVEKIT_URL)
   const [accessError, setAccessError] = useState(null) // { code, message }
@@ -83,6 +84,7 @@ export default function AuctionRoom() {
       setBids(prev => [bid, ...prev])
       setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setBidAmount(String(bid.amount + 1))
+      setActiveItem(prev => prev ? { ...prev, current_bid: bid.amount } : prev)
     })
 
     socket.on('new_chat', (msg) => {
@@ -113,6 +115,17 @@ export default function AuctionRoom() {
       setAuction(prev => prev ? { ...prev, ends_at: new_ends_at } : prev)
     })
 
+    socket.on('item_activated', ({ item }) => {
+      setActiveItem(item)
+      setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
+      setBids([])
+      setBidAmount(String(Math.floor(item.current_bid || item.starting_bid) + 1))
+    })
+
+    socket.on('items_finished', () => {
+      setActiveItem(null)
+    })
+
     socket.on('block_success', ({ targetUsername }) => {
       setBlockingUser(null)
       setChat(prev => [...prev, {
@@ -138,6 +151,8 @@ export default function AuctionRoom() {
       socket.off('auction_started')
       socket.off('auction_extended')
       socket.off('block_success')
+      socket.off('item_activated')
+      socket.off('items_finished')
     }
   }, [id])
 
@@ -247,6 +262,16 @@ export default function AuctionRoom() {
 
       {auction.image_url && !livekitToken && (
         <div className="ar-image"><img src={auction.image_url} alt={auction.title} /></div>
+      )}
+
+      {activeItem && (
+        <div className="ar-now-selling">
+          <div className="ar-ns-label">NOW SELLING</div>
+          <div className="ar-ns-info">
+            <span className="ar-ns-title">{activeItem.title}</span>
+            <span className="ar-ns-bid">${parseFloat(activeItem.current_bid || activeItem.starting_bid).toFixed(2)}</span>
+          </div>
+        </div>
       )}
 
       <div className="ar-body">
