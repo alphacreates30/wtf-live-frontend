@@ -395,7 +395,7 @@ export default function AuctionRoom() {
               </div>
             )}
           <div style={{ fontSize: '10px', color: '#555', marginTop: '6px', padding: '4px 6px', borderTop: '1px solid #1a1a1a' }}>
-            🔍 timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : '—'} · load:{String(bidLoading)} · err:"{bidError || 'ok'}" · item:{activeItem ? activeItem.title.slice(0,18) : 'none'}
+            ð timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : 'â'} Â· load:{String(bidLoading)} Â· err:"{bidError || 'ok'}" Â· item:{activeItem ? (activeItem.title || '').slice(0,18) : 'none'}
           </div>
           </div>
 
