@@ -45,6 +45,7 @@ export default function AuctionRoom() {
   const [elapsedSecs, setElapsedSecs] = useState(0)
   const showStartTimeRef = useRef(null)
   const activeItemRef = useRef(null)
+  const currentItemBidRef = useRef(false)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function AuctionRoom() {
     socket.on('viewer_count', setViewers)
 
     socket.on('new_bid', (bid) => {
+      currentItemBidRef.current = true
       setBids(prev => [bid, ...prev])
       setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setBidAmount(String(bid.amount + 1))
@@ -126,9 +128,10 @@ export default function AuctionRoom() {
 
     socket.on('item_activated', ({ item }) => {
       const prevItem = activeItemRef.current
-      if (prevItem && prevItem.leading_bidder && prevItem.current_bid) {
+      if (prevItem && currentItemBidRef.current && prevItem.leading_bidder) {
         setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), winner: prevItem.leading_bidder }])
       }
+      currentItemBidRef.current = false
       setActiveItem(item)
       setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
       setBids([])
