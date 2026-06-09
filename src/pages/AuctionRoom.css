@@ -135,3 +135,22 @@
   color: #fff;
   margin-top: 2px;
 }
+
+/* Now Selling — item image + description */
+.ar-ns-img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 2px solid rgba(224,92,26,0.5);
+}
+.ar-ns-desc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
