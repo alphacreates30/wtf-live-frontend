@@ -20,6 +20,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
     },
   }))
   const [isLive, setIsLive] = useState(false)
+  const [facingMode, setFacingMode] = useState('environment')
   const [isConnected, setIsConnected] = useState(false)
   const [participants, setParticipants] = useState(0)
   const [error, setError] = useState('')
@@ -110,6 +111,26 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
     setIsLive(false)
   }, [room, localTracks])
 
+  const flipCamera = useCallback(async () => {
+    const newFacing = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(newFacing)
+    const videoTrack = localTracks.find(t => t.kind === Track.Kind.Video)
+    if (!videoTrack) return
+    try {
+      await room.localParticipant.unpublishTrack(videoTrack)
+      videoTrack.stop()
+      const newTracks = await createLocalTracks({ video: { facingMode: newFacing } })
+      const newVideo = newTracks.find(t => t.kind === Track.Kind.Video)
+      if (newVideo) {
+        await room.localParticipant.publishTrack(newVideo)
+        if (localPreviewRef.current) newVideo.attach(localPreviewRef.current)
+        setLocalTracks(prev => [...prev.filter(t => t.kind !== Track.Kind.Video), newVideo])
+      }
+    } catch (err) {
+      setError('Camera flip failed: ' + (err.message || err))
+    }
+  }, [facingMode, localTracks, room])
+
   useEffect(() => {
     if (!isConnected) return
     for (const [, participant] of room.remoteParticipants) {
@@ -166,6 +187,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
             <button className="btn-live" onClick={goLive}>Go Live</button>
           ) : (
             <button className="btn-stop" onClick={stopLive}>End Stream</button>
+            <button className="btn-ghost" onClick={flipCamera} style={{marginLeft:'0.5rem'}}>Flip Camera</button>
           )}
         </div>
       )}
