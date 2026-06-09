@@ -12,7 +12,7 @@
   --green: #22c55e;
   --red: #ef4444;
   --radius: 10px;
-  --font: 'Inter', sans-serif;
+  --font: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 
 body {
