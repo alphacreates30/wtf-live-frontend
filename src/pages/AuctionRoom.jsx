@@ -165,6 +165,13 @@ export default function AuctionRoom() {
   }, [id])
 
   useEffect(() => {
+    api.getAuctionItems(id).then(items => {
+      const active = items.find(i => i.status === 'active')
+      if (active) setActiveItem(active)
+    }).catch(() => {})
+  }, [id])
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chat])
 
@@ -278,23 +285,15 @@ export default function AuctionRoom() {
             <div className="ar-ns-label">NOW SELLING</div>
             <div className="ar-ns-title">{activeItem.title}</div>
           </div>
-          <div className="ar-ns-center">
-            {recentBidders.length >= 2 && (
-              <div className="ar-ns-battle">
-                <span className="ar-ns-bidder">@{recentBidders[1].username} ${recentBidders[1].amount}</span>
-                <span className="ar-ns-vs">vs</span>
-                <span className="ar-ns-bidder ar-ns-leading">@{recentBidders[0].username} ${recentBidders[0].amount}</span>
+<div className="ar-ns-center">
+            {recentBidders.length > 0 ? (
+              <div className="ar-ns-winner">
+                <span className="ar-ns-winner-label">Winning</span>
+                <span className="ar-ns-winner-name">@{recentBidders[0].username}</span>
+                <span className="ar-ns-winner-amt">${recentBidders[0].amount.toLocaleString()}</span>
               </div>
-            )}
-            {recentBidders.length === 1 && (
-              <div className="ar-ns-battle">
-                <span className="ar-ns-bidder ar-ns-leading">@{recentBidders[0].username} leads ${recentBidders[0].amount}</span>
-              </div>
-            )}
-            {recentBidders.length === 0 && (
-              <div className="ar-ns-battle">
-                <span className="ar-ns-opening">Opening: ${parseFloat(activeItem.current_bid || activeItem.starting_bid).toFixed(2)}</span>
-              </div>
+            ) : (
+              <span className="ar-ns-opening">Start: ${parseFloat(activeItem.current_bid || activeItem.starting_bid).toFixed(2)}</span>
             )}
           </div>
           <div className="ar-ns-right">
@@ -325,8 +324,8 @@ export default function AuctionRoom() {
                   placeholder={`Min $${minBid}`}
                 />
                 {bidError && <p className="error-msg">{bidError}</p>}
-                <button type="submit" className="btn-primary ar-bid-btn" disabled={bidLoading}>
-                  {bidLoading ? 'Placing...' : token ? `Bid ${bidAmount || '?'}` : 'Log in to bid'}
+                <button type="submit" className="btn-primary ar-bid-btn" disabled={bidLoading || (itemTimeLeft !== null && itemTimeLeft <= 0)}>
+                  {bidLoading ? 'Placing...' : (itemTimeLeft !== null && itemTimeLeft <= 0) ? 'Time\'s up!' : token ? `Bid ${bidAmount || '?'}` : 'Log in to bid'}
                 </button>
               </form>
             )}
