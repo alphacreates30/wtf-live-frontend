@@ -207,7 +207,7 @@ export default function AuctionRoom() {
         ? new Date(auction.starts_at).getTime()
         : Date.now()
     }
-  }, [auction?.status])
+  }, [auction ? auction.status : undefined])
 
 
   useEffect(() => {
@@ -395,7 +395,7 @@ export default function AuctionRoom() {
               </div>
             )}
           <div style={{ fontSize: '10px', color: '#555', marginTop: '6px', padding: '4px 6px', borderTop: '1px solid #1a1a1a' }}>
-            ð timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : 'â'} Â· load:{String(bidLoading)} Â· err:"{bidError || 'ok'}" Â· item:{activeItem ? (activeItem.title || '').slice(0,18) : 'none'}
+            DBG timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : '--'} | load:{String(bidLoading)} | err:"{bidError || 'ok'}" | item:{activeItem ? (activeItem.title || '').slice(0,18) : 'none'}
           </div>
           </div>
 
