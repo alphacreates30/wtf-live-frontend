@@ -34,6 +34,8 @@ export default function AuctionRoom() {
   const [bidError, setBidError] = useState('')
   const [bidLoading, setBidLoading] = useState(false)
   const [activeItem, setActiveItem] = useState(null)
+  const [itemTimeLeft, setItemTimeLeft] = useState(null)
+  const [recentBidders, setRecentBidders] = useState([])
   const [livekitToken, setLivekitToken] = useState(null)
   const [livekitUrl] = useState(import.meta.env.VITE_LIVEKIT_URL)
   const [accessError, setAccessError] = useState(null) // { code, message }
@@ -85,6 +87,7 @@ export default function AuctionRoom() {
       setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setBidAmount(String(bid.amount + 1))
       setActiveItem(prev => prev ? { ...prev, current_bid: bid.amount } : prev)
+      setRecentBidders(prev => [{ username: bid.username, amount: bid.amount }, ...prev.filter(b => b.username !== bid.username)].slice(0, 2))
     })
 
     socket.on('new_chat', (msg) => {
@@ -120,7 +123,11 @@ export default function AuctionRoom() {
       setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
       setBids([])
       setBidAmount(String(Math.floor(item.current_bid || item.starting_bid) + 1))
+      setRecentBidders([])
+      setItemTimeLeft(item.timer_seconds || 60)
     })
+
+    socket.on('item_timer_tick', ({ seconds }) => { setItemTimeLeft(seconds) })
 
     socket.on('items_finished', () => {
       setActiveItem(null)
@@ -152,6 +159,7 @@ export default function AuctionRoom() {
       socket.off('auction_extended')
       socket.off('block_success')
       socket.off('item_activated')
+      socket.off('item_timer_tick')
       socket.off('items_finished')
     }
   }, [id])
@@ -266,10 +274,35 @@ export default function AuctionRoom() {
 
       {activeItem && (
         <div className="ar-now-selling">
-          <div className="ar-ns-label">NOW SELLING</div>
-          <div className="ar-ns-info">
-            <span className="ar-ns-title">{activeItem.title}</span>
-            <span className="ar-ns-bid">${parseFloat(activeItem.current_bid || activeItem.starting_bid).toFixed(2)}</span>
+          <div className="ar-ns-left">
+            <div className="ar-ns-label">NOW SELLING</div>
+            <div className="ar-ns-title">{activeItem.title}</div>
+          </div>
+          <div className="ar-ns-center">
+            {recentBidders.length >= 2 && (
+              <div className="ar-ns-battle">
+                <span className="ar-ns-bidder">@{recentBidders[1].username} ${recentBidders[1].amount}</span>
+                <span className="ar-ns-vs">vs</span>
+                <span className="ar-ns-bidder ar-ns-leading">@{recentBidders[0].username} ${recentBidders[0].amount}</span>
+              </div>
+            )}
+            {recentBidders.length === 1 && (
+              <div className="ar-ns-battle">
+                <span className="ar-ns-bidder ar-ns-leading">@{recentBidders[0].username} leads ${recentBidders[0].amount}</span>
+              </div>
+            )}
+            {recentBidders.length === 0 && (
+              <div className="ar-ns-battle">
+                <span className="ar-ns-opening">Opening: ${parseFloat(activeItem.current_bid || activeItem.starting_bid).toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+          <div className="ar-ns-right">
+            {itemTimeLeft !== null && (
+              <div className={`ar-ns-timer${itemTimeLeft <= 5 ? ' urgent' : ''}`}>
+                {itemTimeLeft > 0 ? `${itemTimeLeft}s` : 'SOLD!'}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -374,6 +407,7 @@ export default function AuctionRoom() {
           <div className="ar-chat-messages">
             {chat.map((msg, i) => {
               if (flaggedUsers.has(msg.username)) return null // hide blocked users' messages
+            if (msg.type === 'bid') return null // bids shown on Now Selling bar instead
               return (
                 <div
                   key={msg.id || i}
