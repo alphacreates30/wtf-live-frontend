@@ -56,7 +56,7 @@ export default function AuctionRoom() {
     socket.on('auction_state', (data) => {
       setAuction(data)
       setBidAmount(String(data.current_bid + 1))
-      if (data.status === 'live' && data.starts_at) showStartTimeRef.current = new Date(data.starts_at).getTime()
+      if (data.status === 'live' && !showStartTimeRef.current) showStartTimeRef.current = Date.now()
     })
 
     // Approval / access errors
@@ -93,7 +93,7 @@ export default function AuctionRoom() {
       setBids(prev => [bid, ...prev])
       setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setBidAmount(String(bid.amount + 1))
-      setActiveItem(prev => prev ? { ...prev, current_bid: bid.amount } : prev)
+      setActiveItem(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setRecentBidders(prev => [{ username: bid.username, amount: bid.amount }, ...prev.filter(b => b.username !== bid.username)].slice(0, 2))
     })
 
@@ -143,6 +143,11 @@ export default function AuctionRoom() {
     socket.on('item_timer_tick', ({ seconds }) => { setItemTimeLeft(seconds) })
 
     socket.on('items_finished', () => {
+      const lastItem = activeItemRef.current
+      if (lastItem && currentItemBidRef.current && lastItem.leading_bidder) {
+        setSoldItems(s => [...s, { title: lastItem.title, amount: Number(lastItem.current_bid), winner: lastItem.leading_bidder }])
+      }
+      currentItemBidRef.current = false
       setActiveItem(null)
     })
 
@@ -312,9 +317,13 @@ export default function AuctionRoom() {
 
       {activeItem && (
         <div className="ar-now-selling">
+          {activeItem.image_url && (
+            <img src={activeItem.image_url} alt={activeItem.title} className="ar-ns-img" />
+          )}
           <div className="ar-ns-left">
             <div className="ar-ns-label">NOW SELLING</div>
             <div className="ar-ns-title">{activeItem.title}</div>
+            {activeItem.description && <div className="ar-ns-desc">{activeItem.description}</div>}
           </div>
 <div className="ar-ns-center">
             {recentBidders.length > 0 ? (
