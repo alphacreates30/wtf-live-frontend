@@ -101,3 +101,37 @@
 .ar-ns-timer { font-size: 1.1rem; font-weight: 700; color: #E05C1A; min-width: 40px; text-align: right; }
 .ar-ns-timer.urgent { color: #ff4444; animation: ns-pulse 0.5s ease-in-out infinite; }
 @keyframes ns-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+/* ── Show Stats Bar (host only) ── */
+.ar-stats-bar {
+  display: flex;
+  gap: 0;
+  background: #1a1a2e;
+  border: 1px solid #E05C1A;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+.ar-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 0.5rem;
+  border-right: 1px solid rgba(224,92,26,0.3);
+}
+.ar-stat:last-child { border-right: none; }
+.ar-stat-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #E05C1A;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ar-stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 2px;
+}
