@@ -56,7 +56,7 @@ export default function AuctionRoom() {
     socket.on('auction_state', (data) => {
       setAuction(data)
       setBidAmount(String(data.current_bid + 1))
-      if (data.status === 'live' && !showStartTimeRef.current) showStartTimeRef.current = Date.now()
+      if (data.status === 'live' && !showStartTimeRef.current) showStartTimeRef.current = data.starts_at ? new Date(data.starts_at).getTime() : Date.now()
     })
 
     // Approval / access errors
@@ -90,6 +90,7 @@ export default function AuctionRoom() {
 
     socket.on('new_bid', (bid) => {
       currentItemBidRef.current = true
+      if (activeItemRef.current) activeItemRef.current = { ...activeItemRef.current, current_bid: bid.amount, leading_bidder: bid.username }
       setBids(prev => [bid, ...prev])
       setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
       setBidAmount(String(bid.amount + 1))
@@ -132,12 +133,15 @@ export default function AuctionRoom() {
         setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), winner: prevItem.leading_bidder }])
       }
       currentItemBidRef.current = !!(item.leading_bidder)
+      activeItemRef.current = item
       setActiveItem(item)
       setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
       setBids([])
       setBidAmount(String(Math.floor(item.current_bid || item.starting_bid) + 1))
       setRecentBidders([])
       setItemTimeLeft(item.timer_seconds || 60)
+      setBidLoading(false)
+      setBidError(null)
     })
 
     socket.on('item_timer_tick', ({ seconds }) => { setItemTimeLeft(seconds) })
@@ -148,6 +152,7 @@ export default function AuctionRoom() {
         setSoldItems(s => [...s, { title: lastItem.title, amount: Number(lastItem.current_bid), winner: lastItem.leading_bidder }])
       }
       currentItemBidRef.current = false
+      activeItemRef.current = null
       setActiveItem(null)
     })
 
@@ -189,7 +194,6 @@ export default function AuctionRoom() {
     return () => clearInterval(timer)
   }, [])
 
-  useEffect(() => { activeItemRef.current = activeItem }, [activeItem])
 
   useEffect(() => {
     api.getAuctionItems(id).then(items => {
