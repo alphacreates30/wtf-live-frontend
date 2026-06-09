@@ -41,6 +41,10 @@ export default function AuctionRoom() {
   const [accessError, setAccessError] = useState(null) // { code, message }
   const [flaggedUsers, setFlaggedUsers] = useState(new Set())
   const [blockingUser, setBlockingUser] = useState(null)
+  const [soldItems, setSoldItems] = useState([])
+  const [elapsedSecs, setElapsedSecs] = useState(0)
+  const showStartTimeRef = useRef(null)
+  const activeItemRef = useRef(null)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -51,6 +55,7 @@ export default function AuctionRoom() {
     socket.on('auction_state', (data) => {
       setAuction(data)
       setBidAmount(String(data.current_bid + 1))
+      if (data.status === 'live' && data.starts_at) showStartTimeRef.current = new Date(data.starts_at).getTime()
     })
 
     // Approval / access errors
@@ -112,6 +117,7 @@ export default function AuctionRoom() {
 
     socket.on('auction_started', () => {
       setAuction(prev => prev ? { ...prev, status: 'live' } : prev)
+      showStartTimeRef.current = Date.now()
     })
 
     socket.on('auction_extended', ({ new_ends_at }) => {
@@ -119,6 +125,10 @@ export default function AuctionRoom() {
     })
 
     socket.on('item_activated', ({ item }) => {
+      const prevItem = activeItemRef.current
+      if (prevItem && prevItem.leading_bidder && prevItem.current_bid) {
+        setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), winner: prevItem.leading_bidder }])
+      }
       setActiveItem(item)
       setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
       setBids([])
@@ -163,6 +173,15 @@ export default function AuctionRoom() {
       socket.off('items_finished')
     }
   }, [id])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (showStartTimeRef.current) setElapsedSecs(Math.floor((Date.now() - showStartTimeRef.current) / 1000))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => { activeItemRef.current = activeItem }, [activeItem])
 
   useEffect(() => {
     api.getAuctionItems(id).then(items => {
@@ -273,6 +292,15 @@ export default function AuctionRoom() {
 
       {livekitToken && livekitUrl && (
         <LiveStream auctionId={id} token={livekitToken} livekitUrl={livekitUrl} isHost={isHost} />
+      )}
+
+      {isHost && isLive && (
+        <div className="ar-stats-bar">
+          <div className="ar-stat"><span className="ar-stat-label">Gross Sales</span><span className="ar-stat-value">${soldItems.reduce((s,i)=>s+i.amount,0).toLocaleString()}</span></div>
+          <div className="ar-stat"><span className="ar-stat-label">Items Sold</span><span className="ar-stat-value">{soldItems.length}</span></div>
+          <div className="ar-stat"><span className="ar-stat-label">Duration</span><span className="ar-stat-value">{formatTime(elapsedSecs)}</span></div>
+          <div className="ar-stat"><span className="ar-stat-label">Viewers</span><span className="ar-stat-value">{viewers}</span></div>
+        </div>
       )}
 
       {auction.image_url && !livekitToken && (
