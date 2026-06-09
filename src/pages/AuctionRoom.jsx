@@ -165,6 +165,11 @@ export default function AuctionRoom() {
       }])
     })
 
+    // Re-join auction room if socket reconnects after a network blip
+    socket.on('connect', () => {
+      socket.emit('join_auction', { auctionId: id, token })
+    })
+
     return () => {
       socket.off('auction_state')
       socket.off('auction_error')
@@ -181,6 +186,7 @@ export default function AuctionRoom() {
       socket.off('auction_started')
       socket.off('auction_extended')
       socket.off('block_success')
+      socket.off('connect')
       socket.off('item_activated')
       socket.off('item_timer_tick')
       socket.off('items_finished')
@@ -193,6 +199,15 @@ export default function AuctionRoom() {
     }, 1000)
     return () => clearInterval(timer)
   }, [])
+
+  // Reactive start-time setter: covers host-refresh & reconnect cases
+  useEffect(() => {
+    if (auction?.status === 'live' && !showStartTimeRef.current) {
+      showStartTimeRef.current = auction.starts_at
+        ? new Date(auction.starts_at).getTime()
+        : Date.now()
+    }
+  }, [auction?.status])
 
 
   useEffect(() => {
@@ -379,6 +394,9 @@ export default function AuctionRoom() {
                 Auction ended{auction.leading_bidder ? `  @${auction.leading_bidder} won${auction.current_bid.toLocaleString()}` : ''}
               </div>
             )}
+          <div style={{ fontSize: '10px', color: '#555', marginTop: '6px', padding: '4px 6px', borderTop: '1px solid #1a1a1a' }}>
+            🔍 timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : '—'} · load:{String(bidLoading)} · err:"{bidError || 'ok'}" · item:{activeItem ? activeItem.title.slice(0,18) : 'none'}
+          </div>
           </div>
 
           {/* Host / Admin controls */}
