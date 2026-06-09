@@ -131,7 +131,7 @@ export default function AuctionRoom() {
       if (prevItem && currentItemBidRef.current && prevItem.leading_bidder) {
         setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), winner: prevItem.leading_bidder }])
       }
-      currentItemBidRef.current = false
+      currentItemBidRef.current = !!(item.leading_bidder)
       setActiveItem(item)
       setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
       setBids([])
