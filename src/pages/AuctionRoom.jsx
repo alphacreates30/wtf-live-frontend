@@ -209,7 +209,6 @@ export default function AuctionRoom() {
     }
   }, [auction ? auction.status : undefined])
 
-
   useEffect(() => {
     api.getAuctionItems(id).then(items => {
       const active = items.find(i => i.status === 'active')
@@ -394,9 +393,7 @@ export default function AuctionRoom() {
                 Auction ended{auction.leading_bidder ? `  @${auction.leading_bidder} won${auction.current_bid.toLocaleString()}` : ''}
               </div>
             )}
-          <div style={{ fontSize: '10px', color: '#555', marginTop: '6px', padding: '4px 6px', borderTop: '1px solid #1a1a1a' }}>
-            DBG timer:{itemTimeLeft !== null ? itemTimeLeft + 's' : '--'} | load:{String(bidLoading)} | err:"{bidError || 'ok'}" | item:{activeItem ? (activeItem.title || '').slice(0,18) : 'none'}
-          </div>
+          
           </div>
 
           {/* Host / Admin controls */}
