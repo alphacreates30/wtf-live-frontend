@@ -186,8 +186,10 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
           {!isLive ? (
             <button className="btn-live" onClick={goLive}>Go Live</button>
           ) : (
-            <button className="btn-stop" onClick={stopLive}>End Stream</button>
-            <button className="btn-ghost" onClick={flipCamera} style={{marginLeft:'0.5rem'}}>Flip Camera</button>
+            <>
+              <button className="btn-stop" onClick={stopLive}>End Stream</button>
+              <button className="btn-ghost" onClick={flipCamera} style={{marginLeft:'0.5rem'}}>Flip Camera</button>
+            </>
           )}
         </div>
       )}
