@@ -320,7 +320,7 @@ export default function AuctionRoom() {
         <LiveStream auctionId={id} token={livekitToken} livekitUrl={livekitUrl} isHost={isHost} />
       )}
 
-      {isHost && isLive && (
+      {(isHost || isAdmin) && isLive && (
         <div className="ar-stats-bar">
           <div className="ar-stat"><span className="ar-stat-label">Gross Sales</span><span className="ar-stat-value">${soldItems.reduce((s,i)=>s+i.amount,0).toLocaleString()}</span></div>
           <div className="ar-stat"><span className="ar-stat-label">Items Sold</span><span className="ar-stat-value">{soldItems.length}</span></div>
