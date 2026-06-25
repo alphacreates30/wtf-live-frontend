@@ -10,9 +10,10 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...authHeaders(), ...options.headers },
     ...options,
   })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Request failed')
-  return data
+  const text = await res.text()
+      const data = text ? JSON.parse(text) : {}
+      if (!res.ok) throw new Error(data.error || 'Request failed')
+      return data
 }
 
 export const api = {
