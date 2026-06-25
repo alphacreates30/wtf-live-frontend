@@ -293,6 +293,12 @@ export default function AuctionRoom() {
   // Viewers in chat: extract unique usernames from chat messages (for block buttons)
   const chatUsers = [...new Set(chat.filter(m => m.type === 'msg' && m.username !== username && m.username !== auction.host_username).map(m => m.username))]
 
+    // Include the currently active item in stats once its timer has ended
+    // and it has a winning bid, so Gross Sales / Items Sold don't lag by one item.
+    const provisionalSoldItems = (activeItem && itemTimeLeft !== null && itemTimeLeft <= 0 && activeItem.leading_bidder)
+      ? [...soldItems, { title: activeItem.title, amount: Number(activeItem.current_bid), winner: activeItem.leading_bidder }]
+          : soldItems
+
   return (
     <div className="page auction-room">
       {/* Header */}
@@ -322,8 +328,8 @@ export default function AuctionRoom() {
 
       {(isHost || isAdmin) && isLive && (
         <div className="ar-stats-bar">
-          <div className="ar-stat"><span className="ar-stat-label">Gross Sales</span><span className="ar-stat-value">${soldItems.reduce((s,i)=>s+i.amount,0).toLocaleString()}</span></div>
-          <div className="ar-stat"><span className="ar-stat-label">Items Sold</span><span className="ar-stat-value">{soldItems.length}</span></div>
+          <div className="ar-stat"><span className="ar-stat-label">Gross Sales</span><span className="ar-stat-value">${provisionalSoldItems.reduce((s,i)=>s+i.amount,0).toLocaleString()}</span></div>
+          <div className="ar-stat"><span className="ar-stat-label">Items Sold</span><span className="ar-stat-value">{provisionalSoldItems.length}</span></div>
           <div className="ar-stat"><span className="ar-stat-label">Duration</span><span className="ar-stat-value">{formatTime(elapsedSecs)}</span></div>
           <div className="ar-stat"><span className="ar-stat-label">Viewers</span><span className="ar-stat-value">{viewers}</span></div>
         </div>
