@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import './Navbar.css'
+import { disconnectSocket } from '../socket'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -9,8 +10,10 @@ export default function Navbar() {
 
   function logout() {
     localStorage.removeItem('wtf_token')
-    localStorage.removeItem('wtf_username')
-    navigate('/login')
+        localStorage.removeItem('wtf_username')
+        localStorage.removeItem('wtf_user_id')
+        disconnectSocket()
+        navigate('/login')
   }
 
   return (
