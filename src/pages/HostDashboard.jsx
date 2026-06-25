@@ -51,7 +51,7 @@ export default function HostDashboard() {
         image_url: form.image_url || undefined,
         category: form.category || undefined,
         starting_bid: parseInt(form.starting_bid),
-        starts_at: form.starts_at || undefined,
+                starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : undefined,
         ends_at: new Date(form.ends_at).toISOString(),
       })
       setSuccess('Auction created!')
