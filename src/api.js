@@ -62,6 +62,12 @@ export const api = {
   cancelPrebid: (auctionId, itemId) =>
     request(`/auction/${auctionId}/items/${itemId}/prebid`, { method: 'DELETE' }),
 
+    // Standard auction proxy bidding
+    placeStandardBid: (auctionId, itemId, max_amount) =>
+          request(`/auction/${auctionId}/items/${itemId}/bid`, { method: 'POST', body: JSON.stringify({ max_amount }) }),
+    getStandardStatus: (auctionId) => request(`/auction/${auctionId}/items/standard-status`),
+  
+
   // Admin
   getAdminBuyers: () => request('/admin/buyers'),
   updateBuyerStatus: (userId, status) =>
