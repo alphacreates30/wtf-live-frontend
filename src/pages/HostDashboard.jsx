@@ -13,9 +13,11 @@ function dateTimeLocal(offsetMinutes = 30) {
   return d.toISOString().slice(0, 16)
 }
 
+const STANDARD_DEFAULT_OFFSET = 7 * 24 * 60 // 7 days, in minutes
+
 export default function HostDashboard() {
   const username = localStorage.getItem('wtf_username')
-  const [form, setForm] = useState({ ...EMPTY_FORM, ends_at: dateTimeLocal(30) })
+  const [form, setForm] = useState({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
   const [auctions, setAuctions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -40,7 +42,11 @@ export default function HostDashboard() {
   }
 
     function setMode(mode) {
-        setForm(prev => ({ ...prev, mode }))
+        setForm(prev => ({
+          ...prev,
+          mode,
+          ends_at: mode === 'standard' ? (prev.ends_at || dateTimeLocal(STANDARD_DEFAULT_OFFSET)) : '',
+        }))
     }
 
   async function handleSubmit(e) {
@@ -56,12 +62,12 @@ export default function HostDashboard() {
         category: form.category || undefined,
         starting_bid: parseInt(form.starting_bid),
                 starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : undefined,
-                ends_at: form.mode === 'standard' ? undefined : new Date(form.ends_at).toISOString(),
+                ends_at: form.mode === 'standard' && form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
                 mode: form.mode,
       })
       setSuccess('Auction created!')
       setSelectedAuction(data)
-      setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(30) })
+      setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
       await loadAuctions()
     } catch (err) {
       setError(err.message)
@@ -118,7 +124,7 @@ export default function HostDashboard() {
                                       <p style={{fontSize:'0.8rem',opacity:0.7,marginTop:'0.4rem'}}>
                                         {form.mode === 'standard'
                                                             ? 'No live video. Upload items and run a timed bidding auction, like Goldin or AuctionNinja, with proxy bidding and a closing time per item.'
-                                                            : 'Host a live video auction and sell items one at a time in real time.'}
+                                                            : 'Host a live video auction and sell items one at a time in real time. No end time — you start it when you go live and end it manually when you\'re done.'}
                                       </p>
                         </div>
             <div className="form-group">
@@ -145,18 +151,18 @@ export default function HostDashboard() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Starts at (leave blank = now)</label>
+                <label>{form.mode === 'standard' ? 'Starts at (leave blank = now)' : 'Starts at (leave blank = go live now)'}</label>
                 <input name="starts_at" type="datetime-local" value={form.starts_at} onChange={handleChange} />
               </div>
-              {form.mode !== 'standard' && (
+              {form.mode === 'standard' && (
       <div className="form-group">
-                <label>Ends at *</label>
+                <label>Auction Ends At *</label>
                 <input name="ends_at" type="datetime-local" value={form.ends_at} onChange={handleChange} required />
               </div>
       )}
             </div>
             {form.mode === 'standard' && (
-      <p style={{fontSize:'0.8rem',opacity:0.7}}>Each item gets its own closing time once you add it below in "Items".</p>)}
+      <p style={{fontSize:'0.8rem',opacity:0.7}}>This is the overall bidding window (e.g. 7 days). Each item also gets its own closing time once you add it below in "Items" — keep item closing times within this window.</p>)}
             {error && <p className="error-msg">{error}</p>}
             {success && <p className="success-msg">{success}</p>}
             <button type="submit" className="btn-primary host-submit" disabled={loading}>
@@ -186,7 +192,7 @@ export default function HostDashboard() {
                   <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)}>
                     {selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}
                   </button>
-                  <Link to={a.mode === 'standard' ? `/standard-auction/${a.id}` : `/auction/${a.id}`}>
+                  <Link to={`/auction/${a.id}`}>
                     <button className="btn-ghost host-go-btn">
                       {a.mode === 'standard' ? 'View' : (a.status === 'live' ? 'Open Room' : 'View')}
                     </button>
