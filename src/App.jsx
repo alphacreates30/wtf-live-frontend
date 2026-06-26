@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import Listings from './pages/Listings'
-import AuctionRoom from './pages/AuctionRoom'
+import AuctionRoomGate from './pages/AuctionRoomGate'
 import HostDashboard from './pages/HostDashboard'
 import ProfileSetup from './pages/ProfileSetup'
 import AdminBuyers from './pages/AdminBuyers'
@@ -102,7 +102,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/auction/:id" element={
           <ProfileGate>
-            <AuctionRoom />
+            <AuctionRoomGate />
           </ProfileGate>
         } />
         <Route
