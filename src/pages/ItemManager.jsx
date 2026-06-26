@@ -27,13 +27,27 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
-export default function ItemManager({ auctionId, auctionStatus }) {
+function dateTimeLocal(offsetMinutes = 60) {
+  const d = new Date(Date.now() + offsetMinutes * 60000)
+  return d.toISOString().slice(0, 16)
+}
+
+function toLocalInputValue(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
+  const isStandard = auctionMode === 'standard'
   const [items, setItems] = useState([])
-  const [form, setForm] = useState({ title: '', description: '', image_url: '', starting_bid: '' })
+  const [form, setForm] = useState({ title: '', description: '', image_url: '', starting_bid: '', ends_at: dateTimeLocal(60) })
   const [adding, setAdding] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadResult, setUploadResult] = useState(null)
   const [error, setError] = useState('')
+  const [endsAtEdits, setEndsAtEdits] = useState({})
   const fileRef = useRef(null)
 
   useEffect(() => { if (auctionId) loadItems() }, [auctionId])
@@ -45,10 +59,13 @@ export default function ItemManager({ auctionId, auctionStatus }) {
   async function handleAdd(e) {
     e.preventDefault()
     if (!form.title || !form.starting_bid) return setError('Title and starting bid are required')
+    if (isStandard && !form.ends_at) return setError('Closing time is required for standard auction items')
     setAdding(true); setError('')
     try {
-      await api.createAuctionItem(auctionId, { ...form, starting_bid: parseFloat(form.starting_bid) })
-      setForm({ title: '', description: '', image_url: '', starting_bid: '' })
+      const payload = { title: form.title, description: form.description, image_url: form.image_url, starting_bid: parseFloat(form.starting_bid) }
+      if (isStandard) payload.ends_at = new Date(form.ends_at).toISOString()
+      await api.createAuctionItem(auctionId, payload)
+      setForm({ title: '', description: '', image_url: '', starting_bid: '', ends_at: dateTimeLocal(60) })
       await loadItems()
     } catch (err) { setError(err.message) }
     finally { setAdding(false) }
@@ -72,6 +89,16 @@ export default function ItemManager({ auctionId, auctionStatus }) {
     await loadItems()
   }
 
+  async function saveEndsAt(itemId) {
+    const val = endsAtEdits[itemId]
+    if (!val) return
+    try {
+      await api.updateAuctionItem(auctionId, itemId, { ends_at: new Date(val).toISOString() })
+      setEndsAtEdits(prev => { const next = { ...prev }; delete next[itemId]; return next })
+      await loadItems()
+    } catch (err) { setError(err.message) }
+  }
+
   async function handleCSVUpload(e) {
     const file = e.target.files[0]
     if (!file) return
@@ -92,15 +119,15 @@ export default function ItemManager({ auctionId, auctionStatus }) {
   }
 
   const canEdit = auctionStatus !== 'ended'
-  const pendingCount = items.filter(i => i.status === 'pending').length
-  const activeItem = items.find(i => i.status === 'active')
+  const pendingCount = items.filter(i => i.status === 'pending' || i.status === 'open').length
+  const activeItem = !isStandard && items.find(i => i.status === 'active')
 
   return (
     <div className="item-manager">
       <div className="im-header">
         <div>
           <span className="im-count">{items.length} item{items.length !== 1 ? 's' : ''}</span>
-          {pendingCount > 0 && <span className="im-pending"> ({pendingCount} pending)</span>}
+          {pendingCount > 0 && <span className="im-pending"> ({pendingCount} {isStandard ? 'open' : 'pending'})</span>}
           {activeItem && <span className="im-active-badge">NOW: {activeItem.title}</span>}
         </div>
         {canEdit && (
@@ -136,13 +163,30 @@ export default function ItemManager({ auctionId, auctionStatus }) {
               {item.description && <div className="im-desc">{item.description}</div>}
               <div className="im-meta">
                 Start: ${parseFloat(item.starting_bid).toFixed(2)}
-                {item.pre_bid_count > 0 && <span className="im-prebids"> · {item.pre_bid_count} pre-bid{item.pre_bid_count > 1 ? 's' : ''} · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</span>}
+                {!isStandard && item.pre_bid_count > 0 && <span className="im-prebids"> · {item.pre_bid_count} pre-bid{item.pre_bid_count > 1 ? 's' : ''} · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</span>}
+                {isStandard && <span> · Current bid: ${parseFloat(item.current_bid || item.starting_bid).toFixed(2)} · {item.bid_count || 0} bid{item.bid_count === 1 ? '' : 's'}</span>}
               </div>
+              {isStandard && (
+                <div className="im-meta">
+                  Closes: {item.ends_at ? new Date(item.ends_at).toLocaleString() : 'Not set'}
+                  {canEdit && item.status === 'open' && (
+                    <span style={{marginLeft:'0.5rem'}}>
+                      <input
+                        type="datetime-local"
+                        value={endsAtEdits[item.id] !== undefined ? endsAtEdits[item.id] : toLocalInputValue(item.ends_at)}
+                        onChange={e => setEndsAtEdits(prev => ({ ...prev, [item.id]: e.target.value }))}
+                        style={{fontSize:'0.75rem'}}
+                      />
+                      <button type="button" className="im-btn" onClick={() => saveEndsAt(item.id)}>Save</button>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            {canEdit && item.status === 'pending' && (
+            {canEdit && (item.status === 'pending' || (isStandard && item.status === 'open')) && (
               <div className="im-actions">
-                <button onClick={() => moveItem(item.id, 'up')} disabled={idx === 0} className="im-btn">^</button>
-                <button onClick={() => moveItem(item.id, 'down')} disabled={idx === items.length - 1} className="im-btn">v</button>
+                {!isStandard && <button onClick={() => moveItem(item.id, 'up')} disabled={idx === 0} className="im-btn">^</button>}
+                {!isStandard && <button onClick={() => moveItem(item.id, 'down')} disabled={idx === items.length - 1} className="im-btn">v</button>}
                 <button onClick={() => handleDelete(item.id)} className="im-btn im-del">x</button>
               </div>
             )}
@@ -159,6 +203,14 @@ export default function ItemManager({ auctionId, auctionStatus }) {
             <input placeholder="Title *" value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} required />
             <input placeholder="Starting bid ($) *" type="number" min="1" step="0.01" value={form.starting_bid} onChange={e => setForm(f => ({...f, starting_bid: e.target.value}))} required />
           </div>
+          {isStandard && (
+            <div className="im-row">
+              <label style={{fontSize:'0.8rem',display:'flex',flexDirection:'column',gap:'0.2rem'}}>
+                Closes at *
+                <input type="datetime-local" value={form.ends_at} onChange={e => setForm(f => ({...f, ends_at: e.target.value}))} required />
+              </label>
+            </div>
+          )}
           <input placeholder="Image URL (optional)" value={form.image_url} onChange={e => setForm(f => ({...f, image_url: e.target.value}))} />
           {form.image_url && <img src={form.image_url} alt="preview" className="im-preview" onError={e => e.target.style.display='none'} />}
           <input placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
