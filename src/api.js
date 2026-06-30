@@ -68,6 +68,12 @@ export const api = {
     getStandardStatus: (auctionId) => request(`/auction/${auctionId}/items/standard-status`),
   
 
+
+    // Item Images
+    getItemImages: (auctionId, itemId) => request(`/auction/${auctionId}/items/${itemId}/images`),
+    addItemImage: (auctionId, itemId, url, position) =>
+          request(`/auction/${auctionId}/items/${itemId}/images`, { method: 'POST', body: JSON.stringify({ url, position }) }),
+    deleteItemImage: (imageId) => request(`/item-image/${imageId}`, { method: 'DELETE' }),
   // Admin
   getAdminBuyers: () => request('/admin/buyers'),
   updateBuyerStatus: (userId, status) =>
