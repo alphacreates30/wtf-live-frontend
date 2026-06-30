@@ -1,181 +1,533 @@
+/* ===== Standard Auction Room ===== */
+
 .standard-auction-room {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
 }
 
+/* ---- Header ---- */
 .sar-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.sar-badges {
+.sar-header-badges {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .badge-standard {
-  background: #2a1a00;
-  color: #ffb300;
-  border: 1px solid #ffb300;
-  padding: 2px 10px;
-  border-radius: 999px;
+  background: var(--accent);
+  color: var(--btn-text);
   font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sar-category {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--surface-2, rgba(128,128,128,0.12));
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
 }
 
 .sar-title {
-  font-size: 1.8rem;
-  margin: 0.25rem 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  margin: 0 0 0.4rem;
+  color: var(--text);
 }
 
 .sar-desc {
   color: var(--text-muted);
-  margin: 0.25rem 0;
+  font-size: 0.93rem;
+  margin: 0 0 0.6rem;
+  max-width: 640px;
 }
 
-.sar-host {
-  color: var(--text-muted);
+.sar-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.85rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.sar-sep {
+  opacity: 0.4;
 }
 
 .sar-empty {
-  color: var(--text-muted);
   text-align: center;
-  padding: 3rem 0;
+  color: var(--text-muted);
+  padding: 4rem 0;
+  font-size: 1rem;
 }
 
+/* ---- Item Grid ---- */
 .sar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
 }
 
-.sar-item {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
+@media (max-width: 1100px) {
+  .sar-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 750px) {
+  .sar-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .sar-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- Card ---- */
+.sar-card {
+  background: var(--card-bg, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 10px;
   overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+  position: relative;
 }
 
-.sar-item.sar-closed {
+.sar-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  z-index: 1;
+}
+
+.sar-card-closed {
   opacity: 0.7;
 }
 
-.sar-item-img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
+.sar-card-closed:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
 }
 
-.sar-item-body {
-  padding: 1rem;
+/* ---- Card image ---- */
+.sar-card-img-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 aspect ratio */
+  background: var(--surface-2, rgba(128,128,128,0.06));
+  overflow: hidden;
+}
+
+.sar-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.sar-card:hover .sar-card-img {
+  transform: scale(1.04);
+}
+
+.sar-card-no-img {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.sar-card-lot {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+}
+
+.sar-card-status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sar-status-open   { background: #22c55e; color: #fff; }
+.sar-status-sold   { background: #ef4444; color: #fff; }
+.sar-status-unsold { background: #94a3b8; color: #fff; }
+
+/* ---- Hover quick-bid overlay ---- */
+.sar-hover-bid {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(2px);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.sar-item-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem;
+.sar-card:hover .sar-hover-bid {
+  opacity: 1;
 }
 
-.sar-item-title {
-  font-size: 1.05rem;
+.sar-hover-bid-label {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
   margin: 0;
 }
+
+.sar-hover-bid input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.sar-hover-bid input::placeholder { color: rgba(255,255,255,0.55); }
+.sar-hover-bid input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sar-quick-bid-btn {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.sar-card-error  { color: #fca5a5; font-size: 0.75rem; margin: 0; text-align: center; }
+.sar-card-success { color: #86efac; font-size: 0.75rem; margin: 0; text-align: center; }
+
+/* ---- Card body ---- */
+.sar-card-body {
+  padding: 0.75rem 0.85rem 0.8rem;
+}
+
+.sar-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0 0 0.55rem;
+  color: var(--text);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sar-card-stats {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.sar-card-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sar-card-stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sar-card-stat-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sar-countdown { color: #22c55e; }
+.sar-urgent    { color: #ef4444; animation: pulse 1s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.sar-card-leading-you { color: #f59e0b; font-size: 0.78rem; margin: 0.2rem 0 0; font-weight: 600; }
+.sar-card-winner      { color: #22c55e; font-size: 0.78rem; margin: 0.2rem 0 0; font-weight: 600; }
+.sar-card-unsold      { color: var(--text-muted); font-size: 0.78rem; margin: 0.2rem 0 0; }
+
+.sar-card-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0.3rem 0 0;
+  opacity: 0.6;
+}
+
+/* ===== Item Detail Modal ===== */
+
+.sar-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.sar-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+
+@media (max-width: 640px) {
+  .sar-modal {
+    grid-template-columns: 1fr;
+    max-height: 96vh;
+    overflow-y: auto;
+  }
+}
+
+.sar-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0,0,0,0.45);
+  border: none;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.sar-modal-close:hover { background: rgba(0,0,0,0.7); }
+
+/* ---- Modal image panel ---- */
+.sar-modal-images {
+  background: var(--surface-2, rgba(128,128,128,0.06));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sar-modal-main-img-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 260px;
+  overflow: hidden;
+}
+
+.sar-modal-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.sar-img-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 5;
+}
+.sar-img-nav:hover { background: rgba(0,0,0,0.8); }
+.sar-img-nav:disabled { opacity: 0.2; cursor: default; }
+.sar-img-prev { left: 8px; }
+.sar-img-next { right: 8px; }
+
+.sar-modal-thumbs {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  overflow-x: auto;
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.sar-modal-thumb {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.65;
+  flex-shrink: 0;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.sar-modal-thumb:hover { opacity: 0.9; }
+.sar-modal-thumb.active { border-color: var(--accent); opacity: 1; }
+
+.sar-modal-no-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 260px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ---- Modal detail panel ---- */
+.sar-modal-details {
+  padding: 1.5rem 1.5rem 1.75rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sar-modal-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
 .sar-status-badge {
   font-size: 0.68rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.sar-status-open {
-  background: #002a0e;
-  color: #3ddc6a;
-  border: 1px solid #3ddc6a;
-}
-
-.sar-status-sold {
-  background: #001a2a;
-  color: #4db8ff;
-  border: 1px solid #4db8ff;
-}
-
-.sar-status-unsold {
-  background: #2a0000;
-  color: #ff6b6b;
-  border: 1px solid #ff6b6b;
-}
-
-.sar-item-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.sar-item-stats {
-  display: flex;
-  gap: 1rem;
-  margin: 0.25rem 0;
-}
-
-.sar-stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.sar-stat-label {
-  font-size: 0.68rem;
-  color: var(--text-muted);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
 }
 
-.sar-stat-value {
-  font-size: 1rem;
-  font-weight: 600;
+.sar-modal-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+  font-weight: 800;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.25;
 }
 
-.sar-countdown {
-  color: #ffb300;
-}
-
-.sar-leading {
-  font-size: 0.85rem;
+.sar-modal-desc {
   color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
   margin: 0;
 }
 
-.sar-leading-you strong {
-  color: #3ddc6a;
+.sar-modal-stats {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
-.sar-bid-form {
+.sar-modal-stat { display: flex; flex-direction: column; gap: 2px; }
+.sar-modal-stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.sar-modal-stat-val   { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+
+.sar-modal-leading {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+.sar-modal-leading.you { color: #f59e0b; font-weight: 600; }
+
+/* ---- Bid section ---- */
+.sar-modal-bid-section { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; }
+
+.sar-modal-bid-row {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.25rem;
 }
 
-.sar-bid-form input {
+.sar-modal-bid-row input {
   flex: 1;
   min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-bg, var(--surface));
+  color: var(--text);
+  font-size: 0.9rem;
 }
 
-.sar-success {
-  color: #3ddc6a;
-  font-size: 0.8rem;
-  margin: 0;
+.sar-modal-bid-row .btn-primary {
+  white-space: nowrap;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
 }
 
 .sar-hint {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.sar-success {
+  color: #22c55e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 0.82rem;
   margin: 0;
 }
