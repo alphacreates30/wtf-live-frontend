@@ -1,4 +1,4 @@
-.item-manager { margin-top: 1.5rem; }
+ .item-manager { margin-top: 1.5rem; }
 .im-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
 .im-count { font-weight: 700; font-size: 0.95rem; }
 .im-pending { color: var(--text-muted, #888); font-size: 0.85rem; }
@@ -127,3 +127,14 @@
   font-size: 0.82rem;
 }
 .im-image-url-input:focus { border-color: var(--accent, #E05C1A); outline: none; }
+
+
+/* ---- Auto-stagger panel ---- */
+.im-stagger-panel { background: var(--bg-card, #1a1a1a); border: 1px solid var(--border, #333); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.im-stagger-title { margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 700; }
+.im-stagger-row { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+.im-stagger-label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; color: var(--text-muted, #888); flex: 1; min-width: 160px; }
+.im-stagger-input, .im-stagger-select { padding: 0.45rem 0.65rem; background: var(--bg, #111); border: 1px solid var(--border, #333); border-radius: 6px; color: var(--text, #fff); font-size: 0.88rem; width: 100%; box-sizing: border-box; }
+.im-stagger-input:focus, .im-stagger-select:focus { border-color: var(--accent, #E05C1A); outline: none; }
+.im-stagger-btn { flex-shrink: 0; align-self: flex-end; padding: 0.5rem 1.25rem; font-size: 0.88rem; white-space: nowrap; }
+.im-stagger-hint { margin: 0.6rem 0 0; font-size: 0.78rem; color: var(--text-muted, #888); }
