@@ -39,6 +39,31 @@ function toLocalInputValue(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+function resizeImageToBlob(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const objUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objUrl)
+      const MAX = 800
+      let { width, height } = img
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round(height * MAX / width); width = MAX }
+        else { width = Math.round(width * MAX / height); height = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width; canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+      canvas.toBlob(blob => {
+        if (!blob) return reject(new Error('Image conversion failed'))
+        resolve(blob)
+      }, file.type || 'image/jpeg', 0.85)
+    }
+    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Failed to load image')) }
+    img.src = objUrl
+  })
+}
+
 export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const isStandard = auctionMode === 'standard'
   const [items, setItems] = useState([])
@@ -53,6 +78,11 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const [staggerInterval, setStaggerInterval] = useState(2)
   const [staggerApplying, setStaggerApplying] = useState(false)
   const fileRef = useRef(null)
+  const imgInputRef = useRef(null)
+  const imageFileRef = useRef(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [replacingPhotoFor, setReplacingPhotoFor] = useState(null)
   const pollRef = useRef(null)
   const prevItemsRef = useRef([])
   const [closedToasts, setClosedToasts] = useState([])
@@ -136,20 +166,62 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
     }
   }
 
+  function handleImageSelect(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    imageFileRef.current = file
+    const reader = new FileReader()
+    reader.onload = ev => setImagePreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  function clearImageSelection() {
+    setImagePreview(null)
+    imageFileRef.current = null
+    if (imgInputRef.current) imgInputRef.current.value = ''
+  }
+
+  async function handleReplacePhoto(itemId, e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setReplacingPhotoFor(itemId)
+    setError('')
+    try {
+      const blob = await resizeImageToBlob(file)
+      const result = await api.uploadImage(blob, file.type || 'image/jpeg')
+      await api.updateAuctionItem(auctionId, itemId, { image_url: result.url })
+      await loadItems()
+    } catch (err) { setError(err.message) }
+    finally {
+      setReplacingPhotoFor(null)
+      if (e.target) e.target.value = ''
+    }
+  }
+
   async function handleAdd(e) {
     e.preventDefault()
     if (!form.title || !form.starting_bid) return setError('Title and starting bid are required')
     if (isStandard && !form.ends_at) return setError('Closing time is required for standard auction items')
     setAdding(true); setError('')
     try {
-      const payload = { title: form.title, description: form.description, image_url: form.image_url, starting_bid: parseFloat(form.starting_bid) }
+      let image_url = ''
+      if (imageFileRef.current) {
+        setUploadingImage(true)
+        const blob = await resizeImageToBlob(imageFileRef.current)
+        const result = await api.uploadImage(blob, imageFileRef.current.type || 'image/jpeg')
+        image_url = result.url
+        setUploadingImage(false)
+      }
+      const payload = { title: form.title, description: form.description, image_url, starting_bid: parseFloat(form.starting_bid) }
       if (isStandard) payload.ends_at = new Date(form.ends_at).toISOString()
       await api.createAuctionItem(auctionId, payload)
       setForm({ title: '', description: '', image_url: '', starting_bid: '', ends_at: dateTimeLocal(60) })
+      clearImageSelection()
       await loadItems()
     } catch (err) { setError(err.message) }
-    finally { setAdding(false) }
+    finally { setAdding(false); setUploadingImage(false) }
   }
+
 
   async function handleDelete(itemId) {
     if (!confirm('Remove this item?')) return
@@ -298,6 +370,10 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
               <div className="im-actions">
                 {!isStandard && <button onClick={() => moveItem(item.id, 'up')} disabled={idx === 0} className="im-btn">^</button>}
                 {!isStandard && <button onClick={() => moveItem(item.id, 'down')} disabled={idx === items.length - 1} className="im-btn">v</button>}
+                <label className="im-btn im-replace-photo" title="Replace photo">
+                  {replacingPhotoFor === item.id ? '…' : '📷'}
+                  <input type="file" accept="image/*" style={{display:'none'}} onChange={e => handleReplacePhoto(item.id, e)} disabled={replacingPhotoFor === item.id} />
+                </label>
                 <button onClick={() => handleDelete(item.id)} className="im-btn im-del">x</button>
               </div>
             )}
@@ -392,10 +468,20 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
               </label>
             </div>
           )}
-          <input placeholder="Primary image URL (optional — shown as thumbnail in grid)" value={form.image_url} onChange={e => setForm(f => ({...f, image_url: e.target.value}))} />
-          {form.image_url && <img src={form.image_url} alt="preview" className="im-preview" onError={e => e.target.style.display='none'} />}
+          <div className="im-image-upload">
+            <label className="im-img-pick-btn">
+              {imagePreview ? '🔄 Change photo' : '📷 Add photo (optional)'}
+              <input ref={imgInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleImageSelect} />
+            </label>
+            {imagePreview && (
+              <div className="im-img-preview-wrap">
+                <img src={imagePreview} alt="preview" className="im-preview" />
+                <button type="button" className="im-remove-img" onClick={clearImageSelection}>✕</button>
+              </div>
+            )}
+          </div>}
           <input placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
-          <button type="submit" className="btn-primary" disabled={adding}>{adding ? 'Adding...' : 'Add Item'}</button>
+          <button type="submit" className="btn-primary" disabled={adding || uploadingImage}>{uploadingImage ? 'Uploading photo...' : adding ? 'Adding...' : 'Add Item'}</button>
           <p style={{fontSize:'0.78rem',color:'var(--text-muted)',marginTop:'0.25rem'}}>After adding, use the 🖼 button on each item to attach extra images shown in the detail modal.</p>
         </form>
       )}
