@@ -88,4 +88,15 @@ export const api = {
     request(`/admin/orders/${id}/ungroup`, { method: 'POST' }),
   updateOrderStatus: (id, status) =>
     request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  uploadImage: async (blob, mimeType) => {
+    const token = localStorage.getItem('wtf_token')
+    const res = await fetch(`${BASE}/upload-image`, {
+      method: 'POST',
+      headers: { 'Content-Type': mimeType || 'image/jpeg', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: blob,
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Upload failed')
+    return data
+  },
 }
