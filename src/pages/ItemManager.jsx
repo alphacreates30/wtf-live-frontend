@@ -502,7 +502,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
                 {imagePreviews.map((src, idx) => (
                   <div key={idx} className="im-img-preview-wrap">
                     <img src={src} alt={"preview " + (idx+1)} className="im-preview" />
-                    <button type="button" className="im-remove-img" onClick={() => clearImageSelection(idx)}>&#x2715;</button>
+                    <button type="button" className="im-remove-img" onClick={() => clearImageSelection(idx)}>{'✕'}</button>
                   </div>
                 ))}
               </div>
