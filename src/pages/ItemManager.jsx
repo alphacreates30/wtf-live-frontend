@@ -1,4 +1,4 @@
- import { useState, useEffect, useRef } from 'react'
+  import { useState, useEffect, useRef } from 'react'
 import { api } from '../api'
 import './ItemManager.css'
 
@@ -310,7 +310,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
         ))}
       </div>
 
-      {isStandard && canEdit && openCount > 0 && (
+      {canEdit && openCount > 0 && (
         <div className='im-stagger-panel'>
           <h4 className='im-stagger-title'>⏱ Auto-stagger closing times</h4>
           <div className='im-stagger-row'>
