@@ -274,7 +274,14 @@ export default function StandardAuctionRoom() {
     return <div className="page"><p style={{ color: 'var(--text-muted)', padding: '2rem' }}>Loading…</p></div>
   }
 
-  const openItems = items.filter(i => i.status === 'open')
+  const openItems = items
+    .filter(i => i.status === 'open')
+    .sort((a, b) => {
+      if (!a.ends_at && !b.ends_at) return 0
+      if (!a.ends_at) return 1
+      if (!b.ends_at) return -1
+      return new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime()
+    })
   const closedItems = items.filter(i => i.status !== 'open')
   const sorted = [...openItems, ...closedItems]
 
@@ -306,11 +313,13 @@ export default function StandardAuctionRoom() {
             const floor = parseFloat(item.current_bid || item.starting_bid || 0)
             const timeLabel = !closed ? timeLeftLabel(item.ends_at, now) : null
             const urgentCountdown = timeLabel && /^\d+s$/.test(timeLabel)
+            const msLeft = (!closed && item.ends_at) ? new Date(item.ends_at).getTime() - now : Infinity
+            const closingSoon = msLeft > 0 && msLeft <= 10 * 60 * 1000
 
             return (
               <div
                 key={item.id}
-                className={`sar-card${closed ? ' sar-card-closed' : ''}`}
+                className={`sar-card${closed ? ' sar-card-closed' : ''}${closingSoon && !urgentCountdown ? ' sar-closing-soon' : ''}${urgentCountdown ? ' sar-urgent-item' : ''}`}
                 onClick={() => setSelectedItem(item)}
               >
                 <div className="sar-card-img-wrap">
@@ -350,6 +359,11 @@ export default function StandardAuctionRoom() {
                 </div>
 
                 <div className="sar-card-body">
+                  {closingSoon && (
+                    <span className={`sar-closing-badge${urgentCountdown ? ' sar-urgent-badge' : ''}`}>
+                      {urgentCountdown ? '🚨 Closing now!' : '🔥 Closing soon'}
+                    </span>
+                  )}
                   <h3 className="sar-card-title">{item.title}</h3>
                   <div className="sar-card-stats">
                     <div className="sar-card-stat">
