@@ -1,4 +1,4 @@
-/* ===== Standard Auction Room ===== */
+ * ===== Standard Auction Room ===== */
 
 .standard-auction-room {
   max-width: 1400px;
@@ -530,4 +530,32 @@
   color: #ef4444;
   font-size: 0.82rem;
   margin: 0;
+}
+
+/* ---- Closing soon badge ---- */
+.sar-closing-badge {
+  display: inline-block;
+  background: #f59e0b;
+  color: #000;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.18rem 0.45rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.03em;
+}
+.sar-urgent-badge {
+  background: #ef4444;
+  color: #fff;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* ---- Closing soon card border ---- */
+.sar-closing-soon {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 1px #f59e0b22;
+}
+.sar-urgent-item {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef444422;
 }
