@@ -494,7 +494,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
           )}
           <div className="im-image-upload">
             <label className="im-img-pick-btn">
-              {imagePreview ? '🔄 Change photo' : '📷 Add photo (optional)'}
+              {imagePreviews.length > 0 ? '🔄 Change photos' : '📷 Add photos (optional)'}
               <input ref={imgInputRef} type="file" accept="image/*" multiple style={{display:'none'}} onChange={handleImageSelect} />
             </label>
             {imagePreviews.length > 0 && (
