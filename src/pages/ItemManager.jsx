@@ -1,4 +1,4 @@
-  import { useState, useEffect, useRef } from 'react'
+   import { useState, useEffect, useRef } from 'react'
 import { api } from '../api'
 import './ItemManager.css'
 
@@ -53,6 +53,9 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const [staggerInterval, setStaggerInterval] = useState(2)
   const [staggerApplying, setStaggerApplying] = useState(false)
   const fileRef = useRef(null)
+  const pollRef = useRef(null)
+  const prevItemsRef = useRef([])
+  const [closedToasts, setClosedToasts] = useState([])
 
   // Multi-image state
   const [itemImages, setItemImages] = useState({})
@@ -60,7 +63,31 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const [newImageUrl, setNewImageUrl] = useState({})
   const [imageAdding, setImageAdding] = useState({})
 
-  useEffect(() => { if (auctionId) loadItems() }, [auctionId])
+  useEffect(() => {
+    if (!auctionId) return
+    loadItems()
+    pollRef.current = setInterval(loadItems, 30000)
+    return () => clearInterval(pollRef.current)
+  }, [auctionId])
+
+  useEffect(() => {
+    if (prevItemsRef.current.length === 0) { prevItemsRef.current = items; return }
+    const newlyClosed = items.filter(item => {
+      const prev = prevItemsRef.current.find(p => p.id === item.id)
+      return prev && prev.status === 'open' && item.status !== 'open'
+    })
+    if (newlyClosed.length) {
+      const toasts = newlyClosed.map(item => ({
+        key: `${item.id}-${Date.now()}`,
+        title: item.title,
+        winner: item.leading_bidder,
+        amount: item.current_bid,
+      }))
+      setClosedToasts(prev => [...prev, ...toasts])
+      toasts.forEach(t => setTimeout(() => setClosedToasts(prev => prev.filter(x => x.key !== t.key)), 8000))
+    }
+    prevItemsRef.current = items
+  }, [items])
 
   async function loadItems() {
     try { setItems(await api.getAuctionItems(auctionId)) } catch {}
@@ -198,6 +225,16 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
 
   return (
     <div className="item-manager">
+      {closedToasts.length > 0 && (
+        <div className="im-toasts">
+          {closedToasts.map(t => (
+            <div key={t.key} className="im-toast">
+              <span>🔔 <strong>{t.title}</strong> just closed{t.winner ? ` — Won by @${t.winner} for $${parseFloat(t.amount || 0).toFixed(2)}` : ' — No bids'}</span>
+              <button className="im-toast-dismiss" onClick={() => setClosedToasts(prev => prev.filter(x => x.key !== t.key))}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="im-header">
         <div>
           <span className="im-count">{items.length} item{items.length !== 1 ? 's' : ''}</span>
