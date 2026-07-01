@@ -145,3 +145,14 @@
 .im-toast-dismiss { background: none; border: none; color: #fff; font-size: 1.15rem; cursor: pointer; opacity: 0.75; line-height: 1; padding: 0; flex-shrink: 0; }
 .im-toast-dismiss:hover { opacity: 1; }
 @keyframes im-toast-in { from { transform: translateX(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ---- Direct image upload UI ---- */
+.im-image-upload { margin-bottom: 0.5rem; }
+.im-img-pick-btn { display: inline-flex; align-items: center; gap: 0.35rem; background: var(--surface, #1a1a1a); border: 1px dashed var(--border, #333); color: var(--text, #fff); font-size: 0.82rem; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer; transition: border-color 0.15s; }
+.im-img-pick-btn:hover { border-color: var(--accent, #E05C1A); }
+.im-img-preview-wrap { position: relative; display: inline-block; margin-top: 0.5rem; }
+.im-img-preview-wrap .im-preview { display: block; width: 100px; height: 100px; object-fit: cover; border-radius: 6px; }
+.im-remove-img { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.im-remove-img:hover { background: #dc2626; }
+.im-replace-photo { background: var(--surface, #1a1a1a); border: 1px solid var(--border, #333); color: var(--text, #fff); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; padding: 0; }
+.im-replace-photo:hover { border-color: var(--accent, #E05C1A); }
