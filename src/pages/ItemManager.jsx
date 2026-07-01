@@ -152,7 +152,6 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
     } catch (err) { setError(err.message) }
   }
 
-  async function 
   async function applyStagger() {
     if (!staggerFirstClose) return
     const openItems = items.filter(i => i.status === 'open')
@@ -173,7 +172,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
       setStaggerApplying(false)
     }
   }
-handleCSVUpload(e) {
+  async function handleCSVUpload(e) {
     const file = e.target.files[0]
     if (!file) return
     setUploading(true); setUploadResult(null); setError('')
