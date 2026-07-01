@@ -50,10 +50,59 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const [endsAtEdits, setEndsAtEdits] = useState({})
   const fileRef = useRef(null)
 
+  // Multi-image state
+  const [itemImages, setItemImages] = useState({})
+  const [expandedImages, setExpandedImages] = useState({})
+  const [newImageUrl, setNewImageUrl] = useState({})
+  const [imageAdding, setImageAdding] = useState({})
+
   useEffect(() => { if (auctionId) loadItems() }, [auctionId])
 
   async function loadItems() {
     try { setItems(await api.getAuctionItems(auctionId)) } catch {}
+  }
+
+  async function loadImagesForItem(itemId) {
+    try {
+      const imgs = await api.getItemImages(auctionId, itemId)
+      setItemImages(prev => ({ ...prev, [itemId]: imgs || [] }))
+    } catch {
+      setItemImages(prev => ({ ...prev, [itemId]: [] }))
+    }
+  }
+
+  async function toggleImages(itemId) {
+    const isOpen = expandedImages[itemId]
+    if (!isOpen && !itemImages[itemId]) {
+      await loadImagesForItem(itemId)
+    }
+    setExpandedImages(prev => ({ ...prev, [itemId]: !isOpen }))
+  }
+
+  async function addImage(itemId) {
+    const url = (newImageUrl[itemId] || '').trim()
+    if (!url) return
+    setImageAdding(prev => ({ ...prev, [itemId]: true }))
+    try {
+      const imgs = itemImages[itemId] || []
+      await api.addItemImage(auctionId, itemId, url, imgs.length)
+      setNewImageUrl(prev => ({ ...prev, [itemId]: '' }))
+      await loadImagesForItem(itemId)
+    } catch (e) {
+      alert(e.message || 'Failed to add image')
+    } finally {
+      setImageAdding(prev => ({ ...prev, [itemId]: false }))
+    }
+  }
+
+  async function deleteImage(imageId, itemId) {
+    if (!confirm('Remove this image?')) return
+    try {
+      await api.deleteItemImage(imageId)
+      await loadImagesForItem(itemId)
+    } catch (e) {
+      alert(e.message || 'Failed to delete image')
+    }
   }
 
   async function handleAdd(e) {
@@ -190,7 +239,48 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
                 <button onClick={() => handleDelete(item.id)} className="im-btn im-del">x</button>
               </div>
             )}
+            <button
+              className={`im-btn im-images-btn${expandedImages[item.id] ? ' active' : ''}`}
+              onClick={() => toggleImages(item.id)}
+              title="Manage extra images"
+            >
+              🖼 {itemImages[item.id] ? itemImages[item.id].length : '…'}
+            </button>
             <span className={`im-badge im-badge-${item.status}`}>{item.status}</span>
+
+            {expandedImages[item.id] && (
+              <div className="im-image-panel">
+                <p className="im-image-panel-title">Extra Images (shown in detail modal)</p>
+                <div className="im-image-thumbs">
+                  {(itemImages[item.id] || []).length === 0 && (
+                    <span className="im-image-empty">No extra images yet</span>
+                  )}
+                  {(itemImages[item.id] || []).map(img => (
+                    <div key={img.id} className="im-image-thumb-wrap">
+                      <img src={img.url} alt="" className="im-image-thumb" onError={e => { e.target.src = '' }} />
+                      <button className="im-image-del" onClick={() => deleteImage(img.id, item.id)} title="Remove">✕</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="im-image-add-row">
+                  <input
+                    type="url"
+                    placeholder="Paste image URL…"
+                    value={newImageUrl[item.id] || ''}
+                    onChange={e => setNewImageUrl(prev => ({ ...prev, [item.id]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addImage(item.id) } }}
+                    className="im-image-url-input"
+                  />
+                  <button
+                    className="im-btn"
+                    onClick={() => addImage(item.id)}
+                    disabled={imageAdding[item.id] || !(newImageUrl[item.id] || '').trim()}
+                  >
+                    {imageAdding[item.id] ? '…' : 'Add'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -211,10 +301,11 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
               </label>
             </div>
           )}
-          <input placeholder="Image URL (optional)" value={form.image_url} onChange={e => setForm(f => ({...f, image_url: e.target.value}))} />
+          <input placeholder="Primary image URL (optional — shown as thumbnail in grid)" value={form.image_url} onChange={e => setForm(f => ({...f, image_url: e.target.value}))} />
           {form.image_url && <img src={form.image_url} alt="preview" className="im-preview" onError={e => e.target.style.display='none'} />}
           <input placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
           <button type="submit" className="btn-primary" disabled={adding}>{adding ? 'Adding...' : 'Add Item'}</button>
+          <p style={{fontSize:'0.78rem',color:'var(--text-muted)',marginTop:'0.25rem'}}>After adding, use the 🖼 button on each item to attach extra images shown in the detail modal.</p>
         </form>
       )}
     </div>
