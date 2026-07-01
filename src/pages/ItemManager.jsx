@@ -227,7 +227,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
         image_url = result.url
         setUploadingImage(false)
       }
-      const payload      const payload = { title: form.title, description: form.description, image_url, starting_bid: parseFloat(form.starting_bid) }
+      const payload = { title: form.title, description: form.description, image_url, starting_bid: parseFloat(form.starting_bid) }
       if (isStandard) payload.ends_at = new Date(form.ends_at).toISOString()
       const newItem = await api.createAuctionItem(auctionId, payload)
       if (newItem?.id && extraFiles.length) {
