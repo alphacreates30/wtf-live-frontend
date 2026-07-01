@@ -156,3 +156,14 @@
 .im-remove-img:hover { background: #dc2626; }
 .im-replace-photo { background: var(--surface, #1a1a1a); border: 1px solid var(--border, #333); color: var(--text, #fff); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; padding: 0; }
 .im-replace-photo:hover { border-color: var(--accent, #E05C1A); }
+
+/* ---- Multi-image preview row ---- */
+.im-img-preview-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+/* ---- Multi-image preview row ---- */
+.im-img-preview-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+/* ---- Multi-image preview row ---- */
+.im-img-preview-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+.im-img-preview-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
