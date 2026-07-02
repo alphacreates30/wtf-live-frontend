@@ -175,14 +175,14 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onB
   )
 }
 
-export default function StandardAuctionRoom() {
+export default function StandardAuctionRoom({ initialAuction = null }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const token = localStorage.getItem('wtf_token')
   const username = localStorage.getItem('wtf_username')
   const isAdmin = username === ADMIN_USERNAME
 
-  const [auction, setAuction] = useState(null)
+  const [auction, setAuction] = useState(initialAuction)
   const [items, setItems] = useState([])
   const [accessError, setAccessError] = useState(null)
   const [now, setNow] = useState(Date.now())
@@ -210,7 +210,7 @@ export default function StandardAuctionRoom() {
   }, [id])
 
   useEffect(() => {
-    loadAuction()
+    if (!initialAuction) loadAuction()
     loadItems()
     pollRef.current = setInterval(loadItems, POLL_MS)
     return () => clearInterval(pollRef.current)
