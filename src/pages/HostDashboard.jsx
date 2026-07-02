@@ -28,6 +28,7 @@ export default function HostDashboard() {
   const [pwError, setPwError] = useState('')
   const [pwSuccess, setPwSuccess] = useState('')
   const [pwLoading, setPwLoading] = useState(false)
+  const [imgUploading, setImgUploading] = useState(false)
 
   async function loadAuctions() {
     try {
@@ -147,8 +148,31 @@ export default function HostDashboard() {
               </div>
             </div>
             <div className="form-group">
-              <label>Image URL</label>
-              <input name="image_url" value={form.image_url} onChange={handleChange} placeholder="https://..." />
+              <label>Auction Image</label>
+              {form.image_url && (
+                <img src={form.image_url} alt="preview" style={{ width: '100%', maxHeight: '120px', objectFit: 'cover', borderRadius: 6, marginBottom: '0.5rem' }} />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                disabled={imgUploading}
+                onChange={async e => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setImgUploading(true)
+                  try {
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    const base = import.meta.env.VITE_API_URL
+                    const tok = localStorage.getItem('wtf_token')
+                    const r = await fetch(base + '/upload-image', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: fd })
+                    const data = await r.json()
+                    if (data.url) setForm(prev => ({ ...prev, image_url: data.url }))
+                  } catch (e) { console.error('Upload failed', e) }
+                  setImgUploading(false)
+                }}
+              />
+              {imgUploading && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>Uploading…</p>}
             </div>
             <div className="form-row">
               <div className="form-group">
