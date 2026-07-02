@@ -25,6 +25,7 @@ export default function Navbar() {
         {token ? (
           <>
             <span className="navbar-user">@{username}</span>
+            {username !== 'whatthefind' && <Link to="/my-bids" className="navbar-link">My Bids</Link>}
             {username === 'whatthefind' && (
               <>
                 <Link to="/host" className={`navbar-link ${location.pathname === '/host' ? 'active' : ''}`}>
