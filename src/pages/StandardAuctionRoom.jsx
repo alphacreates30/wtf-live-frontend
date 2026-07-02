@@ -46,13 +46,15 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onB
   const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
   const isLeading = item.leading_bidder === username
   const floor = parseFloat(item.current_bid || item.starting_bid || 0)
-  const timeLabel = timeLeftLabel(item.ends_at, now)
+
+  const minIncrement = floor < 50 ? 1 : floor < 100 ? 2 : floor < 200 ? 5 : floor < 500 ? 10 : floor < 1000 ? 25 : 50
+  const minBid = floor + (item.bid_count > 0 ? minIncrement : 0)  const timeLabel = timeLeftLabel(item.ends_at, now)
 
   async function placeBid() {
     if (!token) { navigate('/login'); return }
     const amount = parseFloat(bidInput)
-    if (!amount || amount < floor) {
-      setBidError(`Max bid must be at least $${floor.toFixed(2)}`); return
+    if (!amount || amount < minBid) {
+      setBidError(`Min bid: $${minBid.toFixed(2)}`); return
     }
     setBidLoading(true); setBidError('')
     try {
@@ -149,9 +151,9 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onB
               <div className="sar-modal-bid-row">
                 <input
                   type="number"
-                  min={floor}
+                  min={minBid}
                   step="0.01"
-                  placeholder={token ? `Max bid (min $${floor.toFixed(2)})` : 'Log in to bid'}
+                  placeholder={token ? `Max bid (min $${minBid.toFixed(2)})` : 'Log in to bid'}
                   value={bidInput}
                   disabled={!token || bidLoading}
                   onChange={e => { setBidInput(e.target.value); setBidError('') }}
