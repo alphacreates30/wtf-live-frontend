@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api'
 import ItemManager from './ItemManager'
 import './HostDashboard.css'
+import AuctionResults from './AuctionResults'
 
 const EMPTY_FORM = {
   title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '', mode: 'live',
@@ -205,7 +206,9 @@ export default function HostDashboard() {
         {selectedAuction && (
           <div className="card" style={{marginTop: '1.5rem'}}>
             <h2 style={{marginBottom: 0}}>{selectedAuction.title} - Items</h2>
-            <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status}  auctionMode={selectedAuction.mode}/>
+            {selectedAuction.mode === 'standard' && selectedAuction.status === 'ended'
+              ? <AuctionResults auctionId={selectedAuction.id} />
+              : <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status}  auctionMode={selectedAuction.mode}/>}
           </div>
         )}
         <div className="card" style={{marginTop:'1.5rem',maxWidth:'480px'}}>
