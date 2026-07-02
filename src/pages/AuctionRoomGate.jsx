@@ -9,12 +9,13 @@ import StandardAuctionRoom from './StandardAuctionRoom'
 export default function AuctionRoomGate() {
   const { id } = useParams()
   const [mode, setMode] = useState(null)
-  const [error, setError] = useState(false)
+
+  const [auction, setAuction] = useState(null)  const [error, setError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     api.getAuction(id)
-      .then(a => { if (!cancelled) setMode(a.mode === 'standard' ? 'standard' : 'live') })
+      .then(a => { if (!cancelled) { setAuction(a); setMode(a.mode === 'standard' ? 'standard' : 'live') } })
       .catch(() => { if (!cancelled) setError(true) })
     return () => { cancelled = true }
   }, [id])
@@ -22,5 +23,5 @@ export default function AuctionRoomGate() {
   if (error) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Auction not found.</p></div>
   if (!mode) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading auction...</p></div>
 
-  return mode === 'standard' ? <StandardAuctionRoom /> : <AuctionRoom />
+  return mode === 'standard' ? <StandardAuctionRoom initialAuction={auction} /> : <AuctionRoom />
 }
