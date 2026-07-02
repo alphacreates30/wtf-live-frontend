@@ -9,6 +9,7 @@ import ProfileSetup from './pages/ProfileSetup'
 import AdminBuyers from './pages/AdminBuyers'
 import AdminOrders from './pages/AdminOrders'
 import { api } from './api'
+import MyBids from './pages/MyBids'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -137,7 +138,8 @@ export default function App() {
             </AdminRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="/my-bids" element={<MyBids />} />
+<Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
