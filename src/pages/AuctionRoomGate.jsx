@@ -10,7 +10,8 @@ export default function AuctionRoomGate() {
   const { id } = useParams()
   const [mode, setMode] = useState(null)
 
-  const [auction, setAuction] = useState(null)  const [error, setError] = useState(false)
+  const [auction, setAuction] = useState(null)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
