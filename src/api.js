@@ -76,6 +76,7 @@ export const api = {
     deleteItemImage: (imageId) => request(`/item-image/${imageId}`, { method: 'DELETE' }),
   // Admin
   getAdminBuyers: () => request('/admin/buyers'),
+  getMyBids: () => request('/my-bids'),
   updateBuyerStatus: (userId, status) =>
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAuction: (id) => request(`/auction/${id}`, { method: 'DELETE' }),
