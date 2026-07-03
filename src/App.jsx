@@ -138,7 +138,7 @@ export default function App() {
             </AdminRoute>
           }
         />
-                <Route path="/my-bids" element={<MyBids />} />
+                <Route path="/my-bids" element={<ProtectedRoute><MyBids /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
