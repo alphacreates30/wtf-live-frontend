@@ -48,7 +48,9 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onB
   const floor = parseFloat(item.current_bid || item.starting_bid || 0)
 
   const minIncrement = floor < 50 ? 1 : floor < 100 ? 2 : floor < 200 ? 5 : floor < 500 ? 10 : floor < 1000 ? 25 : 50
-  const minBid = floor + (item.bid_count > 0 ? minIncrement : 0)
+  // The current leader may raise their own proxy without clearing the increment.
+  // This must stay in sync with the same rule in the backend bid endpoint.
+  const minBid = isLeading ? floor : floor + (item.bid_count > 0 ? minIncrement : 0)
   const timeLabel = timeLeftLabel(item.ends_at, now)
 
   async function placeBid() {
