@@ -37,7 +37,7 @@ export default function MyBids() {
       <h1 style={{ marginBottom: '1.5rem' }}>My Bids &amp; Wins</h1>
 
       {Object.values(grouped).map(({ auction, items: aItems }) => {
-        const wins = aItems.filter(i => i.won)
+        const wins = aItems.filter(i => i.won && i.closed)
         const totalWon = wins.reduce((s, i) => s + Number(i.current_bid || 0), 0)
         return (
           <div key={auction?.id} style={{ marginBottom: '2rem' }}>
@@ -69,11 +69,13 @@ export default function MyBids() {
                     <td style={{ padding: '0.5rem 0.75rem' }}>{item.max_bid ? fmt(item.max_bid) : '—'}</td>
                     <td style={{ padding: '0.5rem 0.75rem' }}>{item.current_bid ? fmt(item.current_bid) : '—'}</td>
                     <td style={{ padding: '0.5rem 0.75rem' }}>
-                      {auction?.status !== 'ended'
-                        ? <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>In progress</span>
+                      {!item.closed
+                        ? (item.won
+                            ? <span style={{ color: '#22c55e', fontWeight: 700 }}>Leading</span>
+                            : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Outbid</span>)
                         : item.won
-                          ? <span style={{ color: '#22c55e', fontWeight: 700 }}>{'Won'}</span>
-                          : <span style={{ color: 'var(--text-muted)' }}>Outbid</span>}
+                          ? <span style={{ color: '#22c55e', fontWeight: 700 }}>Won</span>
+                          : <span style={{ color: 'var(--text-muted)' }}>Lost</span>}
                     </td>
                   </tr>
                 ))}
