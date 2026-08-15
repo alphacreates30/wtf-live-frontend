@@ -1,6 +1,7 @@
    import { useState, useEffect, useRef } from 'react'
 import { api } from '../api'
 import './ItemManager.css'
+import BulkLotUpload from './BulkLotUpload'
 
 const CSV_TEMPLATE = 'Title,Starting Bid,Image URL,Description\nExample Item 1,25,https://i.imgur.com/example.jpg,Optional description\nExample Item 2,10,,';
 
@@ -355,6 +356,10 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
         </div>
       )}
 
+      {isStandard && canEdit && (
+        <BulkLotUpload auctionId={auctionId} onDone={loadItems} />
+      )}
+
       <div className="im-list">
         {items.length === 0 && <p className="im-empty">No items yet. Add items below or upload a CSV.</p>}
         {items.map((item, idx) => (
@@ -506,7 +511,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
                   </div>
                 ))}
               </div>
-            )}          </div>}
+            )}          </div>
           <input placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
           <button type="submit" className="btn-primary" disabled={adding || uploadingImage}>{uploadingImage ? 'Uploading photo...' : adding ? 'Adding...' : 'Add Item'}</button>
           <p style={{fontSize:'0.78rem',color:'var(--text-muted)',marginTop:'0.25rem'}}>After adding, use the 🖼 button on each item to attach extra images shown in the detail modal.</p>

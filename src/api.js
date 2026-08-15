@@ -89,6 +89,14 @@ export const api = {
     request(`/admin/orders/${id}/ungroup`, { method: 'POST' }),
   updateOrderStatus: (id, status) =>
     request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  // AI bulk lot creation
+  analyzeLot: (images, condition) =>
+    request('/ai/analyze-lot', { method: 'POST', body: JSON.stringify({ images, condition }) }),
+  regenerateDescription: (title, condition) =>
+    request('/ai/regenerate-description', { method: 'POST', body: JSON.stringify({ title, condition }) }),
+  bulkCreateItems: (auctionId, lots) =>
+    request(`/auction/${auctionId}/items/bulk`, { method: 'POST', body: JSON.stringify({ lots }) }),
+
   uploadImage: async (blob, mimeType) => {
     const token = localStorage.getItem('wtf_token')
     const res = await fetch(`${BASE}/upload-image`, {
