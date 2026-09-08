@@ -6,14 +6,26 @@ function authHeaders() {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...options.headers },
-    ...options,
-  })
+  let res
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...authHeaders(), ...options.headers },
+      ...options,
+    })
+  } catch {
+    throw new Error('Could not reach the server. Check your connection and try again.')
+  }
   const text = await res.text()
-      const data = text ? JSON.parse(text) : {}
-      if (!res.ok) throw new Error(data.error || 'Request failed')
-      return data
+  let data
+  try {
+    data = text ? JSON.parse(text) : {}
+  } catch {
+    // Non-JSON body (e.g. a platform error page during a deploy) - surface
+    // something readable instead of a raw JSON parse error.
+    throw new Error(`Server error (${res.status}). Try again in a moment.`)
+  }
+  if (!res.ok) throw new Error(data.error || 'Request failed')
+  return data
 }
 
 export const api = {
