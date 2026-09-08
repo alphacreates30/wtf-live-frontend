@@ -144,7 +144,7 @@ export default function HostDashboard() {
               </div>
               <div className="form-group">
                 <label>Starting Bid ($) *</label>
-                <input name="starting_bid" type="number" min="1" value={form.starting_bid} onChange={handleChange} placeholder="50" required />
+                <input name="starting_bid" type="number" min="0" value={form.starting_bid} onChange={handleChange} placeholder="50" required />
               </div>
             </div>
             <div className="form-group">

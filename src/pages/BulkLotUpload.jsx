@@ -85,6 +85,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
   const [doneCount, setDoneCount] = useState(0)
   const filesRef = useRef([])
   const fileInputRef = useRef(null)
+  const containerRef = useRef(null)
 
   // ---- Load files ----
   async function handleFiles(e) {
@@ -113,6 +114,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     setSelected(new Set())
     setAnchor(null)
     setBusy('')
+    fileInputRef.current?.blur()
   }
 
   // ---- Range selection ----
@@ -153,13 +155,17 @@ export default function BulkLotUpload({ auctionId, onDone }) {
   }, [])
 
   // Enter groups, Escape clears. At hundreds of lots per batch, reaching for
-  // the mouse after every range selection adds up.
+  // the mouse after every range selection adds up. Only suppressed when focus
+  // is on a text field inside this component (e.g. a lot's title/description) -
+  // focus sitting in an unrelated form elsewhere on the page shouldn't block it.
   useEffect(() => {
     function onKey(e) {
       if (e.key !== 'Enter' && e.key !== 'Escape') return
       if (!selected.size) return
-      const tag = document.activeElement?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      const active = document.activeElement
+      const tag = active?.tagName
+      const isTextField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+      if (isTextField && containerRef.current?.contains(active)) return
       e.preventDefault()
       e.key === 'Enter' ? groupSelected() : clearSelection()
     }
@@ -310,7 +316,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
   const working = busy === 'reading' || busy === 'analyzing' || busy === 'committing'
 
   return (
-    <div className="blu">
+    <div className="blu" ref={containerRef}>
       <div className="blu-head">
         <div>
           <h3 className="blu-title">Bulk Lot Upload</h3>
