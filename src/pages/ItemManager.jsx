@@ -487,7 +487,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
           {error && <p className="error-msg">{error}</p>}
           <div className="im-row">
             <input placeholder="Title *" value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} required />
-            <input placeholder="Starting bid ($) *" type="number" min="1" step="0.01" value={form.starting_bid} onChange={e => setForm(f => ({...f, starting_bid: e.target.value}))} required />
+            <input placeholder="Starting bid ($) *" type="number" min="0" step="0.01" value={form.starting_bid} onChange={e => setForm(f => ({...f, starting_bid: e.target.value}))} required />
           </div>
           {isStandard && (
             <div className="im-row">
