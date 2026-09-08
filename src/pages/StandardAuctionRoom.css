@@ -487,6 +487,12 @@
 }
 .sar-modal-leading.you { color: #f59e0b; font-weight: 600; }
 
+.sar-premium-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: -0.25rem 0 0;
+}
+
 /* ---- Bid section ---- */
 .sar-modal-bid-section { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; }
 

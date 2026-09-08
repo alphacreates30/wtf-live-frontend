@@ -27,6 +27,8 @@ export const api = {
     request(`/auctions${status ? `?status=${status}` : ''}`),
 
   getAuction: (id) => request(`/auction/${id}`),
+  updateAuction: (id, data) =>
+    request(`/auction/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 
   createAuction: (data) =>
     request('/auction', { method: 'POST', body: JSON.stringify(data) }),

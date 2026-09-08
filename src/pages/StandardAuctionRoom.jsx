@@ -21,7 +21,7 @@ function timeLeftLabel(endsAt, now) {
   return `${s}s`
 }
 
-function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onBidSuccess }) {
+function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, onClose, onBidSuccess }) {
   const token = localStorage.getItem('wtf_token')
   const navigate = useNavigate()
   const [images, setImages] = useState([])
@@ -138,6 +138,8 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, onClose, onB
               </div>
             )}
           </div>
+
+          <p className="sar-premium-note">+{premiumPct}% buyer's premium applies to the winning bid.</p>
 
           {item.leading_bidder && (
             <p className={`sar-modal-leading ${isLeading ? 'you' : ''}`}>
@@ -415,6 +417,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           username={username}
           isAdmin={isAdmin}
           now={now}
+          premiumPct={auction.buyers_premium_pct ?? 15}
           onClose={() => setSelectedItem(null)}
           onBidSuccess={loadItems}
         />

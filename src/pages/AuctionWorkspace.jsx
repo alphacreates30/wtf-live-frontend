@@ -71,7 +71,7 @@ export default function AuctionWorkspace() {
           <Route path="schedule" element={<AuctionSchedule auctionId={auction.id} auctionStatus={auction.status} auctionMode={auction.mode} />} />
           <Route path="results" element={<AuctionResults auctionId={auction.id} />} />
           <Route path="orders" element={<AdminOrders auctionId={auction.id} />} />
-          <Route path="details" element={<AuctionDetails auction={auction} />} />
+          <Route path="details" element={<AuctionDetails auction={auction} onSaved={setAuction} />} />
           <Route path="*" element={<Navigate to="lots" replace />} />
         </Routes>
       </div>
