@@ -1,15 +1,7 @@
 .host-title { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
 .host-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
 
-.host-body {
-  display: grid;
-  grid-template-columns: 500px 1fr;
-  gap: 24px;
-  align-items: start;
-}
-@media (max-width: 900px) {
-  .host-body { grid-template-columns: 1fr; }
-}
+.host-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
 .host-section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
 
@@ -18,11 +10,22 @@
 textarea { resize: vertical; }
 .host-submit { padding: 12px; font-size: 15px; width: 100%; }
 
-.host-auctions {}
 .host-auction-list { display: flex; flex-direction: column; gap: 12px; }
 .host-auction-item {}
 .host-auction-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .host-auction-category { font-size: 11px; color: var(--text-muted); }
 .host-auction-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.host-auction-dates { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; flex-wrap: wrap; }
 .host-auction-stats { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; flex-wrap: wrap; }
 .host-go-btn { font-size: 13px; padding: 7px 14px; }
+.host-warn-badge { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b; }
+
+.host-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem; overflow-y: auto;
+}
+.host-modal { width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+.host-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.host-modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; }
+.host-modal-close:hover { color: var(--text); }
