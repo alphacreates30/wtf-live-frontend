@@ -1,4 +1,4 @@
-.auction-room { max-width: 1200px; }
+.page.auction-room { max-width: 1200px; }
 
 .ar-header {
   display: flex;
