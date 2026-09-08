@@ -1,0 +1,12 @@
+.auction-workspace { max-width: 1400px; }
+
+.aw-back {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.aw-back:hover { color: var(--accent); }
+
+.aw-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.aw-title { font-size: 24px; font-weight: 800; margin: 0; }

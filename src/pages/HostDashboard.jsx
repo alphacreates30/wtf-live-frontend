@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
-import ItemManager from './ItemManager'
 import './HostDashboard.css'
-import AuctionResults from './AuctionResults'
 
 const EMPTY_FORM = {
   title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '', mode: 'live',
@@ -23,11 +21,6 @@ export default function HostDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [selectedAuction, setSelectedAuction] = useState(null)
-  const [pwForm, setPwForm] = useState({ current_password: '', new_password: '', confirm_password: '' })
-  const [pwError, setPwError] = useState('')
-  const [pwSuccess, setPwSuccess] = useState('')
-  const [pwLoading, setPwLoading] = useState(false)
   const [imgUploading, setImgUploading] = useState(false)
 
   async function loadAuctions() {
@@ -57,7 +50,7 @@ export default function HostDashboard() {
     setSuccess('')
     setLoading(true)
     try {
-      const data = await api.createAuction({
+      await api.createAuction({
         title: form.title,
         description: form.description || undefined,
         image_url: form.image_url || undefined,
@@ -68,7 +61,6 @@ export default function HostDashboard() {
                 mode: form.mode,
       })
       setSuccess('Auction created!')
-      setSelectedAuction(data)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
       await loadAuctions()
     } catch (err) {
@@ -81,29 +73,6 @@ export default function HostDashboard() {
   async function deleteAuction(auctionId) {
     if (!confirm('Delete this auction permanently?')) return;
     try { await api.deleteAuction(auctionId); await loadAuctions(); } catch (err) { alert(err.message); }
-  }
-
-  async function handlePasswordChange(e) {
-    e.preventDefault()
-    setPwError('')
-    setPwSuccess('')
-    if (pwForm.new_password !== pwForm.confirm_password) { setPwError('New passwords do not match'); return }
-    setPwLoading(true)
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('wtf_token')}` },
-        body: JSON.stringify({ current_password: pwForm.current_password, new_password: pwForm.new_password })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to change password')
-      setPwSuccess('Password updated!')
-      setPwForm({ current_password: '', new_password: '', confirm_password: '' })
-    } catch (err) {
-      setPwError(err.message)
-    } finally {
-      setPwLoading(false)
-    }
   }
 
     const statusOrder = { live: 0, upcoming: 1, ended: 2 }
@@ -214,9 +183,9 @@ export default function HostDashboard() {
                 </div>
                 <div style={{display:'flex',gap:'0.5rem',marginTop:'0.5rem'}}>
                   {a.status === 'ended' && <button className="btn-danger" style={{fontSize:'0.75rem',padding:'0.3rem 0.6rem'}} onClick={() => deleteAuction(a.id)}>Delete</button>}
-                  <button className="btn-ghost host-go-btn" onClick={() => setSelectedAuction(selectedAuction && selectedAuction.id === a.id ? null : a)}>
-                    {selectedAuction && selectedAuction.id === a.id ? 'Hide Items' : 'Items'}
-                  </button>
+                  <Link to={`/host/auction/${a.id}/lots`}>
+                    <button className="btn-ghost host-go-btn">Items</button>
+                  </Link>
                   <Link to={`/auction/${a.id}`}>
                     <button className="btn-ghost host-go-btn">
                       {a.mode === 'standard' ? 'View' : (a.status === 'live' ? 'Open Room' : 'View')}
@@ -226,25 +195,6 @@ export default function HostDashboard() {
               </div>
             ))}
           </div>
-        </div>
-        {selectedAuction && (
-          <div className="card" style={{marginTop: '1.5rem'}}>
-            <h2 style={{marginBottom: 0}}>{selectedAuction.title} - Items</h2>
-            {selectedAuction.mode === 'standard' && selectedAuction.status === 'ended'
-              ? <AuctionResults auctionId={selectedAuction.id} />
-              : <ItemManager auctionId={selectedAuction.id} auctionStatus={selectedAuction.status}  auctionMode={selectedAuction.mode}/>}
-          </div>
-        )}
-        <div className="card" style={{marginTop:'1.5rem',maxWidth:'480px'}}>
-          <h2 className="host-section-title">Change Password</h2>
-          <form onSubmit={handlePasswordChange} className="host-form">
-            <div className="form-group"><label>Current Password</label><input type="password" value={pwForm.current_password} onChange={e=>setPwForm(p=>({...p,current_password:e.target.value}))} required /></div>
-            <div className="form-group"><label>New Password</label><input type="password" value={pwForm.new_password} onChange={e=>setPwForm(p=>({...p,new_password:e.target.value}))} required minLength={6} /></div>
-            <div className="form-group"><label>Confirm New Password</label><input type="password" value={pwForm.confirm_password} onChange={e=>setPwForm(p=>({...p,confirm_password:e.target.value}))} required /></div>
-            {pwError && <p className="error-msg">{pwError}</p>}
-            {pwSuccess && <p className="success-msg">{pwSuccess}</p>}
-            <button type="submit" className="btn-primary host-submit" disabled={pwLoading}>{pwLoading?'Updating...':'Update Password'}</button>
-          </form>
         </div>
       </div>
     </div>

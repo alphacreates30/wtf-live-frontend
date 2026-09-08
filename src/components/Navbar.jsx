@@ -37,6 +37,9 @@ export default function Navbar() {
               <Link to="/admin/orders" className={`navbar-link ${location.pathname === '/admin/orders' ? 'active' : ''}`}>
                   Orders
                 </Link>
+                <Link to="/host/settings" className={`navbar-link ${location.pathname === '/host/settings' ? 'active' : ''}`}>
+                  Settings
+                </Link>
               </>
             )}
             <button className="btn-ghost navbar-btn" onClick={logout}>Log out</button>

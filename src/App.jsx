@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import Listings from './pages/Listings'
 import AuctionRoomGate from './pages/AuctionRoomGate'
 import HostDashboard from './pages/HostDashboard'
+import AuctionWorkspace from './pages/AuctionWorkspace'
+import HostSettings from './pages/HostSettings'
 import ProfileSetup from './pages/ProfileSetup'
 import AdminBuyers from './pages/AdminBuyers'
 import AdminOrders from './pages/AdminOrders'
@@ -119,6 +121,22 @@ export default function App() {
           element={
             <AdminRoute>
               <HostDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/host/auction/:id/lots"
+          element={
+            <AdminRoute>
+              <AuctionWorkspace />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/host/settings"
+          element={
+            <AdminRoute>
+              <HostSettings />
             </AdminRoute>
           }
         />
