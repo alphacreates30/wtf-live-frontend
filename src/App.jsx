@@ -125,7 +125,7 @@ export default function App() {
           }
         />
         <Route
-          path="/host/auction/:id/lots"
+          path="/host/auction/:id/*"
           element={
             <AdminRoute>
               <AuctionWorkspace />
@@ -141,7 +141,7 @@ export default function App() {
           }
         />
         <Route
-          path="/admin/buyers"
+          path="/host/buyers"
           element={
             <AdminRoute>
               <AdminBuyers />
@@ -149,13 +149,15 @@ export default function App() {
           }
         />
         <Route
-          path="/admin/orders"
+          path="/host/orders"
           element={
             <AdminRoute>
               <AdminOrders />
             </AdminRoute>
           }
         />
+        <Route path="/admin/buyers" element={<Navigate to="/host/buyers" replace />} />
+        <Route path="/admin/orders" element={<Navigate to="/host/orders" replace />} />
                 <Route path="/my-bids" element={<ProtectedRoute><MyBids /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -28,13 +28,13 @@ export default function Navbar() {
             {username !== 'whatthefind' && <Link to="/my-bids" className="navbar-link">My Bids</Link>}
             {username === 'whatthefind' && (
               <>
-                <Link to="/host" className={`navbar-link ${location.pathname === '/host' ? 'active' : ''}`}>
-                  Host
+                <Link to="/host" className={`navbar-link ${location.pathname === '/host' || location.pathname.startsWith('/host/auction') ? 'active' : ''}`}>
+                  Auctions
                 </Link>
-                <Link to="/admin/buyers" className={`navbar-link ${location.pathname === '/admin/buyers' ? 'active' : ''}`}>
+                <Link to="/host/buyers" className={`navbar-link ${location.pathname === '/host/buyers' ? 'active' : ''}`}>
                   Buyers
                 </Link>
-              <Link to="/admin/orders" className={`navbar-link ${location.pathname === '/admin/orders' ? 'active' : ''}`}>
+              <Link to="/host/orders" className={`navbar-link ${location.pathname === '/host/orders' ? 'active' : ''}`}>
                   Orders
                 </Link>
                 <Link to="/host/settings" className={`navbar-link ${location.pathname === '/host/settings' ? 'active' : ''}`}>

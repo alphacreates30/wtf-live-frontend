@@ -9,7 +9,7 @@ const STATUS_COLORS = {
   delivered: '#10b981',
 }
 
-export default function AdminOrders() {
+export default function AdminOrders({ auctionId } = {}) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(new Set())
@@ -22,7 +22,7 @@ export default function AdminOrders() {
     setLoading(true)
     try {
       const data = await api.getAdminOrders()
-      setOrders(data)
+      setOrders(auctionId ? data.filter(o => o.auction_id === auctionId) : data)
     } catch (e) {
       setError(e.message)
     } finally {
@@ -100,9 +100,9 @@ export default function AdminOrders() {
   })
 
   return (
-    <div className="admin-orders">
+    <div className={auctionId ? '' : 'admin-orders'}>
       <div className="ao-header">
-        <h1>Orders</h1>
+        {!auctionId && <h1>Orders</h1>}
         <div className="ao-actions">
           {selected.size > 0 && (
             <>

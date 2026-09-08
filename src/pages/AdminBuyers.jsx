@@ -67,7 +67,7 @@ export default function AdminBuyers() {
     <div className="page" style={{ maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0 }}>Buyer Management</h2>
+          <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Buyer Management</h1>
           <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0', fontSize: '0.85rem' }}>
             {buyers.length} total · {counts.pending || 0} pending · {counts.approved || 0} approved
           </p>
