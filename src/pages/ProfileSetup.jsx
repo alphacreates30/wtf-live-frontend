@@ -62,10 +62,14 @@ function ProfileForm() {
     setSaving(true)
 
     try {
-      // 1. Create SetupIntent + Stripe customer
+      // 1. Save profile first - this is what actually creates the profiles
+      // row, so the Stripe fields below have a row to attach to.
+      await api.saveProfile(form)
+
+      // 2. Create SetupIntent + Stripe customer
       const { client_secret, customer_id } = await api.createSetupIntent()
 
-      // 2. Confirm card setup
+      // 3. Confirm card setup
       const cardEl = elements.getElement(CardElement)
       const { setupIntent, error: stripeErr } = await stripe.confirmCardSetup(client_secret, {
         payment_method: {
@@ -75,11 +79,9 @@ function ProfileForm() {
       })
       if (stripeErr) { setError(stripeErr.message); setSaving(false); return }
 
-      // 3. Save payment method ID to backend
+      // 4. Save payment method ID to backend
       await api.savePaymentMethod(setupIntent.payment_method, customer_id)
 
-      // 4. Save profile
-      await api.saveProfile(form)
       setStatus('pending')
     } catch (err) {
       setError(err.message || 'Something went wrong')
