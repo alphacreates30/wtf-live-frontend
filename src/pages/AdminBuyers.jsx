@@ -122,6 +122,10 @@ export default function AdminBuyers() {
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                     Submitted {new Date(buyer.created_at).toLocaleDateString()}
                     {buyer.stripe_payment_method_id && ' · Card on file ✓'}
+                    {buyer.card_verified_at && <span style={{ color: '#42f580' }}> · Card verified ✓</span>}
+                    {buyer.card_verify_error && (
+                      <span style={{ color: '#f54242' }}> · Card verify failed: {buyer.card_verify_error}</span>
+                    )}
                   </div>
                 </div>
 
