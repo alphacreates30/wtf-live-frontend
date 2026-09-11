@@ -9,12 +9,24 @@ const STATUS_COLORS = {
   delivered: '#10b981',
 }
 
+const PAYMENT_STATUS_COLORS = {
+  unpaid: '#f59e0b',
+  charging: '#3b82f6',
+  paid: '#10b981',
+  failed: '#ef4444',
+}
+
 export default function AdminOrders({ auctionId } = {}) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(new Set())
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
+  // Order ids this client just clicked Charge/Retry on - kept separate from
+  // order.payment_status === 'charging' (which reflects any in-flight
+  // attempt, from this client or another) so the button disables instantly
+  // on click and also whenever the server says a charge is already running.
+  const [chargingIds, setChargingIds] = useState(new Set())
 
   useEffect(() => { loadOrders() }, [])
 
@@ -80,6 +92,22 @@ export default function AdminOrders({ auctionId } = {}) {
       await api.updateOrderStatus(id, status)
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
     } catch (e) { setError(e.message) }
+  }
+
+  async function handleCharge(orderId) {
+    setChargingIds(prev => new Set(prev).add(orderId))
+    setError('')
+    try {
+      await api.chargeOrder(orderId)
+    } catch (e) {
+      // The specific reason lands on the order itself (payment_error) and
+      // shows inline once loadOrders() below refreshes - this banner is
+      // just a fallback for e.g. a network/auth error with no order to show it on.
+      setError(e.message)
+    } finally {
+      await loadOrders()
+      setChargingIds(prev => { const next = new Set(prev); next.delete(orderId); return next })
+    }
   }
 
   // Group orders visually: group_id groups together, null = standalone
@@ -172,6 +200,35 @@ export default function AdminOrders({ auctionId } = {}) {
                     </div>
                   </div>
                   <div className="ao-order-right">
+                    {order.payment_status && (
+                      <div className="ao-payment">
+                        <span
+                          className="ao-status"
+                          style={{
+                            background: PAYMENT_STATUS_COLORS[order.payment_status] + '22',
+                            color: PAYMENT_STATUS_COLORS[order.payment_status],
+                            border: '1px solid ' + PAYMENT_STATUS_COLORS[order.payment_status],
+                          }}
+                        >
+                          {order.payment_status === 'charging' ? 'charging…' : order.payment_status}
+                          {order.total_cents != null && ` · $${(order.total_cents / 100).toFixed(2)}`}
+                        </span>
+                        {order.payment_status === 'failed' && order.payment_error && (
+                          <span className="ao-payment-error" title={order.payment_error}>{order.payment_error}</span>
+                        )}
+                        {(order.payment_status === 'unpaid' || order.payment_status === 'failed') && (
+                          <button
+                            className="btn-sm"
+                            onClick={() => handleCharge(order.id)}
+                            disabled={chargingIds.has(order.id) || order.payment_status === 'charging'}
+                          >
+                            {chargingIds.has(order.id)
+                              ? 'Charging…'
+                              : order.payment_status === 'failed' ? 'Retry' : 'Charge card'}
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <span className="ao-status" style={{ background: STATUS_COLORS[order.status] + '22', color: STATUS_COLORS[order.status], border: '1px solid ' + STATUS_COLORS[order.status] }}>
                       {order.status.replace('_', ' ')}
                     </span>

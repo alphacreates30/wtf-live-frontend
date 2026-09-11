@@ -95,6 +95,8 @@ export const api = {
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAuction: (id) => request(`/auction/${id}`, { method: 'DELETE' }),
   getAdminOrders: () => request('/admin/orders'),
+  chargeOrder: (order_id) =>
+    request('/charge-winner', { method: 'POST', body: JSON.stringify({ order_id }) }),
   generateLabel: (order_ids) =>
     request('/admin/orders/label', { method: 'POST', body: JSON.stringify({ order_ids }) }),
   groupOrders: (order_ids) =>
