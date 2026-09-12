@@ -44,6 +44,8 @@ export const api = {
 
   createAuction: (data) =>
     request('/auction', { method: 'POST', body: JSON.stringify(data) }),
+  publishAuction: (id) =>
+    request(`/auction/${id}/publish`, { method: 'POST' }),
 
   getBids: (id) => request(`/auction/${id}/bids`),
   getChat: (id) => request(`/auction/${id}/chat`),
@@ -56,8 +58,8 @@ export const api = {
 
   // Stripe
   createSetupIntent: () => request('/create-setup-intent', { method: 'POST' }),
-  savePaymentMethod: (payment_method_id, customer_id) =>
-    request('/save-payment-method', { method: 'POST', body: JSON.stringify({ payment_method_id, customer_id }) }),
+  savePaymentMethod: (payment_method_id) =>
+    request('/save-payment-method', { method: 'POST', body: JSON.stringify({ payment_method_id }) }),
 
   // Auction Items
   getAuctionItems: (auctionId) => request(`/auction/${auctionId}/items`),

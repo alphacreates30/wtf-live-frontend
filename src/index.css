@@ -102,6 +102,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); }
 .badge-live { background: #ff4d0022; color: var(--accent); border: 1px solid var(--accent); }
 .badge-upcoming { background: #3b82f622; color: #60a5fa; border: 1px solid #3b82f6; }
 .badge-ended { background: #ffffff11; color: var(--text-muted); border: 1px solid var(--border); }
+.badge-draft { background: #eab30822; color: #eab308; border: 1px solid #eab308; }
 
 .error-msg { color: var(--red); font-size: 13px; margin-top: 8px; }
 .success-msg { color: var(--green); font-size: 13px; margin-top: 8px; }

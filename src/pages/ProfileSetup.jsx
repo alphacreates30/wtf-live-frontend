@@ -67,7 +67,7 @@ function ProfileForm() {
       await api.saveProfile(form)
 
       // 2. Create SetupIntent + Stripe customer
-      const { client_secret, customer_id } = await api.createSetupIntent()
+      const { client_secret } = await api.createSetupIntent()
 
       // 3. Confirm card setup
       const cardEl = elements.getElement(CardElement)
@@ -80,7 +80,7 @@ function ProfileForm() {
       if (stripeErr) { setError(stripeErr.message); setSaving(false); return }
 
       // 4. Save payment method ID to backend
-      await api.savePaymentMethod(setupIntent.payment_method, customer_id)
+      await api.savePaymentMethod(setupIntent.payment_method)
 
       setStatus('pending')
     } catch (err) {
