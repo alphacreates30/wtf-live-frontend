@@ -4,7 +4,7 @@ import { api } from '../api'
 import './HostDashboard.css'
 
 const EMPTY_FORM = {
-  title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '', mode: 'live',
+  title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
 }
 
 function dateTimeLocal(offsetMinutes = 30) {
@@ -61,14 +61,6 @@ export default function HostDashboard() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  function setMode(mode) {
-    setForm(prev => ({
-      ...prev,
-      mode,
-      ends_at: mode === 'standard' ? (prev.ends_at || dateTimeLocal(STANDARD_DEFAULT_OFFSET)) : '',
-    }))
-  }
-
   function closeCreate() {
     setShowCreate(false)
     setError('')
@@ -86,8 +78,8 @@ export default function HostDashboard() {
         category: form.category || undefined,
         starting_bid: parseInt(form.starting_bid),
         starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : undefined,
-        ends_at: form.mode === 'standard' && form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
-        mode: form.mode,
+        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
+        mode: 'standard',
       })
       setShowCreate(false)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
@@ -185,18 +177,9 @@ export default function HostDashboard() {
               <button type="button" className="host-modal-close" onClick={closeCreate}>×</button>
             </div>
             <form onSubmit={handleSubmit} className="host-form">
-              <div className="form-group">
-                <label>Auction Type</label>
-                <div style={{display:'flex',gap:'0.5rem'}}>
-                  <button type="button" className={form.mode === 'live' ? 'btn-primary' : 'btn-ghost'} style={{flex:1}} onClick={() => setMode('live')}>Live Auction</button>
-                  <button type="button" className={form.mode === 'standard' ? 'btn-primary' : 'btn-ghost'} style={{flex:1}} onClick={() => setMode('standard')}>Standard Auction</button>
-                </div>
-                <p style={{fontSize:'0.8rem',opacity:0.7,marginTop:'0.4rem'}}>
-                  {form.mode === 'standard'
-                    ? 'No live video. Upload items and run a timed bidding auction, like Goldin or AuctionNinja, with proxy bidding and a closing time per item.'
-                    : 'Host a live video auction and sell items one at a time in real time. No end time — you start it when you go live and end it manually when you\'re done.'}
-                </p>
-              </div>
+              <p style={{fontSize:'0.8rem',opacity:0.7}}>
+                Upload items and run a timed bidding auction, like Goldin or AuctionNinja, with proxy bidding and a closing time per item.
+              </p>
               <div className="form-group">
                 <label>Title *</label>
                 <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. 1:6 Custom Figure" required />
@@ -244,18 +227,15 @@ export default function HostDashboard() {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>{form.mode === 'standard' ? 'Starts at (leave blank = now)' : 'Starts at (leave blank = go live now)'}</label>
+                  <label>Starts at (leave blank = now)</label>
                   <input name="starts_at" type="datetime-local" value={form.starts_at} onChange={handleChange} />
                 </div>
-                {form.mode === 'standard' && (
-                  <div className="form-group">
-                    <label>Auction Ends At *</label>
-                    <input name="ends_at" type="datetime-local" value={form.ends_at} onChange={handleChange} required />
-                  </div>
-                )}
+                <div className="form-group">
+                  <label>Auction Ends At *</label>
+                  <input name="ends_at" type="datetime-local" value={form.ends_at} onChange={handleChange} required />
+                </div>
               </div>
-              {form.mode === 'standard' && (
-                <p style={{fontSize:'0.8rem',opacity:0.7}}>This is the overall bidding window (e.g. 7 days). Each item also gets its own closing time once you add it in Manage Lots — keep item closing times within this window.</p>)}
+              <p style={{fontSize:'0.8rem',opacity:0.7}}>This is the overall bidding window (e.g. 7 days). Each item also gets its own closing time once you add it in Manage Lots — keep item closing times within this window.</p>
               {error && <p className="error-msg">{error}</p>}
               <button type="submit" className="btn-primary host-submit" disabled={loading}>
                 {loading ? 'Creating...' : 'Create Auction'}
