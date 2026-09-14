@@ -82,11 +82,20 @@ export default function MyBids() {
               </tbody>
             </table>
 
-            {auction?.status === 'ended' && wins.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                <span>{wins.length} item{wins.length !== 1 ? 's' : ''} won &mdash; Total: <strong style={{ color: 'var(--text)' }}>{fmt(totalWon)}</strong></span>
-              </div>
-            )}
+            {auction?.status === 'ended' && wins.length > 0 && (() => {
+              const premiumPct = auction?.buyers_premium_pct ?? 15
+              const premium = totalWon * premiumPct / 100
+              return (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textAlign: 'right' }}>
+                    <div>{wins.length} item{wins.length !== 1 ? 's' : ''} won</div>
+                    <div>Hammer total: {fmt(totalWon)}</div>
+                    <div>Buyer's premium ({premiumPct}%): {fmt(premium)}</div>
+                    <div style={{ color: 'var(--text)', fontWeight: 700 }}>Total: {fmt(totalWon + premium)}</div>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )
       })}

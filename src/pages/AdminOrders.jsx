@@ -168,7 +168,9 @@ export default function AdminOrders({ auctionId } = {}) {
                 <div className="ao-bundle-header">
                   <span>📦 Bundle — {group.items.length} items · {group.items[0].ship_name}</span>
                   <span className="ao-bundle-total">
-                    ${group.items.reduce((s, o) => s + parseFloat(o.final_bid), 0).toFixed(2)} total
+                    {/* total_cents (hammer + premium) is what's actually charged - final_bid alone
+                        undercounts a bundle's real total by the premium on every item in it. */}
+                    ${(group.items.reduce((s, o) => s + (o.total_cents ?? Math.round(parseFloat(o.final_bid) * 100)), 0) / 100).toFixed(2)} total
                   </span>
                 </div>
               )}
@@ -192,7 +194,10 @@ export default function AdminOrders({ auctionId } = {}) {
                       )}
                     </div>
                     <div className="ao-meta">
-                      <span className="ao-bid">${parseFloat(order.final_bid).toFixed(2)}</span>
+                      <span className="ao-bid">
+                        ${parseFloat(order.final_bid).toFixed(2)}
+                        {order.premium_cents != null && ` + $${(order.premium_cents / 100).toFixed(2)} premium`}
+                      </span>
                       <span className="ao-date">{new Date(order.created_at).toLocaleDateString()}</span>
                       {order.tracking_number && (
                         <span className="ao-tracking">Tracking: {order.tracking_number}</span>
