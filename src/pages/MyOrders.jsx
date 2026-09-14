@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 
-// Best-effort carrier tracking links - only rendered when tracking_carrier
-// matches a known slug. Falls back to plain text otherwise, since orders.
-// tracking_carrier isn't guaranteed to always be populated with one.
+// tracking_url is Shippo's own hosted tracking page for the shipment,
+// stored at label-purchase time - always prefer it. CARRIER_TRACK_URLS is
+// only a fallback for orders shipped before tracking_url existed, which
+// have a carrier name but no stored URL.
 const CARRIER_TRACK_URLS = {
   usps: n => `https://tools.usps.com/go/TrackConfirmAction?tLabels=${n}`,
   ups: n => `https://www.ups.com/track?tracknum=${n}`,
@@ -12,11 +13,12 @@ const CARRIER_TRACK_URLS = {
   dhl: n => `https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=${n}`,
 }
 
-function trackingLink(carrier, number) {
-  if (!carrier || !number) return null
-  const key = String(carrier).toLowerCase().replace(/[^a-z]/g, '')
+function trackingLink(order) {
+  if (order.tracking_url) return order.tracking_url
+  if (!order.tracking_carrier || !order.tracking_number) return null
+  const key = String(order.tracking_carrier).toLowerCase().replace(/[^a-z]/g, '')
   const build = CARRIER_TRACK_URLS[key]
-  return build ? build(encodeURIComponent(number)) : null
+  return build ? build(encodeURIComponent(order.tracking_number)) : null
 }
 
 const PAYMENT_STATUS_STYLE = {
@@ -63,7 +65,7 @@ export default function MyOrders() {
         const statusKey = order.payment_status || 'unpaid'
         const style = PAYMENT_STATUS_STYLE[statusKey] || PAYMENT_STATUS_STYLE.unpaid
         const label = PAYMENT_STATUS_LABEL[statusKey] || statusKey
-        const link = trackingLink(order.tracking_carrier, order.tracking_number)
+        const link = trackingLink(order)
 
         return (
           <div key={order.id} className="card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem' }}>
