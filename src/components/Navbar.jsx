@@ -26,6 +26,7 @@ export default function Navbar() {
           <>
             <span className="navbar-user">@{username}</span>
             {username !== 'whatthefind' && <Link to="/my-bids" className="navbar-link">My Bids</Link>}
+            {username !== 'whatthefind' && <Link to="/my-orders" className="navbar-link">My Orders</Link>}
             {username === 'whatthefind' && (
               <>
                 <Link to="/host" className={`navbar-link ${location.pathname === '/host' || location.pathname.startsWith('/host/auction') ? 'active' : ''}`}>

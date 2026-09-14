@@ -93,6 +93,7 @@ export const api = {
   // Admin
   getAdminBuyers: () => request('/admin/buyers'),
   getMyBids: () => request('/my-bids'),
+  getMyOrders: () => request('/my-orders'),
   updateBuyerStatus: (userId, status) =>
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAuction: (id) => request(`/auction/${id}`, { method: 'DELETE' }),

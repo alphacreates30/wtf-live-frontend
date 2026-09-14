@@ -12,6 +12,7 @@ import AdminBuyers from './pages/AdminBuyers'
 import AdminOrders from './pages/AdminOrders'
 import { api } from './api'
 import MyBids from './pages/MyBids'
+import MyOrders from './pages/MyOrders'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -159,6 +160,7 @@ export default function App() {
         <Route path="/admin/buyers" element={<Navigate to="/host/buyers" replace />} />
         <Route path="/admin/orders" element={<Navigate to="/host/orders" replace />} />
                 <Route path="/my-bids" element={<ProtectedRoute><MyBids /></ProtectedRoute>} />
+                <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
