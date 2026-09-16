@@ -1,17 +1,5 @@
 # Terms of Sale — WhatTheFind Live
 
-> **DRAFT — needs a lawyer's review before it goes live.** This is the document
-> that governs taking people's money. I'm not a lawyer; this is written to match
-> how the platform actually behaves and to be defensible, but it is not legal
-> advice.
->
-> **Placeholders to fill before publishing:**
-> - `[LEGAL ENTITY NAME]` — your registered business name, or your own name if
->   operating as a sole proprietor
-> - `[STATE]` — the state you operate from (test data suggests Florida; confirm)
-> - `[PICKUP ADDRESS]`
-> - `[EFFECTIVE DATE]`
-
 **Effective [EFFECTIVE DATE]**
 
 These Terms of Sale govern all purchases made through WhatTheFind Live
