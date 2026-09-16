@@ -6,6 +6,35 @@ import './StandardAuctionRoom.css'
 const ADMIN_USERNAME = 'whatthefind'
 const POLL_MS = 4000
 
+function fmtPickupDate(iso) {
+  if (!iso) return null
+  return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function FulfillmentNote({ auction }) {
+  const mode = auction.fulfillment_mode
+  if (!mode || mode === 'shipping') {
+    return <p className="sar-fulfillment-note">📦 Shipping only</p>
+  }
+  const windowLabel = auction.pickup_starts_at && auction.pickup_ends_at
+    ? `${fmtPickupDate(auction.pickup_starts_at)} – ${fmtPickupDate(auction.pickup_ends_at)}`
+    : null
+  if (mode === 'pickup') {
+    return (
+      <p className="sar-fulfillment-note">
+        🚗 Local pickup only{auction.pickup_address ? ` — ${auction.pickup_address}` : ''}
+        {windowLabel ? ` · Pickup window: ${windowLabel}` : ''}
+      </p>
+    )
+  }
+  return (
+    <p className="sar-fulfillment-note">
+      📦🚗 Shipping or local pickup{auction.pickup_address ? ` — pickup at ${auction.pickup_address}` : ''}
+      {windowLabel ? ` · Pickup window: ${windowLabel}` : ''}
+    </p>
+  )
+}
+
 function timeLeftLabel(endsAt, now) {
   if (!endsAt) return null
   const ms = new Date(endsAt).getTime() - now
@@ -308,6 +337,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           <span className="sar-sep">·</span>
           <span>{openItems.length} open</span>
         </div>
+        <FulfillmentNote auction={auction} />
       </div>
 
       {sorted.length === 0 ? (

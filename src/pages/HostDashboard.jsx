@@ -5,6 +5,7 @@ import './HostDashboard.css'
 
 const EMPTY_FORM = {
   title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
+  fulfillment_mode: '', pickup_address: '', pickup_starts_at: '', pickup_ends_at: '',
 }
 
 function dateTimeLocal(offsetMinutes = 30) {
@@ -69,6 +70,15 @@ export default function HostDashboard() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    if (!form.fulfillment_mode) {
+      setError('Choose a fulfilment method')
+      return
+    }
+    const needsPickup = form.fulfillment_mode === 'pickup' || form.fulfillment_mode === 'both'
+    if (needsPickup && (!form.pickup_address || !form.pickup_starts_at || !form.pickup_ends_at)) {
+      setError('Pickup address, start, and end are required for this fulfilment method')
+      return
+    }
     setLoading(true)
     try {
       const created = await api.createAuction({
@@ -80,7 +90,17 @@ export default function HostDashboard() {
         starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : undefined,
         ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
         mode: 'standard',
+        fulfillment_mode: form.fulfillment_mode,
       })
+      // Pickup details are saved via PATCH, not the create call - POST
+      // /auction only takes fulfillment_mode itself.
+      if (needsPickup) {
+        await api.updateAuction(created.id, {
+          pickup_address: form.pickup_address,
+          pickup_starts_at: new Date(form.pickup_starts_at).toISOString(),
+          pickup_ends_at: new Date(form.pickup_ends_at).toISOString(),
+        })
+      }
       setShowCreate(false)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
       navigate(`/host/auction/${created.id}/lots`)
@@ -236,6 +256,37 @@ export default function HostDashboard() {
                 </div>
               </div>
               <p style={{fontSize:'0.8rem',opacity:0.7}}>This is the overall bidding window (e.g. 7 days). Each item also gets its own closing time once you add it in Manage Lots — keep item closing times within this window.</p>
+
+              <div className="form-group">
+                <label>Fulfilment *</label>
+                <select name="fulfillment_mode" value={form.fulfillment_mode} onChange={handleChange} required>
+                  <option value="" disabled>Choose how buyers get their items…</option>
+                  <option value="shipping">Shipping only</option>
+                  <option value="pickup">Local pickup only</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+
+              {(form.fulfillment_mode === 'pickup' || form.fulfillment_mode === 'both') && (
+                <>
+                  <div className="form-group">
+                    <label>Pickup Address *</label>
+                    <input name="pickup_address" value={form.pickup_address} onChange={handleChange} placeholder="123 Main St, City, ST" required />
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Pickup Window Starts *</label>
+                      <input name="pickup_starts_at" type="datetime-local" value={form.pickup_starts_at} onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                      <label>Pickup Window Ends *</label>
+                      <input name="pickup_ends_at" type="datetime-local" value={form.pickup_ends_at} onChange={handleChange} required />
+                    </div>
+                  </div>
+                  <p style={{fontSize:'0.8rem',opacity:0.7}}>Pickup must end after the auction closes.</p>
+                </>
+              )}
+
               {error && <p className="error-msg">{error}</p>}
               <button type="submit" className="btn-primary host-submit" disabled={loading}>
                 {loading ? 'Creating...' : 'Create Auction'}
