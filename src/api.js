@@ -1,18 +1,27 @@
 const BASE = import.meta.env.VITE_API_URL
 
+// Same pattern as the backend's own Resend call (server.js, AbortSignal.timeout(8000)) -
+// without this, an unreachable or slow backend hangs the UI indefinitely instead of
+// erroring out. AI/upload calls pass a longer timeoutMs since they're legitimately slower.
+const DEFAULT_TIMEOUT_MS = 8000
+
 function authHeaders() {
   const token = localStorage.getItem('wtf_token')
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-async function request(path, options = {}) {
+async function request(path, { timeoutMs = DEFAULT_TIMEOUT_MS, ...options } = {}) {
   let res
   try {
     res = await fetch(`${BASE}${path}`, {
       headers: { 'Content-Type': 'application/json', ...authHeaders(), ...options.headers },
+      signal: AbortSignal.timeout(timeoutMs),
       ...options,
     })
-  } catch {
+  } catch (err) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+      throw new Error('The server is taking too long to respond. Check your connection and try again.')
+    }
     throw new Error('Could not reach the server. Check your connection and try again.')
   }
   const text = await res.text()
@@ -112,21 +121,31 @@ export const api = {
     request(`/admin/orders/${id}/ungroup`, { method: 'POST' }),
   updateOrderStatus: (id, status) =>
     request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  // AI bulk lot creation
+  // AI bulk lot creation - longer timeout than the default, this is genuine
+  // vision-model processing, not a plain CRUD call.
   analyzeLot: (images, condition) =>
-    request('/ai/analyze-lot', { method: 'POST', body: JSON.stringify({ images, condition }) }),
+    request('/ai/analyze-lot', { method: 'POST', body: JSON.stringify({ images, condition }), timeoutMs: 45000 }),
   regenerateDescription: (title, condition) =>
-    request('/ai/regenerate-description', { method: 'POST', body: JSON.stringify({ title, condition }) }),
+    request('/ai/regenerate-description', { method: 'POST', body: JSON.stringify({ title, condition }), timeoutMs: 20000 }),
   bulkCreateItems: (auctionId, lots) =>
     request(`/auction/${auctionId}/items/bulk`, { method: 'POST', body: JSON.stringify({ lots }) }),
 
   uploadImage: async (blob, mimeType) => {
     const token = localStorage.getItem('wtf_token')
-    const res = await fetch(`${BASE}/upload-image`, {
-      method: 'POST',
-      headers: { 'Content-Type': mimeType || 'image/jpeg', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: blob,
-    })
+    let res
+    try {
+      res = await fetch(`${BASE}/upload-image`, {
+        method: 'POST',
+        headers: { 'Content-Type': mimeType || 'image/jpeg', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: blob,
+        signal: AbortSignal.timeout(30000),
+      })
+    } catch (err) {
+      if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+        throw new Error('The upload is taking too long. Check your connection and try again.')
+      }
+      throw new Error('Could not reach the server. Check your connection and try again.')
+    }
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Upload failed')
     return data

@@ -236,7 +236,7 @@ export default function HostDashboard() {
                       fd.append('file', file)
                       const base = import.meta.env.VITE_API_URL
                       const tok = localStorage.getItem('wtf_token')
-                      const r = await fetch(base + '/upload-image', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: fd })
+                      const r = await fetch(base + '/upload-image', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: fd, signal: AbortSignal.timeout(30000) })
                       const data = await r.json()
                       if (data.url) setForm(prev => ({ ...prev, image_url: data.url }))
                     } catch (e) { console.error('Upload failed', e) }

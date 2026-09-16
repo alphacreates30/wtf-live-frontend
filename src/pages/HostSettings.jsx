@@ -18,14 +18,15 @@ export default function HostSettings() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('wtf_token')}` },
-        body: JSON.stringify({ current_password: pwForm.current_password, new_password: pwForm.new_password })
+        body: JSON.stringify({ current_password: pwForm.current_password, new_password: pwForm.new_password }),
+        signal: AbortSignal.timeout(8000),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to change password')
       setPwSuccess('Password updated!')
       setPwForm({ current_password: '', new_password: '', confirm_password: '' })
     } catch (err) {
-      setPwError(err.message)
+      setPwError(err.name === 'TimeoutError' ? 'The server is taking too long to respond. Check your connection and try again.' : err.message)
     } finally {
       setPwLoading(false)
     }

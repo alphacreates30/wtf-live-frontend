@@ -81,7 +81,8 @@ export default function AuctionRoom() {
     // LiveKit token
     if (token) {
       fetch(`${import.meta.env.VITE_API_URL}/auction/${id}/token`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(8000),
       })
         .then(r => r.json())
         .then(data => { if (data.token) setLivekitToken(data.token) })
