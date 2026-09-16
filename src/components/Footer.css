@@ -1,0 +1,14 @@
+.site-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.footer-link {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+.footer-link:hover { color: var(--text); }

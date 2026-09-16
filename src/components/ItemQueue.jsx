@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../api'
 import { getSocket } from '../socket'
 
-export default function ItemQueue({ auctionId, isHost, token }) {
+export default function ItemQueue({ auctionId, isHost, token, gateBid }) {
   const [items, setItems] = useState([])
   const [activeItem, setActiveItem] = useState(null)
   const [prebidModal, setPrebidModal] = useState(null) // item to pre-bid on
@@ -64,13 +64,11 @@ export default function ItemQueue({ auctionId, isHost, token }) {
     socket.emit('next_item', { auctionId, token, timerSeconds: nextItemTimer })
   }
 
-  async function handlePrebid(e) {
-    e.preventDefault()
-    if (!prebidModal || !prebidAmount) return
+  async function submitPrebid(itemId, amount) {
     setLoading(true); setError('')
     try {
-      await api.placePrebid(auctionId, prebidModal.id, parseFloat(prebidAmount))
-      setMyPrebids(prev => ({...prev, [prebidModal.id]: parseFloat(prebidAmount)}))
+      await api.placePrebid(auctionId, itemId, amount)
+      setMyPrebids(prev => ({...prev, [itemId]: amount}))
       // Refresh item stats
       const updated = await api.getAuctionItems(auctionId)
       setItems(updated)
@@ -78,6 +76,13 @@ export default function ItemQueue({ auctionId, isHost, token }) {
       setPrebidAmount('')
     } catch (err) { setError(err.message) }
     finally { setLoading(false) }
+  }
+
+  function handlePrebid(e) {
+    e.preventDefault()
+    if (!prebidModal || !prebidAmount) return
+    setError('')
+    gateBid(() => submitPrebid(prebidModal.id, parseFloat(prebidAmount)))
   }
 
   async function handleCancelPrebid(itemId) {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import './StandardAuctionRoom.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -50,7 +51,7 @@ function timeLeftLabel(endsAt, now) {
   return `${s}s`
 }
 
-function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, onClose, onBidSuccess }) {
+function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, gateBid, onClose, onBidSuccess }) {
   const token = localStorage.getItem('wtf_token')
   const navigate = useNavigate()
   const [images, setImages] = useState([])
@@ -82,12 +83,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
   const minBid = isLeading ? floor : floor + (item.bid_count > 0 ? minIncrement : 0)
   const timeLabel = timeLeftLabel(item.ends_at, now)
 
-  async function placeBid() {
-    if (!token) { navigate('/login'); return }
-    const amount = parseFloat(bidInput)
-    if (!amount || amount < minBid) {
-      setBidError(`Min bid: $${minBid.toFixed(2)}`); return
-    }
+  async function submitBid(amount) {
     setBidLoading(true); setBidError('')
     try {
       await api.placeStandardBid(auctionId, item.id, amount)
@@ -100,6 +96,15 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
     } finally {
       setBidLoading(false)
     }
+  }
+
+  function placeBid() {
+    if (!token) { navigate('/login'); return }
+    const amount = parseFloat(bidInput)
+    if (!amount || amount < minBid) {
+      setBidError(`Min bid: $${minBid.toFixed(2)}`); return
+    }
+    gateBid(() => submitBid(amount))
   }
 
   function prevImg() { setActiveImg(i => Math.max(0, i - 1)) }
@@ -227,6 +232,9 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
   const [bidLoading, setBidLoading] = useState({})
   const [bidSuccess, setBidSuccess] = useState({})
   const [selectedItem, setSelectedItem] = useState(null)
+  const [termsAccepted, setTermsAccepted] = useState(null)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const pendingBidRef = useRef(null)
   const pollRef = useRef(null)
 
   const loadAuction = useCallback(async () => {
@@ -265,12 +273,61 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
     })
   }, [items])
 
+  // A different auction always needs a fresh acknowledgement, so this resets
+  // (and re-checks with the server) whenever `id` changes.
+  useEffect(() => {
+    setTermsAccepted(null)
+    if (!token) { setTermsAccepted(false); return }
+    api.getTermsAcceptance(id)
+      .then(res => setTermsAccepted(!!res.accepted))
+      .catch(() => setTermsAccepted(false))
+  }, [id, token])
+
+  // Gates the FIRST bid in this auction behind the acknowledgement modal;
+  // every later bid calls `action` immediately. `action` is whatever the
+  // caller was already about to do, so accepting places the bid they were
+  // already making instead of making them click twice.
+  function gateBid(action) {
+    if (termsAccepted) { action(); return }
+    pendingBidRef.current = action
+    setShowTermsModal(true)
+  }
+
+  async function handleTermsAccept() {
+    await api.acceptTerms(id)
+    setTermsAccepted(true)
+    setShowTermsModal(false)
+    const pending = pendingBidRef.current
+    pendingBidRef.current = null
+    if (pending) pending()
+  }
+
+  function handleTermsCancel() {
+    setShowTermsModal(false)
+    pendingBidRef.current = null
+  }
+
   function updateBidInput(itemId, val) {
     setBidInputs(prev => ({ ...prev, [itemId]: val }))
     setBidErrors(prev => ({ ...prev, [itemId]: '' }))
   }
 
-  async function placeCardBid(e, item) {
+  async function submitCardBid(itemId, amount) {
+    setBidLoading(prev => ({ ...prev, [itemId]: true }))
+    try {
+      await api.placeStandardBid(id, itemId, amount)
+      setBidSuccess(prev => ({ ...prev, [itemId]: true }))
+      setBidInputs(prev => ({ ...prev, [itemId]: '' }))
+      await loadItems()
+      setTimeout(() => setBidSuccess(prev => ({ ...prev, [itemId]: false })), 2500)
+    } catch (err) {
+      setBidErrors(prev => ({ ...prev, [itemId]: err.message || 'Bid failed' }))
+    } finally {
+      setBidLoading(prev => ({ ...prev, [itemId]: false }))
+    }
+  }
+
+  function placeCardBid(e, item) {
     e.stopPropagation()
     if (!token) { navigate('/login'); return }
     const raw = bidInputs[item.id]
@@ -280,18 +337,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
       setBidErrors(prev => ({ ...prev, [item.id]: `Min $${floor.toFixed(2)}` }))
       return
     }
-    setBidLoading(prev => ({ ...prev, [item.id]: true }))
-    try {
-      await api.placeStandardBid(id, item.id, amount)
-      setBidSuccess(prev => ({ ...prev, [item.id]: true }))
-      setBidInputs(prev => ({ ...prev, [item.id]: '' }))
-      await loadItems()
-      setTimeout(() => setBidSuccess(prev => ({ ...prev, [item.id]: false })), 2500)
-    } catch (err) {
-      setBidErrors(prev => ({ ...prev, [item.id]: err.message || 'Bid failed' }))
-    } finally {
-      setBidLoading(prev => ({ ...prev, [item.id]: false }))
-    }
+    gateBid(() => submitCardBid(item.id, amount))
   }
 
   if (accessError) {
@@ -448,8 +494,17 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           isAdmin={isAdmin}
           now={now}
           premiumPct={auction.buyers_premium_pct ?? 15}
+          gateBid={gateBid}
           onClose={() => setSelectedItem(null)}
           onBidSuccess={loadItems}
+        />
+      )}
+
+      {showTermsModal && (
+        <TermsAcknowledgementModal
+          auction={auction}
+          onCancel={handleTermsCancel}
+          onAccept={handleTermsAccept}
         />
       )}
     </div>

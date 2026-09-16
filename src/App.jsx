@@ -13,6 +13,8 @@ import AdminOrders from './pages/AdminOrders'
 import { api } from './api'
 import MyBids from './pages/MyBids'
 import MyOrders from './pages/MyOrders'
+import Terms from './pages/Terms'
+import Footer from './components/Footer'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -104,6 +106,7 @@ export default function App() {
           </ProfileGate>
         } />
         <Route path="/login" element={<Login />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/auction/:id" element={
           <ProfileGate>
             <AuctionRoomGate />
@@ -163,6 +166,7 @@ export default function App() {
                 <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   )
 }

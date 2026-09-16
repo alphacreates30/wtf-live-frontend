@@ -47,6 +47,10 @@ export const api = {
   publishAuction: (id) =>
     request(`/auction/${id}/publish`, { method: 'POST' }),
 
+  getTermsAcceptance: (auctionId) => request(`/auction/${auctionId}/terms-acceptance`),
+  acceptTerms: (auctionId) =>
+    request(`/auction/${auctionId}/terms-acceptance`, { method: 'POST' }),
+
   getBids: (id) => request(`/auction/${id}/bids`),
   getChat: (id) => request(`/auction/${id}/chat`),
 

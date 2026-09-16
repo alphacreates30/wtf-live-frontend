@@ -1,0 +1,65 @@
+.terms-page { max-width: 780px; }
+
+.terms-content {
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 0.94rem;
+}
+
+.terms-content h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.terms-content h2 {
+  font-size: 1.15rem;
+  margin: 1.75rem 0 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.terms-content p { margin: 0.75rem 0; }
+
+.terms-content ul, .terms-content ol {
+  margin: 0.75rem 0 0.75rem 1.25rem;
+}
+
+.terms-content li { margin: 0.3rem 0; }
+
+.terms-content strong { color: var(--text); }
+
+.terms-content a { color: var(--accent); text-decoration: underline; }
+
+.terms-content blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--surface2);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+}
+.terms-content blockquote p { margin: 0.3rem 0; }
+
+.terms-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75rem 0;
+}
+.terms-content td, .terms-content th {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.terms-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.terms-content code {
+  background: var(--surface2);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}

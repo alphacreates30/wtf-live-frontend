@@ -4,6 +4,7 @@ import { getSocket, disconnectSocket } from '../socket'
 import { api } from '../api'
 import LiveStream from '../components/LiveStream'
 import ItemQueue from '../components/ItemQueue'
+import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import './AuctionRoom.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -43,6 +44,9 @@ export default function AuctionRoom() {
   const [blockingUser, setBlockingUser] = useState(null)
   const [soldItems, setSoldItems] = useState([])
   const [elapsedSecs, setElapsedSecs] = useState(0)
+  const [termsAccepted, setTermsAccepted] = useState(null)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const pendingBidRef = useRef(null)
   const showStartTimeRef = useRef(null)
   const activeItemRef = useRef(null)
   const currentItemBidRef = useRef(false)
@@ -219,6 +223,40 @@ export default function AuctionRoom() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chat])
+
+  // A different auction always needs a fresh acknowledgement, so this resets
+  // (and re-checks with the server) whenever `id` changes.
+  useEffect(() => {
+    setTermsAccepted(null)
+    if (!token) { setTermsAccepted(false); return }
+    api.getTermsAcceptance(id)
+      .then(res => setTermsAccepted(!!res.accepted))
+      .catch(() => setTermsAccepted(false))
+  }, [id, token])
+
+  // Gates the FIRST bid/pre-bid in this auction behind the acknowledgement
+  // modal; every later one calls `action` immediately. `action` is whatever
+  // the caller was already about to do, so accepting completes the bid they
+  // were already making instead of making them click twice.
+  function gateBid(action) {
+    if (termsAccepted) { action(); return }
+    pendingBidRef.current = action
+    setShowTermsModal(true)
+  }
+
+  async function handleTermsAccept() {
+    await api.acceptTerms(id)
+    setTermsAccepted(true)
+    setShowTermsModal(false)
+    const pending = pendingBidRef.current
+    pendingBidRef.current = null
+    if (pending) pending()
+  }
+
+  function handleTermsCancel() {
+    setShowTermsModal(false)
+    pendingBidRef.current = null
+  }
 
   function placeBid(e) {
     e.preventDefault()
@@ -500,8 +538,17 @@ export default function AuctionRoom() {
           auctionId={id}
           isHost={isAdmin}
           token={token}
+          gateBid={gateBid}
         />
       </div>
+
+      {showTermsModal && (
+        <TermsAcknowledgementModal
+          auction={auction}
+          onCancel={handleTermsCancel}
+          onAccept={handleTermsAccept}
+        />
+      )}
     </div>
   )
 }
