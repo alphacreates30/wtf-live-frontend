@@ -27,6 +27,11 @@ export default function AdminOrders({ auctionId } = {}) {
   // attempt, from this client or another) so the button disables instantly
   // on click and also whenever the server says a charge is already running.
   const [chargingIds, setChargingIds] = useState(new Set())
+  // Shipping label flow: weigh -> quote -> confirm & charge -> buy. Null
+  // when no shipping modal is open. step is 'input' (entering weight/dims)
+  // or 'confirm' (quote back, awaiting the explicit charge confirmation) -
+  // this is spending the buyer's money, so it's never a single button.
+  const [shipModal, setShipModal] = useState(null)
 
   useEffect(() => { loadOrders() }, [])
 
@@ -55,16 +60,50 @@ export default function AdminOrders({ auctionId } = {}) {
     setSelected(new Set(ids))
   }
 
-  async function handleGenerateLabel() {
+  function openShipModal() {
     if (!selected.size) return
-    setWorking(true); setError('')
+    setShipModal({
+      orderIds: [...selected],
+      step: 'input',
+      weight_oz: '', length_in: '', width_in: '', height_in: '',
+      quote: null,
+      error: '',
+      working: false,
+    })
+  }
+
+  function closeShipModal() {
+    setShipModal(null)
+  }
+
+  async function handleGetQuote() {
+    const { orderIds, weight_oz, length_in, width_in, height_in } = shipModal
+    const dims = { weight_oz: parseFloat(weight_oz), length_in: parseFloat(length_in), width_in: parseFloat(width_in), height_in: parseFloat(height_in) }
+    if (Object.values(dims).some(n => !(n > 0))) {
+      setShipModal(m => ({ ...m, error: 'Enter a weight and all three dimensions, each greater than 0.' }))
+      return
+    }
+    setShipModal(m => ({ ...m, working: true, error: '' }))
     try {
-      const res = await api.generateLabel([...selected])
+      const quote = await api.getShippingQuote(orderIds, dims)
+      setShipModal(m => ({ ...m, working: false, step: 'confirm', quote }))
+    } catch (e) {
+      setShipModal(m => ({ ...m, working: false, error: e.message }))
+    }
+  }
+
+  async function handleConfirmChargeAndBuy() {
+    const { orderIds, quote } = shipModal
+    setShipModal(m => ({ ...m, working: true, error: '' }))
+    try {
+      const res = await api.chargeAndBuyLabel(orderIds, quote.rate_id, quote.amount_cents)
       window.open(res.label_url, '_blank')
+      closeShipModal()
       await loadOrders()
       setSelected(new Set())
-    } catch (e) { setError(e.message) }
-    finally { setWorking(false) }
+    } catch (e) {
+      setShipModal(m => ({ ...m, working: false, error: e.message }))
+    }
   }
 
   async function handleGroup() {
@@ -141,8 +180,8 @@ export default function AdminOrders({ auctionId } = {}) {
                 </button>
               )}
               {pendingSelected && (
-                <button className="btn-primary" onClick={handleGenerateLabel} disabled={working}>
-                  {working ? 'Generating…' : 'Generate Label'}
+                <button className="btn-primary" onClick={openShipModal} disabled={working}>
+                  Generate Label
                 </button>
               )}
             </>
@@ -274,6 +313,76 @@ export default function AdminOrders({ auctionId } = {}) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {shipModal && (
+        <div className="ao-ship-backdrop" onClick={shipModal.working ? undefined : closeShipModal}>
+          <div className="ao-ship-modal card" onClick={e => e.stopPropagation()}>
+            <h2 className="ao-ship-title">Ship {shipModal.orderIds.length > 1 ? `${shipModal.orderIds.length} items` : 'item'}</h2>
+
+            {shipModal.step === 'input' && (
+              <>
+                <p className="ao-ship-sub">Enter the real parcel weight and dimensions at packing time — postage is charged at exact cost, no fallback.</p>
+                <div className="ao-ship-fields">
+                  <label>
+                    Weight (oz)
+                    <input type="number" min="0" step="any" value={shipModal.weight_oz}
+                      onChange={e => setShipModal(m => ({ ...m, weight_oz: e.target.value }))} />
+                  </label>
+                  <label>
+                    Length (in)
+                    <input type="number" min="0" step="any" value={shipModal.length_in}
+                      onChange={e => setShipModal(m => ({ ...m, length_in: e.target.value }))} />
+                  </label>
+                  <label>
+                    Width (in)
+                    <input type="number" min="0" step="any" value={shipModal.width_in}
+                      onChange={e => setShipModal(m => ({ ...m, width_in: e.target.value }))} />
+                  </label>
+                  <label>
+                    Height (in)
+                    <input type="number" min="0" step="any" value={shipModal.height_in}
+                      onChange={e => setShipModal(m => ({ ...m, height_in: e.target.value }))} />
+                  </label>
+                </div>
+                {shipModal.error && <p className="ao-error">{shipModal.error}</p>}
+                <div className="ao-ship-actions">
+                  <button className="btn-ghost" onClick={closeShipModal} disabled={shipModal.working}>Cancel</button>
+                  <button className="btn-primary" onClick={handleGetQuote} disabled={shipModal.working}>
+                    {shipModal.working ? 'Getting quote…' : 'Get Quote'}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {shipModal.step === 'confirm' && shipModal.quote && (
+              <>
+                <div className="ao-ship-quote">
+                  <div className="ao-ship-quote-row">
+                    <span>Carrier</span>
+                    <strong>{shipModal.quote.provider}{shipModal.quote.servicelevel ? ` — ${shipModal.quote.servicelevel}` : ''}</strong>
+                  </div>
+                  <div className="ao-ship-quote-row ao-ship-quote-total">
+                    <span>Postage to charge the buyer</span>
+                    <strong>${(shipModal.quote.amount_cents / 100).toFixed(2)}</strong>
+                  </div>
+                </div>
+                <p className="ao-ship-sub">
+                  Confirming will charge the buyer's card on file <strong>${(shipModal.quote.amount_cents / 100).toFixed(2)}</strong> for postage, and only on a successful charge, buy this label.
+                </p>
+                {shipModal.error && <p className="ao-error">{shipModal.error}</p>}
+                <div className="ao-ship-actions">
+                  <button className="btn-ghost" onClick={() => setShipModal(m => ({ ...m, step: 'input', quote: null }))} disabled={shipModal.working}>
+                    Back
+                  </button>
+                  <button className="btn-primary" onClick={handleConfirmChargeAndBuy} disabled={shipModal.working}>
+                    {shipModal.working ? 'Charging…' : `Charge $${(shipModal.quote.amount_cents / 100).toFixed(2)} and buy label`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -34,3 +34,15 @@
 .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; background: #E05C1A; }
 .btn-ghost-sm { background: transparent; border: 1px solid var(--border, #333); color: var(--text-muted, #888); }
 .btn-ghost-sm:hover { border-color: #E05C1A; color: #E05C1A; }
+
+.ao-ship-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 100; }
+.ao-ship-modal { width: 100%; max-width: 420px; padding: 1.5rem; background: var(--bg-card, #1a1a1a); border: 1px solid var(--border, #333); border-radius: 8px; }
+.ao-ship-title { font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem; }
+.ao-ship-sub { font-size: 0.85rem; color: var(--text-muted, #888); margin: 0 0 1rem; }
+.ao-ship-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+.ao-ship-fields label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; color: var(--text-muted, #888); }
+.ao-ship-fields input { padding: 0.45rem 0.6rem; border-radius: 4px; background: var(--bg, #111); color: var(--text, #fff); border: 1px solid var(--border, #333); font-size: 0.9rem; }
+.ao-ship-quote { background: var(--bg, #111); border: 1px solid var(--border, #333); border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1rem; }
+.ao-ship-quote-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.3rem 0; }
+.ao-ship-quote-total { border-top: 1px solid var(--border, #333); margin-top: 0.3rem; padding-top: 0.6rem; font-size: 1rem; color: #E05C1A; }
+.ao-ship-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }

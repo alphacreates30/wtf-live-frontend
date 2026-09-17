@@ -113,8 +113,10 @@ export const api = {
   getAdminOrders: () => request('/admin/orders'),
   chargeOrder: (order_id) =>
     request('/charge-winner', { method: 'POST', body: JSON.stringify({ order_id }) }),
-  generateLabel: (order_ids) =>
-    request('/admin/orders/label', { method: 'POST', body: JSON.stringify({ order_ids }) }),
+  getShippingQuote: (order_ids, { weight_oz, length_in, width_in, height_in }) =>
+    request('/admin/orders/shipping-quote', { method: 'POST', body: JSON.stringify({ order_ids, weight_oz, length_in, width_in, height_in }) }),
+  chargeAndBuyLabel: (order_ids, rate_id, amount_cents) =>
+    request('/admin/orders/label', { method: 'POST', body: JSON.stringify({ order_ids, rate_id, amount_cents }) }),
   groupOrders: (order_ids) =>
     request('/admin/orders/group', { method: 'POST', body: JSON.stringify({ order_ids }) }),
   ungroupOrder: (id) =>

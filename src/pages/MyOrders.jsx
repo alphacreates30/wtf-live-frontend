@@ -35,6 +35,13 @@ const PAYMENT_STATUS_LABEL = {
   failed: 'Payment Failed',
 }
 
+const SHIPPING_STATUS_LABEL = {
+  paid: 'Paid',
+  unpaid: 'Not yet charged',
+  charging: 'Charging…',
+  failed: 'Payment Failed',
+}
+
 export default function MyOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -93,6 +100,23 @@ export default function MyOrders() {
                 </tr>
               </tbody>
             </table>
+
+            {order.fulfillment_choice === 'shipping' && (() => {
+              const shipStatusKey = order.shipping_payment_status || 'unpaid'
+              const shipStyle = PAYMENT_STATUS_STYLE[shipStatusKey] || PAYMENT_STATUS_STYLE.unpaid
+              const shipLabel = SHIPPING_STATUS_LABEL[shipStatusKey] || shipStatusKey
+              return (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed var(--border)', fontSize: '0.9rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    Postage{order.shipping_cost_cents != null ? ` — ${fmt(order.shipping_cost_cents)}` : ' — charged separately once packed'}
+                  </span>
+                  <span className="badge" style={shipStyle}>{shipLabel}</span>
+                </div>
+              )
+            })()}
+            {order.fulfillment_choice === 'shipping' && order.shipping_payment_status === 'failed' && order.shipping_payment_error && (
+              <div style={{ fontSize: '0.8rem', color: 'var(--error)', marginTop: '0.25rem' }}>{order.shipping_payment_error}</div>
+            )}
 
             {order.tracking_number && (
               <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
