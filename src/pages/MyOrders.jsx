@@ -46,12 +46,35 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [changingAuctionId, setChangingAuctionId] = useState(null)
+  const [changeError, setChangeError] = useState(null)
+
+  function loadOrders() {
+    return api.getMyOrders().then(data => setOrders(data || []))
+  }
 
   useEffect(() => {
-    api.getMyOrders()
-      .then(data => { setOrders(data || []); setLoading(false) })
-      .catch(e => { setError(e.message); setLoading(false) })
+    loadOrders()
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
   }, [])
+
+  // The backend mirrors a change onto every one of this buyer's still-
+  // pending, not-yet-charged orders from that auction (not just the one
+  // clicked) - reloading rather than patching local state keeps this view
+  // consistent with exactly what the server actually changed.
+  async function handleChangeFulfillment(order, newChoice) {
+    setChangingAuctionId(order.auction_id)
+    setChangeError(null)
+    try {
+      await api.updateFulfillmentChoice(order.auction_id, newChoice)
+      await loadOrders()
+    } catch (e) {
+      setChangeError({ auctionId: order.auction_id, message: e.message })
+    } finally {
+      setChangingAuctionId(null)
+    }
+  }
 
   const fmt = cents => '$' + (Number(cents || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -100,6 +123,27 @@ export default function MyOrders() {
                 </tr>
               </tbody>
             </table>
+
+            {order.fulfillment_choice && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed var(--border)', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  Fulfilment: <strong style={{ color: 'var(--text)' }}>{order.fulfillment_choice === 'pickup' ? 'Local pickup' : 'Shipping'}</strong>
+                </span>
+                {order.can_change_fulfillment && (
+                  <button
+                    type="button"
+                    disabled={changingAuctionId === order.auction_id}
+                    onClick={() => handleChangeFulfillment(order, order.fulfillment_choice === 'pickup' ? 'shipping' : 'pickup')}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline', padding: 0 }}
+                  >
+                    {changingAuctionId === order.auction_id ? 'Switching…' : `Switch to ${order.fulfillment_choice === 'pickup' ? 'shipping' : 'pickup'}`}
+                  </button>
+                )}
+              </div>
+            )}
+            {changeError?.auctionId === order.auction_id && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--error)', marginTop: '0.25rem' }}>{changeError.message}</p>
+            )}
 
             {order.fulfillment_choice === 'shipping' && (() => {
               const shipStatusKey = order.shipping_payment_status || 'unpaid'

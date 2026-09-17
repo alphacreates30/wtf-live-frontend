@@ -57,8 +57,10 @@ export const api = {
     request(`/auction/${id}/publish`, { method: 'POST' }),
 
   getTermsAcceptance: (auctionId) => request(`/auction/${auctionId}/terms-acceptance`),
-  acceptTerms: (auctionId) =>
-    request(`/auction/${auctionId}/terms-acceptance`, { method: 'POST' }),
+  acceptTerms: (auctionId, fulfillment_choice) =>
+    request(`/auction/${auctionId}/terms-acceptance`, { method: 'POST', body: JSON.stringify(fulfillment_choice ? { fulfillment_choice } : {}) }),
+  updateFulfillmentChoice: (auctionId, fulfillment_choice) =>
+    request(`/auction/${auctionId}/fulfillment-choice`, { method: 'PATCH', body: JSON.stringify({ fulfillment_choice }) }),
 
   getBids: (id) => request(`/auction/${id}/bids`),
   getChat: (id) => request(`/auction/${id}/chat`),

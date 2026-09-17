@@ -245,8 +245,8 @@ export default function AuctionRoom() {
     setShowTermsModal(true)
   }
 
-  async function handleTermsAccept() {
-    await api.acceptTerms(id)
+  async function handleTermsAccept(fulfillment_choice) {
+    await api.acceptTerms(id, fulfillment_choice)
     setTermsAccepted(true)
     setShowTermsModal(false)
     const pending = pendingBidRef.current

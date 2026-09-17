@@ -8,20 +8,27 @@ function fmtDate(iso) {
 
 export default function TermsAcknowledgementModal({ auction, onCancel, onAccept }) {
   const [checked, setChecked] = useState(false)
+  // Only meaningful (and only required) when the auction offers both - no
+  // default, no pre-selected radio, so accepting always reflects a
+  // deliberate pick rather than a default the buyer never actually chose.
+  const [choice, setChoice] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const offersPickup = auction.fulfillment_mode === 'pickup' || auction.fulfillment_mode === 'both'
+  const bothOffered = auction.fulfillment_mode === 'both'
+  const pickupOnly = auction.fulfillment_mode === 'pickup'
+  const shippingOnly = auction.fulfillment_mode === 'shipping'
   const premiumPct = auction.buyers_premium_pct ?? 15
   const pickupWindow = auction.pickup_starts_at && auction.pickup_ends_at
     ? `${fmtDate(auction.pickup_starts_at)} – ${fmtDate(auction.pickup_ends_at)}`
     : null
+  const canAccept = checked && (!bothOffered || !!choice) && !submitting
 
   async function handleAccept() {
-    if (!checked || submitting) return
+    if (!canAccept) return
     setSubmitting(true); setError('')
     try {
-      await onAccept()
+      await onAccept(bothOffered ? choice : undefined)
     } catch (err) {
       setError(err.message || 'Could not record your acceptance. Please try again.')
       setSubmitting(false)
@@ -38,18 +45,46 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
           <li><strong>Your card is charged automatically</strong> when a lot closes and you've won it.</li>
           <li><strong>Bids are binding and cannot be retracted.</strong></li>
           <li>Lots are sold <strong>as-is</strong>. All sales final, except a lot materially not as described — tell us within 3 days and we'll refund it.</li>
-          {offersPickup && (
+          {pickupOnly && (
             <>
               <li>
                 <strong>Pickup:{pickupWindow ? ` ${pickupWindow}` : ''}</strong>
-                {auction.pickup_address ? ` at ${auction.pickup_address}.` : '.'} Choose shipping instead if you can't collect.
+                {auction.pickup_address ? ` at ${auction.pickup_address}.` : '.'}
               </li>
               <li className="terms-modal-warning">
-                ⚠️ Lots not collected within the pickup window, with no shipping arranged, are <strong>forfeited with no refund</strong>. Contact us before the window ends and we'll ship instead.
+                ⚠️ Lots not collected within the pickup window are <strong>forfeited with no refund</strong>.
               </li>
             </>
           )}
+          {shippingOnly && (
+            <li>
+              <strong>Shipping:</strong> postage is charged at actual cost, no added fee, as a separate payment after your item is packed.
+            </li>
+          )}
         </ul>
+
+        {bothOffered && (
+          <div className="terms-modal-choice">
+            <p className="terms-modal-choice-label">How will you receive your winnings? *</p>
+            <label className={`terms-modal-choice-option ${choice === 'pickup' ? 'terms-modal-choice-selected' : ''}`}>
+              <input type="radio" name="fulfillment_choice" checked={choice === 'pickup'} onChange={() => setChoice('pickup')} />
+              <span>
+                <strong>Local pickup</strong>
+                <br />
+                {pickupWindow ? `${pickupWindow}` : 'Window to be confirmed'}{auction.pickup_address ? ` at ${auction.pickup_address}` : ''}.{' '}
+                <span className="terms-modal-warning">Lots not collected in this window are forfeited with no refund.</span>
+              </span>
+            </label>
+            <label className={`terms-modal-choice-option ${choice === 'shipping' ? 'terms-modal-choice-selected' : ''}`}>
+              <input type="radio" name="fulfillment_choice" checked={choice === 'shipping'} onChange={() => setChoice('shipping')} />
+              <span>
+                <strong>Shipping</strong>
+                <br />
+                Postage charged at actual cost, no added fee, as a separate payment after your item is packed.
+              </span>
+            </label>
+          </div>
+        )}
 
         <label className="terms-modal-checkbox">
           <input type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} />
@@ -63,7 +98,7 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
 
         <div className="terms-modal-actions">
           <button type="button" className="btn-ghost" onClick={onCancel} disabled={submitting}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleAccept} disabled={!checked || submitting}>
+          <button type="button" className="btn-primary" onClick={handleAccept} disabled={!canAccept}>
             {submitting ? 'Placing bid…' : 'Agree and place bid'}
           </button>
         </div>
