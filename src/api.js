@@ -115,6 +115,11 @@ export const api = {
   getAdminOrders: () => request('/admin/orders'),
   chargeOrder: (order_id) =>
     request('/charge-winner', { method: 'POST', body: JSON.stringify({ order_id }) }),
+  // Standard-auction orders are billed on one invoice per buyer per auction -
+  // charge/retry that instead of an individual order. Same endpoint as
+  // chargeOrder; the backend routes on which field is present.
+  chargeInvoice: (invoice_id) =>
+    request('/charge-winner', { method: 'POST', body: JSON.stringify({ invoice_id }) }),
   getShippingQuote: (order_ids, { weight_oz, length_in, width_in, height_in }) =>
     request('/admin/orders/shipping-quote', { method: 'POST', body: JSON.stringify({ order_ids, weight_oz, length_in, width_in, height_in }) }),
   chargeAndBuyLabel: (order_ids, rate_id, amount_cents) =>

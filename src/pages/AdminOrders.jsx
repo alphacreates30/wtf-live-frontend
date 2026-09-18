@@ -149,6 +149,39 @@ export default function AdminOrders({ auctionId } = {}) {
     }
   }
 
+  // Standard-auction orders are billed together on one invoice per buyer per
+  // auction - charge/retry the invoice, not the individual lot. chargingIds
+  // holds order ids and invoice ids in the same set; they're both opaque
+  // uuids used only to disable the right button, so sharing the set is safe.
+  async function handleChargeInvoice(invoiceId) {
+    setChargingIds(prev => new Set(prev).add(invoiceId))
+    setError('')
+    try {
+      await api.chargeInvoice(invoiceId)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      await loadOrders()
+      setChargingIds(prev => { const next = new Set(prev); next.delete(invoiceId); return next })
+    }
+  }
+
+  // Standard-auction orders share an invoice_id (one invoice per buyer per
+  // auction) - roll them up into one total/status/Charge-Retry button
+  // instead of showing that per lot. Live orders have no invoice_id and
+  // keep the exact per-order payment display below, unchanged.
+  const invoiceSummaries = {}
+  const firstOrderIdForInvoice = new Map()
+  for (const o of orders) {
+    if (!o.invoice_id) continue
+    if (!invoiceSummaries[o.invoice_id]) {
+      invoiceSummaries[o.invoice_id] = { total_cents: 0, payment_status: o.payment_status, payment_error: o.payment_error, lotCount: 0 }
+      firstOrderIdForInvoice.set(o.invoice_id, o.id)
+    }
+    invoiceSummaries[o.invoice_id].total_cents += (o.total_cents || 0)
+    invoiceSummaries[o.invoice_id].lotCount += 1
+  }
+
   // Group orders visually: group_id groups together, null = standalone
   const groups = []
   const seen = new Set()
@@ -244,7 +277,44 @@ export default function AdminOrders({ auctionId } = {}) {
                     </div>
                   </div>
                   <div className="ao-order-right">
-                    {order.payment_status && (
+                    {order.invoice_id ? (
+                      firstOrderIdForInvoice.get(order.invoice_id) === order.id ? (
+                        <div className="ao-payment">
+                          <span
+                            className="ao-status"
+                            style={{
+                              background: PAYMENT_STATUS_COLORS[invoiceSummaries[order.invoice_id].payment_status] + '22',
+                              color: PAYMENT_STATUS_COLORS[invoiceSummaries[order.invoice_id].payment_status],
+                              border: '1px solid ' + PAYMENT_STATUS_COLORS[invoiceSummaries[order.invoice_id].payment_status],
+                            }}
+                          >
+                            {invoiceSummaries[order.invoice_id].payment_status === 'charging' ? 'charging…' : invoiceSummaries[order.invoice_id].payment_status}
+                            {' · '}${(invoiceSummaries[order.invoice_id].total_cents / 100).toFixed(2)}
+                            {' · '}{invoiceSummaries[order.invoice_id].lotCount} lot{invoiceSummaries[order.invoice_id].lotCount === 1 ? '' : 's'}
+                          </span>
+                          {invoiceSummaries[order.invoice_id].payment_status === 'failed' && invoiceSummaries[order.invoice_id].payment_error && (
+                            <span className="ao-payment-error" title={invoiceSummaries[order.invoice_id].payment_error}>{invoiceSummaries[order.invoice_id].payment_error}</span>
+                          )}
+                          {(invoiceSummaries[order.invoice_id].payment_status === 'unpaid' || invoiceSummaries[order.invoice_id].payment_status === 'failed') && (
+                            <button
+                              className="btn-sm"
+                              onClick={() => handleChargeInvoice(order.invoice_id)}
+                              disabled={chargingIds.has(order.invoice_id) || invoiceSummaries[order.invoice_id].payment_status === 'charging'}
+                            >
+                              {chargingIds.has(order.invoice_id)
+                                ? 'Charging…'
+                                : invoiceSummaries[order.invoice_id].payment_status === 'failed' ? 'Retry' : 'Charge card'}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="ao-payment">
+                          <span className="ao-status" style={{ opacity: 0.6 }}>
+                            billed together on one invoice ({invoiceSummaries[order.invoice_id].lotCount} lots)
+                          </span>
+                        </div>
+                      )
+                    ) : order.payment_status && (
                       <div className="ao-payment">
                         <span
                           className="ao-status"
