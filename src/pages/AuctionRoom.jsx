@@ -6,6 +6,7 @@ import LiveStream from '../components/LiveStream'
 import ItemQueue from '../components/ItemQueue'
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import './AuctionRoom.css'
+import './Buyer.css'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -297,32 +298,31 @@ export default function AuctionRoom() {
 
   // Access denied screen (not approved, blocked, etc.)
   if (accessError) {
-    const icons = { pending: '...', blocked: '...', no_profile: '...', payment_failed: '...' }
+    const tag = { pending: 'Pending', blocked: 'Removed', no_profile: 'Profile needed', payment_failed: 'Payment' }[accessError.code] || 'Restricted'
+    const tagClass = accessError.code === 'blocked' ? 'status-tag-blocked' : 'status-tag-pending'
     return (
-      <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div className="card" style={{ textAlign: 'center', maxWidth: 420, padding: '2.5rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>{icons[accessError.code] || '...'}</div>
-          <h2 style={{ marginBottom: '0.5rem' }}>
-            {accessError.code === 'pending' ? 'Approval Required' :
-             accessError.code === 'blocked' ? 'Removed from Auction' :
-             accessError.code === 'no_profile' ? 'Profile Required' : 'Access Restricted'}
-          </h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{accessError.message}</p>
-          {accessError.code === 'no_profile' && (
-            <button className="btn-primary" onClick={() => navigate('/profile-setup')}>Complete Profile </button>
-          )}
-          {accessError.code === 'pending' && (
-            <button className="btn-ghost" onClick={() => navigate('/')}>Browse Auctions</button>
-          )}
-          {accessError.code === 'blocked' && (
-            <button className="btn-ghost" onClick={() => navigate('/')}>Go Home</button>
-          )}
-        </div>
+      <div className="page status-screen">
+        <span className={`status-tag ${tagClass}`}>{tag}</span>
+        <h2>
+          {accessError.code === 'pending' ? 'Approval Required' :
+           accessError.code === 'blocked' ? 'Removed from Auction' :
+           accessError.code === 'no_profile' ? 'Profile Required' : 'Access Restricted'}
+        </h2>
+        <p>{accessError.message}</p>
+        {accessError.code === 'no_profile' && (
+          <button className="btn-primary" onClick={() => navigate('/profile-setup')}>Complete Profile</button>
+        )}
+        {accessError.code === 'pending' && (
+          <button className="btn-ghost" onClick={() => navigate('/')}>Browse Auctions</button>
+        )}
+        {accessError.code === 'blocked' && (
+          <button className="btn-ghost" onClick={() => navigate('/')}>Go Home</button>
+        )}
       </div>
     )
   }
 
-  if (!auction) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading auction...</p></div>
+  if (!auction) return <div className="page"><p className="buyer-note">Loading auction...</p></div>
 
   const isHost = username === auction.host_username
   const isLive = auction.status === 'live'
@@ -422,7 +422,7 @@ export default function AuctionRoom() {
             {isLive && !isHost && (
               <form onSubmit={placeBid} className="ar-bid-form">
                 <input
-                  type="number" min={minBid} value={bidAmount}
+                  type="number" inputMode="decimal" aria-label="Your bid" min={minBid} value={bidAmount}
                   onChange={e => { setBidAmount(e.target.value); setBidError('') }}
                   placeholder={`Min $${minBid}`}
                 />
@@ -460,12 +460,12 @@ export default function AuctionRoom() {
 
               {/* Live viewer block panel  only visible to admin/host */}
               {isLive && chatUsers.length > 0 && (
-                <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border, #333)', paddingTop: '0.75rem' }}>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Active viewers</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div className="ar-viewer-list">
+                  <p className="ar-viewer-list-title">Active viewers</p>
+                  <div className="ar-viewer-rows">
                     {chatUsers.map(u => (
-                      <div key={u} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.82rem' }}>@{u}</span>
+                      <div key={u} className="ar-viewer-row">
+                        <span className="ar-viewer-name">@{u}</span>
                         <button
                           onClick={() => {
                             // We need the userId for this username  we'll use username as the key
@@ -474,7 +474,7 @@ export default function AuctionRoom() {
                             blockUser(u, u) // passing username as id placeholder  see note below
                           }}
                           disabled={blockingUser === u || flaggedUsers.has(u)}
-                          style={{ fontSize: '0.72rem', padding: '2px 8px', background: flaggedUsers.has(u) ? '#333' : '#2a001a', color: flaggedUsers.has(u) ? '#666' : '#cc44ff', border: '1px solid currentColor', borderRadius: '4px', cursor: 'pointer' }}
+                          className="ar-block-btn"
                         >
                           {blockingUser === u ? '...' : flaggedUsers.has(u) ? 'Blocked' : 'Block'}
                         </button>

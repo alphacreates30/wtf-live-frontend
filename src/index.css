@@ -22,7 +22,9 @@
   /* ---- Ink ---- */
   --text:       #F7F3EC;
   --text-muted: #B8A996;   /* 7.8:1 on --bg */
-  --ink-faint:  #8A7D72;   /* 4.5:1 on --bg — do not go fainter */
+  --ink-faint:  #92857A;   /* labels/metadata. 4.97:1 on --bg, 4.53:1 on --surface. NOT for
+                              placeholders on inputs (3.4:1 there) - those use --text-muted.
+                              The brand file's #8A7D72 measures 4.46 / 4.06 / 3.4. */
 
   /* ---- Accent ----
    * Brand red #C0392B measures only 3.3:1 on warm black, so red TEXT is tinted.
@@ -84,8 +86,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Nothing should ever push the page sideways on a phone. */
-html, body { overflow-x: hidden; }
+/* Nothing should ever push the page sideways on a phone. `clip`, NOT `hidden`:
+ * `hidden` on both html and body turns body into a scroll container, which
+ * silently breaks every position: sticky on the page (the navbar scrolled away
+ * and the mobile menu became unreachable). `clip` crops the same way without
+ * creating a scroll container. */
+html, body { overflow-x: clip; }
 img, video, canvas, svg { max-width: 100%; height: auto; }
 
 a { color: inherit; text-decoration: none; }
@@ -184,7 +190,7 @@ input, textarea, select {
   min-height: var(--tap);
   transition: border-color 0.15s;
 }
-input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); }
 
 /* Checkboxes and radios are not text fields — the width/min-height rules above

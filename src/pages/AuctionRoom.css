@@ -1,3 +1,8 @@
+/* ===== Live Auction Room =====
+ * Live mode is gated off at auction creation (v2) but the room stays in scope:
+ * it must be right the moment it is switched back on. Every colour is a token.
+ * Urgent = --accent (urgency is the call to action); winning = --success. */
+
 .page.auction-room { max-width: 1200px; }
 
 .ar-header {
@@ -9,24 +14,43 @@
   flex-wrap: wrap;
 }
 .ar-badges { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-.ar-viewers { font-size: 12px; color: var(--text-muted); }
-.ar-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
-.ar-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 8px; }
-.ar-host { font-size: 13px; color: var(--text-muted); }
+.ar-viewers {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+.ar-title { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 8px; }
+.ar-desc { color: var(--text-muted); font-size: 1rem; margin-bottom: 8px; }
+.ar-host { font-size: 0.92rem; color: var(--text-muted); }
 
 .ar-timer {
   text-align: center;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 24px;
+  padding: 14px 22px;
   min-width: 140px;
   flex-shrink: 0;
 }
-.ar-timer.urgent { border-color: var(--red); }
-.ar-timer.urgent .ar-timer-value { color: var(--red); }
-.ar-timer-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.ar-timer-value { font-size: 32px; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
+.ar-timer.urgent { border-color: var(--accent); }
+.ar-timer.urgent .ar-timer-value { color: var(--accent); animation: ns-pulse 0.8s ease-in-out infinite; }
+.ar-timer-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+.ar-timer-value {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+}
 
 .ar-image { width: 100%; max-height: 400px; overflow: hidden; border-radius: var(--radius); margin-bottom: 24px; }
 .ar-image img { width: 100%; height: 100%; object-fit: cover; }
@@ -37,78 +61,132 @@
   gap: 16px;
   align-items: start;
 }
-@media (max-width: 800px) {
-  .ar-body { grid-template-columns: 1fr; }
-}
 
-.ar-left { display: flex; flex-direction: column; gap: 16px; }
+.ar-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
 /* Bid panel */
-.ar-bid-panel {}
-.ar-current-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.ar-current-bid { font-size: 42px; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 6px; }
-.ar-leading { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.ar-current-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+.ar-current-bid {
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.ar-leading { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 16px; }
 
 .ar-bid-form { display: flex; flex-direction: column; gap: 10px; }
-.ar-bid-btn { width: 100%; padding: 14px; font-size: 16px; }
-.ar-ended-msg { margin-top: 12px; font-size: 14px; color: var(--text-muted); }
+.ar-bid-btn { width: 100%; padding: 14px; font-size: 1.15rem; }
+.ar-ended-msg { margin-top: 12px; font-size: 0.95rem; color: var(--text-muted); }
 
 /* Host panel */
-.ar-host-panel {}
-.ar-host-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.ar-host-title { font-size: 1.4rem; margin-bottom: 12px; }
 .ar-host-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.ar-host-btns button { font-size: 13px; padding: 8px 14px; }
+.ar-host-btns button { font-size: 1rem; padding: 8px 14px; }
+
+/* Host-only: active viewers + block */
+.ar-viewer-list { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+.ar-viewer-list-title {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+.ar-viewer-rows { display: flex; flex-direction: column; gap: 0.25rem; }
+.ar-viewer-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: var(--tap); }
+.ar-viewer-name { font-size: 0.95rem; }
+.ar-block-btn {
+  min-height: var(--tap);
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--error-wash);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+.ar-block-btn:disabled { background: transparent; color: var(--neutral); border-color: var(--border); }
 
 /* Bids */
-.ar-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
-.ar-empty { color: var(--text-muted); font-size: 13px; }
-.ar-bid-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.ar-bid-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.ar-section-title { font-size: 1.4rem; margin-bottom: 12px; }
+.ar-empty { color: var(--text-muted); font-size: 0.95rem; }
+.ar-bid-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.ar-bid-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
 .ar-bid-item.top .ar-bid-user { color: var(--accent); }
-.ar-bid-item.top .ar-bid-amount { color: var(--accent); font-weight: 800; }
+.ar-bid-item.top .ar-bid-amount { color: var(--accent); }
 .ar-bid-user { color: var(--text-muted); }
-.ar-bid-amount { font-weight: 700; }
+.ar-bid-amount { font-family: var(--font-display); font-size: 1.2rem; }
 
 /* Chat */
 .ar-chat { display: flex; flex-direction: column; height: 600px; padding: 16px; }
 .ar-chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding-right: 4px; }
 .ar-chat-messages::-webkit-scrollbar { width: 4px; }
-.ar-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.ar-chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
 
-.ar-chat-msg { font-size: 13px; line-height: 1.4; }
+.ar-chat-msg { font-size: 0.95rem; line-height: 1.45; }
 .ar-chat-msg.system { color: var(--text-muted); font-style: italic; }
 .ar-chat-msg.host .ar-chat-name { color: var(--accent); }
 .ar-chat-name { font-weight: 700; margin-right: 6px; }
 .ar-chat-name.host { color: var(--accent); }
-.ar-chat-name.bidder { color: var(--green); }
+.ar-chat-name.bidder { color: var(--success); }
 
 .ar-chat-form { display: flex; gap: 8px; }
-.ar-chat-form input { flex: 1; }
-.ar-chat-send { padding: 10px 14px; font-size: 16px; flex-shrink: 0; }
+.ar-chat-form input { flex: 1; min-width: 0; }
+.ar-chat-send { padding: 10px 16px; font-size: 1rem; flex-shrink: 0; }
 
-.ar-now-selling { display: flex; align-items: center; gap: 0.75rem; background: #E05C1A18; border: 1px solid #E05C1A55; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; }
+/* Now selling */
+.ar-now-selling {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+}
 .ar-ns-left { display: flex; flex-direction: column; min-width: 0; }
-.ar-ns-label { font-size: 0.6rem; font-weight: 700; color: #E05C1A; letter-spacing: 1px; white-space: nowrap; }
-.ar-ns-title { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.ar-ns-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.ar-ns-title { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
 .ar-ns-center { flex: 1; display: flex; justify-content: center; }
-.ar-ns-battle { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
-.ar-ns-winner { display: flex; align-items: center; gap: 0.5rem; }
-.ar-ns-winner-label { font-size: 0.65rem; color: #2ecc71; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-.ar-ns-winner-name { font-size: 0.95rem; font-weight: 700; color: #fff; }
-.ar-ns-winner-amt { font-size: 1rem; font-weight: 800; color: #E05C1A; }
-.ar-ns-opening { font-size: 0.85rem; color: var(--text-muted, #aaa); }
+.ar-ns-winner { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.ar-ns-winner-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--success);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ar-ns-winner-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+.ar-ns-winner-amt { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--accent); }
+.ar-ns-opening { font-size: 0.92rem; color: var(--text-muted); }
 .ar-ns-right { display: flex; align-items: center; }
-.ar-ns-timer { font-size: 1.1rem; font-weight: 700; color: #E05C1A; min-width: 40px; text-align: right; }
-.ar-ns-timer.urgent { color: #ff4444; animation: ns-pulse 0.5s ease-in-out infinite; }
-@keyframes ns-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.ar-ns-timer { font-family: var(--font-display); font-size: 1.8rem; line-height: 1; color: var(--accent); min-width: 40px; text-align: right; }
+.ar-ns-timer.urgent { animation: ns-pulse 0.5s ease-in-out infinite; }
+@keyframes ns-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 /* ── Show Stats Bar (host only) ── */
 .ar-stats-bar {
   display: flex;
-  gap: 0;
-  background: #1a1a2e;
-  border: 1px solid #E05C1A;
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 0.75rem;
 }
@@ -118,39 +196,86 @@
   flex-direction: column;
   align-items: center;
   padding: 0.6rem 0.5rem;
-  border-right: 1px solid rgba(224,92,26,0.3);
+  border-right: 1px solid var(--border);
 }
 .ar-stat:last-child { border-right: none; }
 .ar-stat-label {
-  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #E05C1A;
-  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
   white-space: nowrap;
 }
-.ar-stat-value {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #fff;
-  margin-top: 2px;
-}
+.ar-stat-value { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--text); margin-top: 3px; }
 
-/* Now Selling — item image + description */
+/* Now Selling: item image + description */
 .ar-ns-img {
   width: 68px;
   height: 68px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: var(--radius);
   flex-shrink: 0;
-  border: 2px solid rgba(224,92,26,0.5);
+  border: 1px solid var(--accent);
 }
 .ar-ns-desc {
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.6);
+  font-size: 0.85rem;
+  color: var(--text-muted);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
+}
+
+/* ===== Phone: one column - video, now selling, BID, chat, history =====
+ * The left column dissolves (display: contents) so the grid can reorder its
+ * cards: the bid panel comes before chat, and the bid controls stick to the
+ * bottom of the screen so a buyer never has to scroll to reach them. */
+@media (max-width: 800px) {
+  .ar-body { grid-template-columns: 1fr; }
+  .ar-left { display: contents; }
+  .ar-bid-panel  { order: 1; }
+  .ar-host-panel { order: 2; }
+  .ar-chat       { order: 3; height: 420px; }
+  .ar-bids       { order: 4; }
+
+  /* The bid controls live in a compact fixed bar (current bid left, input +
+     button right), so they are on screen the moment the room loads - a sticky
+     panel can't pin until its container scrolls into view, which left the bid
+     button below the fold at load. Only when a bid form exists (not for the
+     host, not once ended); the page gets matching bottom padding so the chat
+     and history are never hidden behind it. */
+  .auction-room:has(.ar-bid-form) { padding-bottom: 150px; }
+  .ar-bid-panel:has(.ar-bid-form) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    margin: 0;
+    border-width: 1px 0 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    column-gap: 14px;
+    align-items: center;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    box-shadow: var(--shadow-pop);
+  }
+  .ar-bid-panel:has(.ar-bid-form) > :not(.ar-bid-form) { grid-column: 1; }
+  .ar-bid-panel:has(.ar-bid-form) .ar-bid-form { grid-column: 2; grid-row: 1 / span 3; }
+  .ar-bid-panel:has(.ar-bid-form) .ar-current-bid { font-size: 2.2rem; margin: 0; }
+  .ar-bid-panel:has(.ar-bid-form) .ar-leading { margin: 0; font-size: 0.85rem; }
+  .ar-bid-panel:has(.ar-bid-form) .ar-bid-btn { padding: 8px; font-size: 1.05rem; }
+  .ar-bid-panel:has(.ar-bid-form) .error-msg { margin-top: 0; }
+
+  .ar-now-selling { flex-wrap: wrap; }
+  .ar-ns-center { flex: 1 1 100%; order: 3; justify-content: flex-start; }
+  .ar-ns-title, .ar-ns-desc { max-width: 60vw; }
+  .ar-stats-bar { flex-wrap: wrap; }
+  .ar-stat { flex: 1 1 50%; border-bottom: 1px solid var(--border); }
+}
+
+@media (max-width: 480px) {
+  .ar-timer { width: 100%; }
 }
