@@ -137,7 +137,17 @@
   z-index: 1;
 }
 
-.sar-card-closed { opacity: 0.75; }
+/* A closed (sold / unsold) lot reads as settled, not faded. NOT container opacity:
+ * opacity multiplies against every child, so no token can keep the text legible
+ * (labels fell to 3.19:1 and the "Won by" outcome to 3.55:1 on cream). Instead the
+ * muted colours are set explicitly - both are AA on every surface - and the
+ * outcome text keeps full strength. The photo alone is desaturated. */
+.sar-card-closed .sar-card-title,
+.sar-card-closed .sar-card-stat-val { color: var(--text-muted); }
+.sar-card-closed .sar-card-stat-label,
+.sar-card-closed .sar-prem,
+.sar-card-closed .sar-card-hint { color: var(--ink-faint); }
+.sar-card-closed .sar-card-img { filter: grayscale(0.45); }
 .sar-card-closed:hover {
   transform: none;
   box-shadow: none;
