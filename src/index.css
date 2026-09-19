@@ -11,45 +11,44 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  color-scheme: dark;   /* native scrollbars, checkboxes and pickers follow the ground */
-  /* ---- Surfaces: warm black, not neutral black ---- */
-  --bg:         #1E1612;
-  --surface:    #2A1E14;
-  --surface2:   #3A2B1E;
-  --border:     rgba(247, 243, 236, 0.14);
-  --border-soft: rgba(247, 243, 236, 0.08);
+  color-scheme: light;   /* native scrollbars, checkboxes and pickers follow the ground */
+
+  /* ---- Surfaces: cream (moved from warm black, Sep 19 - see COLOURWAY_SWAP_BRIEF) ---- */
+  --bg:         #F7F3EC;
+  --surface:    #FDF9F3;
+  --surface2:   #F0EADF;   /* brief: #EFE8DD. Lightened ~0.5% so --accent text clears 4.5 on it (4.47 -> 4.54) */
+  --border:     rgba(30, 22, 18, 0.14);    /* flips: ink-alpha on cream, was cream-alpha on black */
+  --border-soft: rgba(30, 22, 18, 0.08);
 
   /* ---- Ink ---- */
-  --text:       #F7F3EC;
-  --text-muted: #B8A996;   /* 7.8:1 on --bg */
-  --ink-faint:  #92857A;   /* labels/metadata. 4.97:1 on --bg, 4.53:1 on --surface. NOT for
-                              placeholders on inputs (3.4:1 there) - those use --text-muted.
-                              The brand file's #8A7D72 measures 4.46 / 4.06 / 3.4. */
+  --text:       #1E1612;
+  --text-muted: #4A3F37;   /* 9.2:1 on --bg */
+  --ink-faint:  #72675D;   /* labels/metadata. Moves DARKER on cream; the dark-ground value
+                              (#92857A) must NOT be carried across - it is 3:1 here. The brief's
+                              #766A60 is 4.75 on --bg but 4.31 on --surface2 (placeholders and
+                              image-less cards sit there), so it is 3% darker: 4.98 / 5.25 / 4.5. */
 
-  /* ---- Accent ----
-   * Brand red #C0392B measures only 3.3:1 on warm black, so red TEXT is tinted.
-   * --accent-solid stays true brand red for large fills carrying cream text.
-   * This is reversed-colourway practice, not a second brand red. */
-  --accent:       #E86B57;   /* 4.9:1 on --bg — text, links, borders, small marks */
-  --accent-hover: #F08670;
-  --accent-solid: #C0392B;   /* large fills only, cream text on top */
-  --on-accent:    #F7F3EC;   /* text on --accent-solid fills. Brand red is
-                                #C0392B on EITHER ground, so this must not be
-                                --text, which inverts with the colourway. */
-  --on-accent-tint: #1E1612; /* text on LIGHT accent/status fills (--accent-hover,
-                                --error, --success). Fixed, like --on-accent:
-                                anything that tracks the page ground can't sit on
-                                top of something that doesn't. */
-  --accent-wash:  rgba(232, 107, 87, 0.13);
+  /* ---- Accent: true brand red, no tint needed on cream ---- */
+  --accent:       #C0392B;   /* text, links, borders, fills */
+  --accent-hover: #A32F23;   /* DARKER on hover: a lighter red loses contrast on cream */
+  --accent-solid: #C0392B;   /* fills carrying --on-accent text */
+  --on-accent:    #F7F3EC;   /* text on --accent-solid fills. Cream on #C0392B is 4.9:1 on
+                                either ground, so this is fixed - never --text, which inverts. */
+  --on-accent-tint: #F7F3EC; /* text on a tinted or STATUS fill (--accent-hover, --success,
+                                --error, --warning). INVERTED from the dark ground: fills are
+                                now DARK, so the text is LIGHT. #1E1612 here would be 2.6:1 on
+                                the button hover. Same value as --on-accent, different role. */
+  --accent-wash:  rgba(192, 57, 43, 0.06);   /* brief: 0.10. Red text on its own wash (LIVE badge) was 4.26:1 */
 
-  /* ---- Semantic status ---- */
-  --success:      #4CAF7D;
-  --success-wash: rgba(76, 175, 125, 0.13);
-  --warning:      #E0A43C;
-  --warning-wash: rgba(224, 164, 60, 0.13);
-  --error:        #E86B57;   /* shares the accent hue — never signal by colour alone */
-  --error-wash:   rgba(232, 107, 87, 0.13);
-  --neutral:      #8A7D72;
+  /* ---- Semantic status: every fill darkens for a light ground ---- */
+  --success:      #2E6B4C;   /* 5.7:1 (the dark-ground #4CAF7D is 2.5:1 on cream) */
+  --success-wash: rgba(46, 107, 76, 0.12);
+  --warning:      #8A5D12;   /* 5.2:1 (the dark-ground #E0A43C is 2.2:1 on cream) */
+  --warning-wash: rgba(138, 93, 18, 0.10);   /* brief: 0.12. Warning text on its wash was 4.43:1 */
+  --error:        #8A2B20;   /* 7.8:1. Now a visibly deeper oxblood than --accent; errors
+                                still get the alert block, so hue is a second signal. */
+  --error-wash:   rgba(138, 43, 32, 0.10);
+  --neutral:      #72675D;   /* = --ink-faint */
 
   /* ---- Overlays ---- */
   --scrim:      rgba(20, 13, 9, 0.62);        /* modal / menu backdrops */
@@ -73,7 +72,9 @@
   /* ---- Back-compat: still referenced in page CSS ---- */
   --green: var(--success);
   --red:   var(--error);
-  --sand:  #D4C8B8;
+  --sand:  #D4C8B8;   /* dividers and placeholder fills - NEVER text (1.5:1 on cream) */
+  --bg-card: var(--surface);   /* referenced 11x by ItemManager/AdminOrders/ItemQueue but never defined,
+                                  so they fell back to a hardcoded #1a1a1a - near-black rows on cream */
 }
 
 body {
@@ -259,7 +260,7 @@ input[type="checkbox"], input[type="radio"] {
 }
 .badge-live     { background: var(--accent-wash);  color: var(--accent);  border: 1px solid var(--accent); }
 .badge-upcoming,
-.badge-scheduled { background: transparent;         color: var(--sand);    border: 1px solid var(--sand); }
+.badge-scheduled { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
 .badge-ended    { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
 .badge-draft    { background: var(--warning-wash); color: var(--warning); border: 1px solid var(--warning); }
 
