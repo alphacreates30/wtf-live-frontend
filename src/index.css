@@ -30,6 +30,9 @@
   --accent:       #E86B57;   /* 4.9:1 on --bg — text, links, borders, small marks */
   --accent-hover: #F08670;
   --accent-solid: #C0392B;   /* large fills only, cream text on top */
+  --on-accent:    #F7F3EC;   /* text on --accent-solid fills. Brand red is
+                                #C0392B on EITHER ground, so this must not be
+                                --text, which inverts with the colourway. */
   --accent-wash:  rgba(232, 107, 87, 0.13);
 
   /* ---- Semantic status ---- */
@@ -190,7 +193,7 @@ input[type="checkbox"], input[type="radio"] {
 
 .btn-primary {
   background: var(--accent-solid);
-  color: var(--text);
+  color: var(--on-accent);
   padding: 11px 22px;
   font-size: 1rem;
 }

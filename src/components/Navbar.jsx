@@ -8,6 +8,7 @@ export default function Navbar() {
   const location = useLocation()
   const token = localStorage.getItem('wtf_token')
   const username = localStorage.getItem('wtf_username')
+  const isAdmin = username === 'whatthefind'
   const [menuOpen, setMenuOpen] = useState(false)
   const toggleRef = useRef(null)
   const firstLinkRef = useRef(null)
@@ -48,7 +49,7 @@ export default function Navbar() {
   }, [menuOpen])
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar${isAdmin ? ' navbar--admin' : ''}`}>
       {/* The wordmark travels with the mark wherever there's room — see the
           risk note in BRAND.md. Mark-only is acceptable below 480px, where
           .navbar-wordmark is hidden. */}
