@@ -37,8 +37,11 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
 
   return (
     <div className="terms-modal-backdrop" onClick={submitting ? undefined : onCancel}>
-      <div className="terms-modal card" onClick={e => e.stopPropagation()}>
-        <h2 className="terms-modal-title">Before you bid — {auction.title}</h2>
+      <div className="terms-modal card" role="dialog" aria-modal="true" aria-labelledby="terms-modal-title" onClick={e => e.stopPropagation()}>
+        {/* Scrolls on its own; the footer below never does, so the button a buyer
+            needs to bid is always on screen. */}
+        <div className="terms-modal-body">
+        <h2 className="terms-modal-title" id="terms-modal-title">Before you bid — {auction.title}</h2>
         <ul className="terms-modal-list">
           <li>Lots open at <strong>$0.00</strong>. Some carry an undisclosed reserve.</li>
           <li>A <strong>{premiumPct}% buyer's premium</strong> is added to your winning bid.</li>
@@ -85,7 +88,9 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
             </label>
           </div>
         )}
+        </div>
 
+        <div className="terms-modal-footer">
         <label className="terms-modal-checkbox">
           <input type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} />
           <span>
@@ -95,12 +100,18 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
         </label>
 
         {error && <p className="error-msg">{error}</p>}
+        {!canAccept && !submitting && (
+          <p className="terms-modal-needs">
+            {!checked ? 'Tick the box to continue' : 'Choose pickup or shipping to continue'}
+          </p>
+        )}
 
         <div className="terms-modal-actions">
           <button type="button" className="btn-ghost" onClick={onCancel} disabled={submitting}>Cancel</button>
           <button type="button" className="btn-primary" onClick={handleAccept} disabled={!canAccept}>
             {submitting ? 'Placing bid…' : 'Agree and place bid'}
           </button>
+        </div>
         </div>
       </div>
     </div>

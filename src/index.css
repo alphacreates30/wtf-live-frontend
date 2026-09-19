@@ -11,6 +11,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  color-scheme: dark;   /* native scrollbars, checkboxes and pickers follow the ground */
   /* ---- Surfaces: warm black, not neutral black ---- */
   --bg:         #1E1612;
   --surface:    #2A1E14;
@@ -51,6 +52,10 @@
   /* ---- Overlays ---- */
   --scrim:      rgba(20, 13, 9, 0.62);        /* modal / menu backdrops */
   --shadow-pop: 0 12px 24px rgba(20, 13, 9, 0.45);
+  /* Chips and controls that sit on top of PHOTOGRAPHS. Fixed, like --on-accent:
+     a photo doesn't change with the colourway, so neither can what's on it. */
+  --scrim-photo: rgba(20, 13, 9, 0.78);
+  --on-photo:    #F7F3EC;
 
   /* ---- Type ---- */
   --font:       'Lora', Georgia, 'Times New Roman', serif;

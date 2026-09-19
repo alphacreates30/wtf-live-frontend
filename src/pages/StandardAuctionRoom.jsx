@@ -113,18 +113,18 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
   return (
     <div className="sar-modal-backdrop" onClick={onClose}>
       <div className="sar-modal" onClick={e => e.stopPropagation()}>
-        <button className="sar-modal-close" onClick={onClose}>✕</button>
+        <button className="sar-modal-close" onClick={onClose} aria-label="Close">✕</button>
 
         <div className="sar-modal-images">
           {images.length > 0 ? (
             <>
               <div className="sar-modal-main-img-wrap">
                 {images.length > 1 && (
-                  <button className="sar-img-nav sar-img-prev" onClick={prevImg} disabled={activeImg === 0}>‹</button>
+                  <button className="sar-img-nav sar-img-prev" onClick={prevImg} disabled={activeImg === 0} aria-label="Previous photo">‹</button>
                 )}
                 <img src={images[activeImg]?.url} alt={item.title} className="sar-modal-main-img" />
                 {images.length > 1 && (
-                  <button className="sar-img-nav sar-img-next" onClick={nextImg} disabled={activeImg === images.length - 1}>›</button>
+                  <button className="sar-img-nav sar-img-next" onClick={nextImg} disabled={activeImg === images.length - 1} aria-label="Next photo">›</button>
                 )}
               </div>
               {images.length > 1 && (
@@ -190,9 +190,11 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
               <div className="sar-modal-bid-row">
                 <input
                   type="number"
+                  inputMode="decimal"
                   min={minBid}
                   step="0.01"
-                  placeholder={token ? `Max bid (min $${minBid.toFixed(2)})` : 'Log in to bid'}
+                  aria-label="Your maximum bid"
+                  placeholder={token ? 'Your max bid' : 'Log in to bid'}
                   value={bidInput}
                   disabled={!token || bidLoading}
                   onChange={e => { setBidInput(e.target.value); setBidError('') }}
@@ -207,7 +209,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
               </div>
               {bidError && <p className="error-msg">{bidError}</p>}
               {bidSuccess && <p className="sar-success">Bid placed!</p>}
-              <p className="sar-hint">We'll automatically bid up to your max to keep you in the lead.</p>
+              <p className="sar-hint">Minimum ${minBid.toFixed(2)}. We'll automatically bid up to your max to keep you in the lead.</p>
             </div>
           )}
         </div>
@@ -366,6 +368,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
     })
   const closedItems = items.filter(i => i.status !== 'open')
   const sorted = [...openItems, ...closedItems]
+  const premiumPct = auction.buyers_premium_pct ?? 15
 
   return (
     <div className="page standard-auction-room">
@@ -408,7 +411,10 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                 <div className="sar-card-img-wrap">
                   {item.image_url
                     ? <img src={item.image_url} alt={item.title} className="sar-card-img" loading="lazy" />
-                    : <div className="sar-card-no-img">No photo</div>
+                    : <div className="sar-card-no-img">
+                        <img src="/logo-mark.svg" alt="" width="40" height="40" />
+                        <span>Photography to follow</span>
+                      </div>
                   }
                   <span className="sar-card-lot">Lot {idx + 1}</span>
                   <span className={`sar-card-status-badge sar-status-${item.status}`}>
@@ -420,6 +426,8 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                       <p className="sar-hover-bid-label">Quick Bid</p>
                       <input
                         type="number"
+                        inputMode="decimal"
+                        aria-label={`Max bid for ${item.title}`}
                         min={floor}
                         step="0.01"
                         placeholder={token ? `$${floor.toFixed(2)} or more` : 'Log in to bid'}
@@ -452,6 +460,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     <div className="sar-card-stat">
                       <span className="sar-card-stat-label">Current Bid</span>
                       <span className="sar-card-stat-val">${floor.toFixed(2)}</span>
+                      <span className="sar-prem">+{premiumPct}% prem.</span>
                     </div>
                     <div className="sar-card-stat">
                       <span className="sar-card-stat-label">Bids</span>
@@ -493,7 +502,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           username={username}
           isAdmin={isAdmin}
           now={now}
-          premiumPct={auction.buyers_premium_pct ?? 15}
+          premiumPct={premiumPct}
           gateBid={gateBid}
           onClose={() => setSelectedItem(null)}
           onBidSuccess={loadItems}
