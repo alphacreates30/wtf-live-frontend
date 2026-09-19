@@ -33,6 +33,10 @@
   --on-accent:    #F7F3EC;   /* text on --accent-solid fills. Brand red is
                                 #C0392B on EITHER ground, so this must not be
                                 --text, which inverts with the colourway. */
+  --on-accent-tint: #1E1612; /* text on LIGHT accent/status fills (--accent-hover,
+                                --error, --success). Fixed, like --on-accent:
+                                anything that tracks the page ground can't sit on
+                                top of something that doesn't. */
   --accent-wash:  rgba(232, 107, 87, 0.13);
 
   /* ---- Semantic status ---- */
@@ -197,7 +201,7 @@ input[type="checkbox"], input[type="radio"] {
   padding: 11px 22px;
   font-size: 1rem;
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); color: var(--bg); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); color: var(--on-accent-tint); }
 
 .btn-ghost {
   background: transparent;
@@ -210,7 +214,7 @@ input[type="checkbox"], input[type="radio"] {
 
 .btn-danger {
   background: var(--error);
-  color: var(--bg);
+  color: var(--on-accent-tint);
   padding: 11px 22px;
   font-size: 1rem;
 }
@@ -218,7 +222,7 @@ input[type="checkbox"], input[type="radio"] {
 
 .btn-green {
   background: var(--success);
-  color: var(--bg);
+  color: var(--on-accent-tint);
   padding: 11px 22px;
   font-size: 1rem;
 }
