@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { api } from '../api'
 import AuctionRoom from './AuctionRoom'
 import StandardAuctionRoom from './StandardAuctionRoom'
+import './Buyer.css'
 
 // Decides whether to render the Live (video/socket) auction room or the
 // Standard (timed, proxy-bid) auction room, based on the auction's mode.
@@ -21,8 +22,8 @@ export default function AuctionRoomGate() {
     return () => { cancelled = true }
   }, [id])
 
-  if (error) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Auction not found.</p></div>
-  if (!mode) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading auction...</p></div>
+  if (error) return <div className="page"><p className="error-msg">Auction not found.</p></div>
+  if (!mode) return <div className="page"><p className="buyer-note">Loading auction...</p></div>
 
   return mode === 'standard' ? <StandardAuctionRoom initialAuction={auction} /> : <AuctionRoom />
 }

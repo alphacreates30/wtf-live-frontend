@@ -1,0 +1,220 @@
+/* Buyer account pages: My Bids, My Orders, Profile setup.
+ * Shared here so the inline style={{}} objects they used to carry can go -
+ * every colour is a token, so a palette change reaches them.
+ *
+ * Status mapping (BRAND.md): paid / winning = --success, needs action /
+ * outbid / in-progress = --warning, failed = --error (an alert block, never
+ * bare red text), unpaid / lost / inactive = --neutral. */
+
+.buyer-title { margin-bottom: 1.5rem; }
+.buyer-note  { color: var(--text-muted); }
+.buyer-note a { color: var(--accent); text-decoration: underline; }
+
+/* ---- Status badges (replaces per-order inline colour objects) ---- */
+.pay-badge { border: 1px solid var(--border); background: transparent; color: var(--text-muted); }
+.pay-paid     { background: var(--success-wash); color: var(--success); border-color: var(--success); }
+.pay-unpaid   { background: transparent;         color: var(--text-muted); border-color: var(--border); }
+.pay-charging { background: var(--warning-wash); color: var(--warning); border-color: var(--warning); }
+.pay-failed   { background: var(--error-wash);   color: var(--error);   border-color: var(--error); }
+
+/* ---- Auction group (My Bids) ---- */
+.bids-group { margin-bottom: 2.5rem; }
+.bids-group-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.9rem;
+}
+.bids-group-title { margin: 0; }
+.bids-view-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---- Tables ---- */
+.buyer-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.buyer-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  border-bottom: 2px solid var(--border);
+}
+.buyer-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); }
+.buyer-table .num { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 0.01em; }
+
+.result-win    { color: var(--success); font-weight: 700; }
+.result-lost   { color: var(--text-muted); }
+.result-outbid { color: var(--warning); font-weight: 600; }
+
+/* Phone: the table stacks into one card per lot; each cell carries its own
+   label from data-label, so nothing scrolls sideways. */
+@media (max-width: 640px) {
+  .buyer-table, .buyer-table tbody, .buyer-table tr, .buyer-table td { display: block; width: 100%; }
+  .buyer-table thead { display: none; }
+  .buyer-table tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.9rem;
+  }
+  .buyer-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    border-bottom: none;
+    text-align: right;
+  }
+  .buyer-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    text-align: left;
+  }
+  .buyer-table td.cell-title { font-weight: 600; text-align: left; justify-content: flex-start; }
+  .buyer-table td.cell-title::before { display: none; }
+}
+
+/* ---- Totals: premium always beside hammer ---- */
+.totals-block { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+.totals-lines { text-align: right; font-size: 0.95rem; color: var(--text-muted); min-width: min(100%, 280px); }
+.totals-lines div { display: flex; justify-content: space-between; gap: 1.5rem; padding: 0.15rem 0; }
+.totals-lines .totals-final {
+  color: var(--text);
+  font-weight: 700;
+  margin-top: 0.3rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---- Order card (My Orders) ---- */
+.order-card { margin-bottom: 1rem; padding: 1.1rem 1.25rem; }
+.order-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.order-name { font-weight: 600; }
+.order-sub  { font-size: 0.9rem; color: var(--text-muted); }
+
+.order-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin-top: 0.75rem; }
+.order-table td { padding: 0.25rem 0; vertical-align: baseline; }
+.order-table td:first-child { color: var(--text-muted); padding-right: 1rem; }
+.order-table td:last-child { text-align: right; white-space: nowrap; }
+.order-table .order-total td {
+  padding-top: 0.45rem;
+  font-weight: 700;
+  color: var(--text);
+  border-top: 1px solid var(--border);
+}
+.order-table .order-total td:first-child { color: var(--text); }
+
+.order-block {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.95rem;
+}
+.order-line { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.muted { color: var(--text-muted); }
+.order-block strong { color: var(--text); }
+.order-ship-lot { color: var(--text-muted); margin-bottom: 0.3rem; }
+.order-tracking { margin-top: 0.5rem; font-size: 0.92rem; color: var(--text-muted); }
+.order-tracking a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 0 0.25rem;
+}
+
+.inline-error { margin: 0.5rem 0 0; }
+
+@media (max-width: 480px) {
+  .order-card { padding: 1rem; }
+}
+
+/* ---- Profile setup ---- */
+.profile-page { max-width: 520px; margin: 0 auto; padding-top: 2rem; }
+.profile-lead { color: var(--text-muted); margin: 0.4rem 0 1.5rem; }
+.profile-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.5rem; }
+.profile-form h3 { margin: 0.6rem 0 0; }
+.profile-form h3:first-child { margin-top: 0; }
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+.profile-field input { text-transform: none; letter-spacing: normal; font-family: var(--font-body); }
+.profile-row { display: grid; grid-template-columns: 1fr 80px 100px; gap: 0.6rem; }
+.profile-help { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+.profile-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0.85rem;
+  min-height: var(--tap);
+}
+.profile-submit { margin-top: 0.4rem; }
+
+@media (max-width: 480px) {
+  .profile-page { padding-top: 1rem; }
+  .profile-form { padding: 1.1rem; }
+  /* State + ZIP share a row; city takes its own line so nothing is cramped. */
+  .profile-row { grid-template-columns: 1fr 1fr; }
+  .profile-row > :first-child { grid-column: 1 / -1; }
+}
+
+/* ---- Status screens (approved / pending / rejected / blocked) ---- */
+.status-screen { max-width: 480px; margin: 0 auto; text-align: center; padding-top: 4rem; }
+.status-screen h2 { margin: 0.9rem 0 0.6rem; }
+.status-screen p { color: var(--text-muted); margin-bottom: 1.25rem; }
+.status-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.status-tag-approved { color: var(--success); border-color: var(--success); background: var(--success-wash); }
+.status-tag-pending  { color: var(--warning); border-color: var(--warning); background: var(--warning-wash); }
+.status-tag-rejected,
+.status-tag-blocked  { color: var(--error);   border-color: var(--error);   background: var(--error-wash); }

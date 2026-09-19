@@ -1,76 +1,101 @@
-.terms-page { max-width: 780px; }
+/* Terms of Sale - long-form reading. Lora on a dark ground wants air: 1rem
+ * body, 1.7 line-height, and a measure of ~66 characters (a full 780px line
+ * of Lora runs past 90, which is too long to track). Headings are Bebas. */
+
+.terms-page { max-width: 760px; }
 
 .terms-draft-notice {
-  background: #eab30822;
-  border: 1px solid #eab308;
+  background: var(--warning-wash);
+  border: 1px solid var(--warning);
+  border-left-width: 3px;
   color: var(--text);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: 2rem;
 }
 
 .terms-content {
   color: var(--text);
-  line-height: 1.65;
-  font-size: 0.94rem;
+  line-height: 1.7;
+  font-size: 1rem;
+  max-width: 66ch;
+  overflow-wrap: anywhere;
 }
 
 .terms-content h1 {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
+  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  margin-bottom: 0.75rem;
 }
 
 .terms-content h2 {
-  font-size: 1.15rem;
-  margin: 1.75rem 0 0.6rem;
-  padding-top: 1rem;
+  font-size: clamp(1.7rem, 4.5vw, 2.1rem);
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border);
 }
 
-.terms-content p { margin: 0.75rem 0; }
-
-.terms-content ul, .terms-content ol {
-  margin: 0.75rem 0 0.75rem 1.25rem;
+.terms-content h3 {
+  font-size: 1.35rem;
+  margin: 1.75rem 0 0.5rem;
 }
 
-.terms-content li { margin: 0.3rem 0; }
+.terms-content p { margin: 0.9rem 0; }
+
+.terms-content ul, .terms-content ol {
+  margin: 0.9rem 0 0.9rem 1.4rem;
+}
+
+.terms-content li { margin: 0.4rem 0; }
 
 .terms-content strong { color: var(--text); }
 
-.terms-content a { color: var(--accent); text-decoration: underline; }
+.terms-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 
 .terms-content blockquote {
   border-left: 3px solid var(--accent);
   background: var(--surface2);
-  padding: 0.75rem 1rem;
-  margin: 1rem 0;
-  border-radius: 0 6px 6px 0;
+  padding: 0.85rem 1.1rem;
+  margin: 1.25rem 0;
   color: var(--text-muted);
 }
 .terms-content blockquote p { margin: 0.3rem 0; }
 
+/* A wide table must scroll inside itself, never push the page sideways. */
 .terms-content table {
+  display: block;
+  overflow-x: auto;
   border-collapse: collapse;
   width: 100%;
-  margin: 0.75rem 0;
+  margin: 1rem 0;
 }
 .terms-content td, .terms-content th {
   border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.8rem;
   text-align: left;
+}
+.terms-content th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
 }
 
 .terms-content hr {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 1.5rem 0;
+  margin: 2rem 0;
 }
 
 .terms-content code {
   background: var(--surface2);
   padding: 0.1rem 0.35rem;
-  border-radius: 4px;
+  font-family: var(--font-mono);
   font-size: 0.85em;
+}
+
+@media (max-width: 480px) {
+  .terms-content h2 { margin-top: 2rem; }
 }

@@ -3,19 +3,43 @@ import { useNavigate } from 'react-router-dom'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { api } from '../api'
+import './Buyer.css'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
-const CARD_STYLE = {
-  style: {
-    base: {
-      color: '#e8e8e8',
-      fontFamily: 'inherit',
-      fontSize: '14px',
-      '::placeholder': { color: '#666' },
+// Stripe's card field lives in an iframe, so it can't see our CSS variables.
+// Read the resolved token values instead of hardcoding hexes, so a palette
+// change reaches the card field too.
+function cardStyle() {
+  const css = getComputedStyle(document.documentElement)
+  const token = name => css.getPropertyValue(name).trim()
+  return {
+    style: {
+      base: {
+        color: token('--text'),
+        fontFamily: token('--font-body') || 'inherit',
+        fontSize: '16px', // 16px stops iOS zooming the page on focus
+        '::placeholder': { color: token('--ink-faint') },
+      },
+      invalid: { color: token('--error') },
     },
-    invalid: { color: '#ff4444' },
-  },
+  }
+}
+
+function StatusScreen({ tag, tagClass, title, children }) {
+  return (
+    <div className="page status-screen">
+      <span className={`status-tag ${tagClass}`}>{tag}</span>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+function Field({ id, label, children }) {
+  return (
+    <label className="profile-field" htmlFor={id}>{label}{children}</label>
+  )
 }
 
 function ProfileForm() {
@@ -90,114 +114,104 @@ function ProfileForm() {
     }
   }
 
-  if (loading) return <div className="page"><p style={{ color: 'var(--text-muted)' }}>Loading…</p></div>
+  if (loading) return <div className="page"><p className="buyer-note">Loading…</p></div>
 
   if (status === 'approved') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>✅</div>
-        <h2>Your account is approved!</h2>
-        <p style={{ color: 'var(--text-muted)' }}>You can join and bid in live auctions.</p>
+      <StatusScreen tag="Approved" tagClass="status-tag-approved" title="Your account is approved">
+        <p>You can join and bid in auctions.</p>
         <button className="btn-primary" onClick={() => navigate('/')}>Browse Auctions</button>
-      </div>
+      </StatusScreen>
     )
   }
 
   if (status === 'pending') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>⏳</div>
-        <h2>Pending Approval</h2>
-        <p style={{ color: 'var(--text-muted)' }}>
+      <StatusScreen tag="Pending" tagClass="status-tag-pending" title="Pending Approval">
+        <p>
           Your profile has been submitted. The WhatTheFind team will review it shortly.
           You'll be able to join auctions once approved.
         </p>
-      </div>
+      </StatusScreen>
     )
   }
 
   if (status === 'rejected') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>❌</div>
-        <h2>Application Not Approved</h2>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Your buyer application was not approved. Please contact WhatTheFind for more information.
-        </p>
-      </div>
+      <StatusScreen tag="Not approved" tagClass="status-tag-rejected" title="Application Not Approved">
+        <p>Your buyer application was not approved. Please contact WhatTheFind for more information.</p>
+      </StatusScreen>
     )
   }
 
   if (status === 'blocked') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>🚫</div>
-        <h2>Account Suspended</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Your account has been suspended. Please contact WhatTheFind.</p>
-      </div>
+      <StatusScreen tag="Suspended" tagClass="status-tag-blocked" title="Account Suspended">
+        <p>Your account has been suspended. Please contact WhatTheFind.</p>
+      </StatusScreen>
     )
   }
 
   // No profile yet — show the form
   return (
-    <div className="page" style={{ maxWidth: 520, margin: '0 auto', paddingTop: '2rem' }}>
-      <h2 style={{ marginBottom: '0.25rem' }}>Complete Your Buyer Profile</h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+    <div className="page profile-page">
+      <h2>Complete Your Buyer Profile</h2>
+      <p className="profile-lead">
         Required before you can participate in auctions. Your card will be saved on file — you won't be charged until you win a bid.
       </p>
 
-      <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 0.5rem' }}>Personal Info</h3>
+      <form onSubmit={handleSubmit} className="card profile-form">
+        <h3>Personal Info</h3>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Full name *
-          <input className="input" value={form.full_name} onChange={set('full_name')} required style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-name" label="Full name *">
+          <input id="pf-name" autoComplete="name" value={form.full_name} onChange={set('full_name')} required />
+        </Field>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Email
-          <input className="input" type="email" value={form.email} onChange={set('email')} style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-email" label="Email">
+          <input id="pf-email" type="email" autoComplete="email" inputMode="email" value={form.email} onChange={set('email')} />
+        </Field>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Phone *
-          <input className="input" type="tel" value={form.phone} onChange={set('phone')} required style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-phone" label="Phone *">
+          <input id="pf-phone" type="tel" autoComplete="tel" inputMode="tel" value={form.phone} onChange={set('phone')} required />
+        </Field>
 
-        <h3 style={{ margin: '0.5rem 0 0.25rem' }}>Shipping Address</h3>
+        <h3>Shipping Address</h3>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Address line 1 *
-          <input className="input" value={form.address_line1} onChange={set('address_line1')} required style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-a1" label="Address line 1 *">
+          <input id="pf-a1" autoComplete="address-line1" value={form.address_line1} onChange={set('address_line1')} required />
+        </Field>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Address line 2
-          <input className="input" value={form.address_line2} onChange={set('address_line2')} style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-a2" label="Address line 2">
+          <input id="pf-a2" autoComplete="address-line2" value={form.address_line2} onChange={set('address_line2')} />
+        </Field>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 90px', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>City *
-            <input className="input" value={form.city} onChange={set('city')} required style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-          </label>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>State *
-            <input className="input" value={form.state} onChange={set('state')} required maxLength={2} style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-          </label>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ZIP *
-            <input className="input" value={form.zip} onChange={set('zip')} required style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-          </label>
+        <div className="profile-row">
+          <Field id="pf-city" label="City *">
+            <input id="pf-city" autoComplete="address-level2" value={form.city} onChange={set('city')} required />
+          </Field>
+          <Field id="pf-state" label="State *">
+            <input id="pf-state" autoComplete="address-level1" value={form.state} onChange={set('state')} required maxLength={2} />
+          </Field>
+          <Field id="pf-zip" label="ZIP *">
+            <input id="pf-zip" autoComplete="postal-code" inputMode="numeric" value={form.zip} onChange={set('zip')} required />
+          </Field>
         </div>
 
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Country
-          <input className="input" value={form.country} onChange={set('country')} style={{ display: 'block', width: '100%', marginTop: '0.25rem' }} />
-        </label>
+        <Field id="pf-country" label="Country">
+          <input id="pf-country" autoComplete="country" value={form.country} onChange={set('country')} />
+        </Field>
 
-        <h3 style={{ margin: '0.5rem 0 0.25rem' }}>Payment Card</h3>
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 0.5rem' }}>
+        <h3>Payment Card</h3>
+        <p className="profile-help">
           Your card is saved securely via Stripe. You won't be charged until you win a bid.
         </p>
-        <div style={{ background: 'var(--surface-2, #1a1a1a)', border: '1px solid var(--border, #333)', borderRadius: '6px', padding: '0.75rem' }}>
-          <CardElement options={CARD_STYLE} />
+        <div className="profile-card">
+          <CardElement options={cardStyle()} />
         </div>
 
         {error && <p className="error-msg">{error}</p>}
 
-        <button type="submit" className="btn-primary" disabled={saving || !stripe} style={{ marginTop: '0.5rem' }}>
+        <button type="submit" className="btn-primary profile-submit" disabled={saving || !stripe}>
           {saving ? 'Submitting…' : 'Submit Profile & Save Card'}
         </button>
       </form>

@@ -15,6 +15,7 @@ import MyBids from './pages/MyBids'
 import MyOrders from './pages/MyOrders'
 import Terms from './pages/Terms'
 import Footer from './components/Footer'
+import './pages/Buyer.css'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -51,7 +52,7 @@ function ProfileGate({ children }) {
   if (!token) return children
 
   if (profileStatus === 'loading') {
-    return <div className="page"><p style={{ color: 'var(--text-muted)', padding: '2rem' }}>Checking profile...</p></div>
+    return <div className="page"><p className="buyer-note">Checking profile...</p></div>
   }
 
   if (profileStatus === 'no_profile') {
@@ -60,10 +61,10 @@ function ProfileGate({ children }) {
 
   if (profileStatus === 'pending') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>⏳</div>
+      <div className="page status-screen">
+        <span className="status-tag status-tag-pending">Pending</span>
         <h2>Pending Approval</h2>
-        <p style={{ color: 'var(--text-muted)' }}>
+        <p>
           Your profile is under review. You'll be able to access auctions once approved by the WhatTheFind team.
         </p>
       </div>
@@ -72,10 +73,10 @@ function ProfileGate({ children }) {
 
   if (profileStatus === 'rejected') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>❌</div>
+      <div className="page status-screen">
+        <span className="status-tag status-tag-rejected">Not approved</span>
         <h2>Application Not Approved</h2>
-        <p style={{ color: 'var(--text-muted)' }}>
+        <p>
           Your buyer application was not approved. Please contact WhatTheFind for more information.
         </p>
       </div>
@@ -84,10 +85,10 @@ function ProfileGate({ children }) {
 
   if (profileStatus === 'blocked') {
     return (
-      <div className="page" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: '4rem' }}>
-        <div style={{ fontSize: '3rem' }}>🚫</div>
+      <div className="page status-screen">
+        <span className="status-tag status-tag-blocked">Suspended</span>
         <h2>Account Suspended</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Your account has been suspended. Please contact WhatTheFind.</p>
+        <p>Your account has been suspended. Please contact WhatTheFind.</p>
       </div>
     )
   }
