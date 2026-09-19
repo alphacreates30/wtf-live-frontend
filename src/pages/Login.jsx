@@ -34,7 +34,8 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card card">
         <div className="login-logo">
-          WhatTheFind <span>LIVE</span>
+          <img src="/logo-mark.svg" alt="" className="login-mark" width="40" height="40" />
+          <span>What The Find</span>
         </div>
         <p className="login-sub">
           {mode === 'login' ? 'Sign in to bid and chat' : 'Create your account'}
@@ -53,9 +54,12 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label>Username</label>
+            <label htmlFor="login-username">Username</label>
             <input
+              id="login-username"
               type="text"
+              autoComplete="username"
+              autoCapitalize="none"
               placeholder="e.g. bidder99"
               value={username}
               onChange={e => setUsername(e.target.value)}
@@ -64,9 +68,11 @@ export default function Login() {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
             <input
+              id="login-password"
               type="password"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}

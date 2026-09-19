@@ -41,8 +41,12 @@
   --error-wash:   rgba(232, 107, 87, 0.13);
   --neutral:      #8A7D72;
 
+  /* ---- Overlays ---- */
+  --scrim:      rgba(20, 13, 9, 0.62);        /* modal / menu backdrops */
+  --shadow-pop: 0 12px 24px rgba(20, 13, 9, 0.45);
+
   /* ---- Type ---- */
-  --font:         'Lora', Georgia, 'Times New Roman', serif;
+  --font:       'Lora', Georgia, 'Times New Roman', serif;
   --font-display: 'Bebas Neue', Impact, 'Haettenschweiler', sans-serif;
   --font-body:    'Lora', Georgia, 'Times New Roman', serif;
   --font-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -186,7 +190,7 @@ input[type="checkbox"], input[type="radio"] {
 
 .btn-primary {
   background: var(--accent-solid);
-  color: #F7F3EC;
+  color: var(--text);
   padding: 11px 22px;
   font-size: 1rem;
 }

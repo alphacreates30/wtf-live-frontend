@@ -1,14 +1,39 @@
 .site-footer {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 20px 40px;
+  padding: 32px 20px 40px;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-soft);
 }
 
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--text-muted);
+}
+.footer-brand:hover { color: var(--text); }
+.footer-mark { width: 22px; height: 22px; display: block; flex-shrink: 0; }
+
 .footer-link {
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
   text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .footer-link:hover { color: var(--text); }
