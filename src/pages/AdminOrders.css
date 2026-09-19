@@ -46,3 +46,9 @@
 .ao-ship-quote-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.3rem 0; }
 .ao-ship-quote-total { border-top: 1px solid var(--border, #333); margin-top: 0.3rem; padding-top: 0.6rem; font-size: 1rem; color: #E05C1A; }
 .ao-ship-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+/* Invoices: one card per buyer per auction, above the per-lot shipping list */
+.ao-payments { margin-bottom: 2rem; }
+.ao-payments-title { font-size: 1.6rem; margin-bottom: 0.9rem; }
+.ao-payments-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 1rem; }
+.ao-invoice { min-width: 0; }

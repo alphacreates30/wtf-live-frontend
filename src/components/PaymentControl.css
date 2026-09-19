@@ -1,0 +1,61 @@
+/* Charge / Retry control. Tokens only - no hardcoded colours. */
+
+.pc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.pc-compact { gap: 0.5rem; align-items: flex-end; }
+
+.pc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.pc-buyer { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; }
+.pc-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+.pc-lots { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.95rem; }
+.pc-lots li { display: flex; justify-content: space-between; gap: 1rem; }
+.pc-lot-title { color: var(--text-muted); min-width: 0; overflow-wrap: anywhere; }
+.pc-lot-amt { white-space: nowrap; }
+
+.pc-totals { font-size: 0.95rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 0.5rem; }
+.pc-totals div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.1rem 0; }
+.pc-totals dt, .pc-totals dd { margin: 0; }
+.pc-totals .pc-total { color: var(--text); font-weight: 700; border-top: 1px solid var(--border); margin-top: 0.3rem; padding-top: 0.4rem; }
+
+.pc-compact-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
+.pc-compact-amt { font-family: var(--font-display); font-size: 1.2rem; }
+
+.pc-reason { margin: 0; }
+.pc-charging { margin: 0; font-size: 0.92rem; color: var(--warning); }
+
+.pc-pi { margin: 0; display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); }
+.pc-pi span { font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-faint); }
+.pc-pi code { font-family: var(--font-mono); overflow-wrap: anywhere; user-select: all; color: var(--text); }
+
+.pc-btn { align-self: flex-start; min-height: var(--tap); }
+.pc-compact .pc-btn { align-self: flex-end; }
+
+/* Confirm dialog */
+.pc-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 200;
+}
+.pc-dialog { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 0.9rem; }
+.pc-dialog-title { font-size: 1.7rem; margin: 0; }
+.pc-dialog-body { margin: 0; color: var(--text-muted); font-size: 1rem; }
+.pc-dialog-body strong { color: var(--text); }
+.pc-dialog-actions { display: flex; justify-content: flex-end; gap: 0.6rem; flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .pc-backdrop { align-items: flex-end; padding: 0; }
+  .pc-dialog { max-width: none; border-left: none; border-right: none; border-bottom: none; }
+  .pc-dialog-actions { flex-direction: column-reverse; }
+  .pc-dialog-actions .btn-ghost, .pc-dialog-actions .btn-primary { width: 100%; }
+  .pc-btn { align-self: stretch; }
+}

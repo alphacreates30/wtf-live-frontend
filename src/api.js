@@ -33,8 +33,36 @@ async function request(path, { timeoutMs = DEFAULT_TIMEOUT_MS, ...options } = {}
     // something readable instead of a raw JSON parse error.
     throw new Error(`Server error (${res.status}). Try again in a moment.`)
   }
-  if (!res.ok) throw new Error(data.error || 'Request failed')
+  if (!res.ok) throw apiError(data, res, 'Request failed')
   return data
+}
+
+// The backend sends `error` (a short sentence) and often `detail` (the specific
+// reason - e.g. error: 'Payment failed', detail: 'Your card was declined.'). Dropping
+// `detail` made a declined card, an expired card and insufficient funds all read
+// "Payment failed", which is the whole value of the charge/retry screen thrown away
+// one line before display. `detail` is sometimes an array or object (Shippo's
+// `messages`), so it's normalised to a string - never "[object Object]".
+export function formatDetail(detail) {
+  if (detail == null || detail === '') return ''
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) return detail.map(formatDetail).filter(Boolean).join('; ')
+  if (typeof detail === 'object') {
+    if (typeof detail.text === 'string') return detail.text
+    if (typeof detail.message === 'string') return detail.message
+    try { return JSON.stringify(detail) } catch { return String(detail) }
+  }
+  return String(detail)
+}
+
+export function apiError(data, res, fallback) {
+  const detail = formatDetail(data?.detail)
+  const base = data?.error ? formatDetail(data.error) : `${fallback} (${res.status})`
+  // Don't repeat the reason when the sentence already contains it.
+  const err = new Error(detail && !base.includes(detail) ? `${base} — ${detail}` : base)
+  err.status = res.status
+  err.detail = detail
+  return err
 }
 
 export const api = {
@@ -156,7 +184,7 @@ export const api = {
       throw new Error('Could not reach the server. Check your connection and try again.')
     }
     const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Upload failed')
+    if (!res.ok) throw apiError(data, res, 'Upload failed')
     return data
   },
 }
