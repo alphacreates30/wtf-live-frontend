@@ -140,7 +140,14 @@ export const api = {
   updateBuyerStatus: (userId, status) =>
     request(`/admin/buyers/${userId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAuction: (id) => request(`/auction/${id}`, { method: 'DELETE' }),
-  getAdminOrders: () => request('/admin/orders'),
+  // { auction_id, q, limit, offset } -> { orders, total, matched }
+  getAdminOrders: (params = {}) => {
+    const qs = new URLSearchParams()
+    for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null && v !== '') qs.set(k, v)
+    const s = qs.toString()
+    return request(`/admin/orders${s ? `?${s}` : ''}`)
+  },
+  getAdminAuctionsSummary: () => request('/admin/auctions/summary'),
   chargeOrder: (order_id) =>
     request('/charge-winner', { method: 'POST', body: JSON.stringify({ order_id }) }),
   // Standard-auction orders are billed on one invoice per buyer per auction -

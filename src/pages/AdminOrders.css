@@ -52,3 +52,13 @@
 .ao-payments-title { font-size: 1.6rem; margin-bottom: 0.9rem; }
 .ao-payments-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 1rem; }
 .ao-invoice { min-width: 0; }
+
+/* Auction selector + search: server-side filters above the list. Tokens only. */
+.ao-filters { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.ao-filter-field { display: flex; flex-direction: column; gap: 0.3rem; flex: 1 1 260px; min-width: 0; }
+.ao-filter-search { flex: 2 1 260px; }
+.ao-filter-label { font-size: 0.75rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+.ao-filter-control { min-height: var(--tap); width: 100%; min-width: 0; padding: 0 0.75rem; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.ao-filter-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ao-count { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; min-height: 1.2em; }
+.ao-empty .btn-ghost { margin-top: 0.75rem; }

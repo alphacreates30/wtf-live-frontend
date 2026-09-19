@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import PaymentControl from '../components/PaymentControl'
 import './AdminOrders.css'
@@ -10,15 +10,37 @@ const STATUS_COLORS = {
   delivered: '#10b981',
 }
 
+const AUCTION_KEY = 'wtf_orders_auction'
+const ALL = '__all__'
+const SEARCH_DEBOUNCE_MS = 300
+
+function readStoredAuction() {
+  try { return localStorage.getItem(AUCTION_KEY) } catch { return null }
+}
+function storeAuction(v) {
+  try { localStorage.setItem(AUCTION_KEY, v) } catch { /* per-viewer convenience only */ }
+}
+
 export default function AdminOrders({ auctionId } = {}) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(new Set())
   const [working, setWorking] = useState(false)
   const [error, setError] = useState('')
-  // auction id -> title, so an invoice can say which auction it bills. Best
-  // effort: the list still works without it.
-  const [auctionTitles, setAuctionTitles] = useState({})
+  // Every auction with its order count (from /admin/auctions/summary - NOT
+  // derived from the orders response, which is bounded). Also gives invoices
+  // their auction title. null until loaded.
+  const [auctions, setAuctions] = useState(null)
+  const auctionTitles = Object.fromEntries((auctions || []).map(a => [a.id, a.title]))
+  // The selector value: an auction id, ALL, or null until the summary has
+  // loaded and a default has been picked. Embedded in an auction workspace
+  // (auctionId prop) there is no selector - that auction is fixed.
+  const [choice, setChoice] = useState(auctionId ? auctionId : null)
+  const [searchInput, setSearchInput] = useState('')
+  const [query, setQuery] = useState('')
+  const [counts, setCounts] = useState({ total: 0, matched: 0 })
+  const requestSeq = useRef(0)
+  const filterAuction = auctionId || (choice && choice !== ALL ? choice : '')
   // Shipping label flow: weigh -> quote -> confirm & charge -> buy. Null
   // when no shipping modal is open. step is 'input' (entering weight/dims)
   // or 'confirm' (quote back, awaiting the explicit charge confirmation) -
@@ -26,21 +48,50 @@ export default function AdminOrders({ auctionId } = {}) {
   const [shipModal, setShipModal] = useState(null)
 
   useEffect(() => {
+    api.getAdminAuctionsSummary().then(list => {
+      setAuctions(list)
+      if (auctionId) return
+      // Default narrow: the remembered auction if it still exists, else the
+      // most recent non-draft one (a draft has no orders and would greet the
+      // admin with an empty page), else everything.
+      const stored = readStoredAuction()
+      if (stored === ALL || list.some(a => a.id === stored)) setChoice(stored)
+      else setChoice((list.find(a => a.status !== 'draft') || list[0])?.id || ALL)
+    }).catch(e => {
+      setAuctions([])
+      if (!auctionId) setChoice(ALL)
+      setError(e.message)
+    })
+  }, [auctionId])
+
+  useEffect(() => {
+    const t = setTimeout(() => setQuery(searchInput.trim()), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  // Server-side: every filter/search change is a new request. Waits for the
+  // default auction to be picked so the page never flashes an unfiltered list.
+  useEffect(() => {
+    if (choice === null) return
+    setSelected(new Set())
     loadOrders()
-    api.getAuctions().then(list => setAuctionTitles(Object.fromEntries((list || []).map(a => [a.id, a.title])))).catch(() => {})
-  }, [])
+  }, [choice, query, auctionId])
 
   // silent: refresh in place with no "Loading…" flash - used after a charge
   // attempt so the new status shows without a full reload.
   async function loadOrders({ silent = false } = {}) {
     if (!silent) setLoading(true)
+    const seq = ++requestSeq.current
     try {
-      const data = await api.getAdminOrders()
-      setOrders(auctionId ? data.filter(o => o.auction_id === auctionId) : data)
+      const data = await api.getAdminOrders({ auction_id: filterAuction, q: query })
+      if (seq !== requestSeq.current) return   // a newer filter/search superseded this one
+      setOrders(data.orders)
+      setCounts({ total: data.total, matched: data.matched })
+      setError('')
     } catch (e) {
-      setError(e.message)
+      if (seq === requestSeq.current) setError(e.message)
     } finally {
-      if (!silent) setLoading(false)
+      if (!silent && seq === requestSeq.current) setLoading(false)
     }
   }
 
@@ -189,6 +240,46 @@ export default function AdminOrders({ auctionId } = {}) {
         </div>
       </div>
 
+      <div className="ao-filters">
+        {!auctionId && (
+          <label className="ao-filter-field">
+            <span className="ao-filter-label">Auction</span>
+            <select
+              className="ao-filter-control"
+              value={choice ?? ''}
+              disabled={choice === null}
+              onChange={e => { setChoice(e.target.value); storeAuction(e.target.value) }}
+            >
+              {choice === null && <option value="">Loading…</option>}
+              {(auctions || []).map(a => (
+                <option key={a.id} value={a.id}>
+                  {a.title} · {new Date(a.starts_at || a.created_at).toLocaleDateString()} · {a.order_count} {a.order_count === 1 ? 'order' : 'orders'}
+                </option>
+              ))}
+              <option value={ALL}>All auctions</option>
+            </select>
+          </label>
+        )}
+        <label className="ao-filter-field ao-filter-search">
+          <span className="ao-filter-label">Search</span>
+          <input
+            type="search"
+            className="ao-filter-control"
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            placeholder="Buyer, lot title, or order id"
+          />
+        </label>
+      </div>
+
+      {!loading && choice !== null && (
+        <p className="ao-count" role="status">
+          {counts.matched < counts.total
+            ? `Showing ${counts.matched} of ${counts.total} — narrow by auction or search`
+            : `${counts.total} ${counts.total === 1 ? 'order' : 'orders'}`}
+        </p>
+      )}
+
       {error && <p className="ao-error">{error}</p>}
 
       {invoices.length > 0 && (
@@ -215,12 +306,21 @@ export default function AdminOrders({ auctionId } = {}) {
         </section>
       )}
 
-      {loading ? (
+      {loading || choice === null ? (
         <p className="ao-loading">Loading orders…</p>
       ) : groups.length === 0 ? (
         <div className="ao-empty">
           <div style={{ fontSize: '3rem' }}>📦</div>
-          <p>No orders yet. Orders appear automatically when auctions end.</p>
+          {query ? (
+            <>
+              <p>No orders match “{query}”{filterAuction ? ' in this auction' : ''}.</p>
+              <button className="btn-ghost" onClick={() => setSearchInput('')}>Clear search</button>
+            </>
+          ) : filterAuction ? (
+            <p>No orders in this auction yet. They appear automatically when it ends.</p>
+          ) : (
+            <p>No orders yet. Orders appear automatically when auctions end.</p>
+          )}
         </div>
       ) : (
         <div className="ao-list">
