@@ -1,35 +1,44 @@
 .listings-header {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
-.listings-title { font-size: 28px; font-weight: 800; }
-.listings-sub { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.listings-eyebrow { margin-bottom: 10px; color: var(--accent); }
+.listings-title {
+  font-size: clamp(2.4rem, 6.5vw, 4.4rem);
+  max-width: 20ch;
+}
+.listings-title .wtf-script-accent { line-height: 0.8; }
+.listings-sub { color: var(--text-muted); font-size: 1rem; margin-top: 14px; max-width: 46ch; }
 
 .listings-filters {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
 }
 .filter-btn {
-  background: var(--surface);
+  background: transparent;
   border: 1px solid var(--border);
   color: var(--text-muted);
-  padding: 7px 16px;
-  font-size: 13px;
-  border-radius: 20px;
-  font-weight: 500;
+  min-height: var(--tap);
+  padding: 0 18px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  border-radius: var(--radius);
 }
 .filter-btn:hover { color: var(--text); border-color: var(--text-muted); }
-.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* Fill is --accent-solid with --on-accent text: cream on the tinted --accent
+   would only reach ~2.9:1. */
+.filter-btn.active { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--on-accent); }
 
 .listings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 16px;
 }
 
@@ -39,7 +48,7 @@
   overflow: hidden;
   padding: 0;
 }
-.auction-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.auction-card:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--text); }
 
 .auction-card-img {
   width: 100%;
@@ -47,28 +56,48 @@
   overflow: hidden;
   background: var(--surface2);
 }
-.auction-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.auction-card-img > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.auction-card-img-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+.auction-card-img-empty img { width: 44px; height: 44px; opacity: 0.4; }
 
 .auction-card-body { padding: 16px; }
 
 .auction-card-top {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
-.auction-category { font-size: 11px; color: var(--text-muted); }
+.auction-category {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
 
 .auction-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  line-height: 1.3;
+  font-size: 1.7rem;
+  margin-bottom: 8px;
 }
 .auction-card-desc {
-  font-size: 13px;
+  font-size: 0.95rem;
+  line-height: 1.55;
   color: var(--text-muted);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -77,13 +106,22 @@
 
 .auction-card-footer {
   display: flex;
-  gap: 20px;
+  gap: 22px;
   flex-wrap: wrap;
 }
-.auction-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.auction-bid { font-size: 20px; font-weight: 800; color: var(--accent); }
-.auction-countdown { font-size: 16px; font-weight: 700; color: var(--green); }
-.auction-leader { font-size: 14px; font-weight: 600; }
+.auction-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+.auction-bid { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; letter-spacing: 0.01em; color: var(--accent); }
+.auction-bid-text { font-size: 1.3rem; color: var(--text); }
+.auction-countdown { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; color: var(--success); }
+.auction-opens { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.15; color: var(--text); }
+.auction-leader { font-size: 0.95rem; font-weight: 600; }
 
-.listings-status { color: var(--text-muted); font-size: 14px; }
+.listings-status { color: var(--text-muted); font-size: 0.95rem; }
 .listings-empty { text-align: center; padding: 60px 0; color: var(--text-muted); }

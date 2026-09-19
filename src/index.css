@@ -243,7 +243,8 @@ input[type="checkbox"], input[type="radio"] {
   letter-spacing: 0.09em;
 }
 .badge-live     { background: var(--accent-wash);  color: var(--accent);  border: 1px solid var(--accent); }
-.badge-upcoming { background: transparent;         color: var(--sand);    border: 1px solid var(--sand); }
+.badge-upcoming,
+.badge-scheduled { background: transparent;         color: var(--sand);    border: 1px solid var(--sand); }
 .badge-ended    { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
 .badge-draft    { background: var(--warning-wash); color: var(--warning); border: 1px solid var(--warning); }
 

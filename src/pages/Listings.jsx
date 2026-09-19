@@ -16,6 +16,11 @@ function timeLeft(endsAt) {
   return `${s}s`
 }
 
+function fmtOpens(iso) {
+  if (!iso) return null
+  return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
 function AuctionCard({ auction }) {
   const [countdown, setCountdown] = useState(timeLeft(auction.ends_at))
 
@@ -27,11 +32,18 @@ function AuctionCard({ auction }) {
 
   return (
     <Link to={`/auction/${auction.id}`} className="auction-card card">
-      {auction.image_url && (
-        <div className="auction-card-img">
-          <img src={auction.image_url} alt={auction.title} />
-        </div>
-      )}
+      {/* Photography leads: a card with no image is a hole on a dark ground,
+          so it gets an honest placeholder instead of collapsing. */}
+      <div className="auction-card-img">
+        {auction.image_url
+          ? <img src={auction.image_url} alt={auction.title} />
+          : (
+            <div className="auction-card-img-empty">
+              <img src="/logo-mark.svg" alt="" width="44" height="44" />
+              <span>Photography to follow</span>
+            </div>
+          )}
+      </div>
       <div className="auction-card-body">
         <div className="auction-card-top">
           <span className={`badge badge-${auction.status}`}>{auction.status}</span>
@@ -42,17 +54,33 @@ function AuctionCard({ auction }) {
           <p className="auction-card-desc">{auction.description}</p>
         )}
         <div className="auction-card-footer">
-          <div>
-            <div className="auction-label">Current Bid</div>
-            <div className="auction-bid">${auction.current_bid.toLocaleString()}</div>
-          </div>
+          {/* A standard auction has no single "current bid" - forty lots, forty
+              bids - so its card says so instead of showing a stale auction-level
+              number. Only a live-mode auction has one running price. */}
+          {auction.mode === 'standard' ? (
+            <div>
+              <div className="auction-label">Bidding</div>
+              <div className="auction-bid auction-bid-text">Lot by lot</div>
+            </div>
+          ) : (
+            <div>
+              <div className="auction-label">Current Bid</div>
+              <div className="auction-bid">${Number(auction.current_bid || 0).toLocaleString()}</div>
+            </div>
+          )}
+          {auction.status === 'scheduled' && auction.starts_at && (
+            <div>
+              <div className="auction-label">Opens</div>
+              <div className="auction-opens">{fmtOpens(auction.starts_at)}</div>
+            </div>
+          )}
           {auction.status === 'live' && (
             <div className="auction-timer">
               <div className="auction-label">Ends in</div>
               <div className="auction-countdown">{countdown}</div>
             </div>
           )}
-          {auction.leading_bidder && (
+          {auction.mode !== 'standard' && auction.leading_bidder && (
             <div>
               <div className="auction-label">Leading</div>
               <div className="auction-leader">@{auction.leading_bidder}</div>
@@ -96,8 +124,12 @@ export default function Listings() {
     <div className="page listings-page">
       <div className="listings-header">
         <div>
-          <h1 className="listings-title">Auctions</h1>
-          <p className="listings-sub">Bid on unique finds in real time</p>
+          <p className="wtf-label listings-eyebrow">Auctions</p>
+          {/* The signature gesture - once per page, and this is the page. */}
+          <h1 className="listings-title">
+            Every collection has a <span className="wtf-script-accent">story</span> worth telling
+          </h1>
+          <p className="listings-sub">Every lot photographed, catalogued and described.</p>
         </div>
         {isAdmin && (
           <Link to="/host">
