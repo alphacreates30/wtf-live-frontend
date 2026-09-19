@@ -55,7 +55,7 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
                 {auction.pickup_address ? ` at ${auction.pickup_address}.` : '.'}
               </li>
               <li className="terms-modal-warning">
-                ⚠️ Lots not collected within the pickup window are <strong>forfeited with no refund</strong>.
+                Lots not collected within the pickup window are <strong>forfeited with no refund</strong>.
               </li>
             </>
           )}

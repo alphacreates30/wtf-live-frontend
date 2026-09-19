@@ -14,24 +14,30 @@ function fmtPickupDate(iso) {
 
 function FulfillmentNote({ auction }) {
   const mode = auction.fulfillment_mode
-  if (!mode || mode === 'shipping') {
-    return <p className="sar-fulfillment-note">📦 Shipping only</p>
-  }
   const windowLabel = auction.pickup_starts_at && auction.pickup_ends_at
     ? `${fmtPickupDate(auction.pickup_starts_at)} – ${fmtPickupDate(auction.pickup_ends_at)}`
     : null
+  const pickupDetail = [
+    auction.pickup_address,
+    windowLabel ? `Pickup window: ${windowLabel}` : null,
+  ].filter(Boolean).join(' · ')
+
+  if (!mode || mode === 'shipping') {
+    return <p className="sar-fulfillment-note"><span className="sar-tag">Shipping only</span></p>
+  }
   if (mode === 'pickup') {
     return (
       <p className="sar-fulfillment-note">
-        🚗 Local pickup only{auction.pickup_address ? ` — ${auction.pickup_address}` : ''}
-        {windowLabel ? ` · Pickup window: ${windowLabel}` : ''}
+        <span className="sar-tag">Pickup only</span>
+        {pickupDetail && <span className="sar-fulfillment-detail">{pickupDetail}</span>}
       </p>
     )
   }
   return (
     <p className="sar-fulfillment-note">
-      📦🚗 Shipping or local pickup{auction.pickup_address ? ` — pickup at ${auction.pickup_address}` : ''}
-      {windowLabel ? ` · Pickup window: ${windowLabel}` : ''}
+      <span className="sar-tag">Shipping</span>
+      <span className="sar-tag">Pickup</span>
+      {pickupDetail && <span className="sar-fulfillment-detail">{pickupDetail}</span>}
     </p>
   )
 }
@@ -444,7 +450,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                         {bidLoading[item.id] ? '…' : token ? 'Place Max Bid' : 'Log In'}
                       </button>
                       {bidErrors[item.id] && <p className="sar-card-error">{bidErrors[item.id]}</p>}
-                      {bidSuccess[item.id] && <p className="sar-card-success">✓ Bid placed!</p>}
+                      {bidSuccess[item.id] && <p className="sar-card-success">Bid placed</p>}
                     </div>
                   )}
                 </div>
@@ -452,7 +458,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                 <div className="sar-card-body">
                   {closingSoon && (
                     <span className={`sar-closing-badge${urgentCountdown ? ' sar-urgent-badge' : ''}`}>
-                      {urgentCountdown ? '🚨 Closing now!' : '🔥 Closing soon'}
+                      {urgentCountdown ? 'Closing now' : 'Closing'}
                     </span>
                   )}
                   <h3 className="sar-card-title">{item.title}</h3>
@@ -477,7 +483,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                   </div>
 
                   {isLeading && !closed && (
-                    <p className="sar-card-leading-you">★ You're leading</p>
+                    <p className="sar-card-leading-you">You're leading</p>
                   )}
                   {closed && item.status === 'sold' && item.leading_bidder && (
                     <p className="sar-card-winner">

@@ -1,8 +1,8 @@
 /* ===== Standard Auction Room =====
  * Sold is NOT red: a sold lot is a good outcome. Sold = --text on --surface2,
- * unsold = --neutral, open/winning = --success, closing = --warning, urgent =
- * --accent. --error shares the accent hue, so errors use the global alert block
- * (.error-msg in index.css) rather than bare red text.
+ * unsold = --neutral, open/winning = --success, closing/urgent = --accent
+ * (urgency is the call to action). --error shares the accent hue, so errors
+ * use the global alert block (.error-msg in index.css), not bare red text.
  */
 
 .page.standard-auction-room {
@@ -68,16 +68,30 @@
 .sar-sep { opacity: 0.4; }
 
 .sar-fulfillment-note {
-  font-size: 0.92rem;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.6rem;
   margin: 0.75rem 0 0;
   padding: 0.5rem 0.8rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
-  display: block;
   max-width: 100%;
 }
+/* Mono caps label - replaces the emoji, which render differently per platform
+   and sit outside the palette. */
+.sar-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+}
+.sar-fulfillment-detail { font-size: 0.92rem; color: var(--text-muted); }
 
 .sar-empty {
   text-align: center;
@@ -301,7 +315,14 @@
   margin: 0.3rem 0 0;
   font-weight: 600;
 }
-.sar-card-leading-you { color: var(--success); }
+.sar-card-leading-you {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--success);
+}
 .sar-card-winner      { color: var(--success); }
 .sar-card-unsold      { color: var(--text-muted); font-weight: 400; }
 
@@ -525,30 +546,29 @@
 /* ---- Closing soon badge ---- */
 .sar-closing-badge {
   display: inline-block;
-  background: var(--warning);
-  color: var(--on-accent-tint);
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
   font-family: var(--font-mono);
   font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.22rem 0.5rem;
+  letter-spacing: 0.12em;
+  padding: 0.2rem 0.5rem;
   border-radius: var(--radius);
   margin-bottom: 0.5rem;
 }
 .sar-urgent-badge {
   background: var(--accent-solid);
+  border-color: var(--accent-solid);
   color: var(--on-accent);
   animation: pulse 1s ease-in-out infinite;
 }
 
-/* ---- Closing soon card border ---- */
-.sar-closing-soon {
-  border-color: var(--warning) !important;
-  box-shadow: 0 0 0 1px var(--warning-wash);
-}
+/* ---- Closing card border: accent red - urgency is the call to action ---- */
+.sar-closing-soon { border-color: var(--accent) !important; }
 .sar-urgent-item {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 1px var(--accent-wash);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 /* ===== Phone: the detail modal becomes a full-screen sheet =====
