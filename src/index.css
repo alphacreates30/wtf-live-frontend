@@ -1,85 +1,219 @@
+/* What The Find — base layer.
+ *
+ * Colourway: WARM BLACK (the brand's dark ground). See wtf-handoff/brand/BRAND.md.
+ * Fonts are loaded in index.html, not @imported here — an @import blocks render.
+ *
+ * Variable names are unchanged from the pre-brand theme on purpose: 200+
+ * references across the app already use them. Values change, names don't.
+ * New names are added alongside.
+ */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface2: #242424;
-  --border: #2e2e2e;
-  --text: #f0f0f0;
-  --text-muted: #888;
-  --accent: #ff4d00;
-  --accent-hover: #ff6a2a;
-  --green: #22c55e;
-  --red: #ef4444;
-  --radius: 10px;
-  --font: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  /* ---- Surfaces: warm black, not neutral black ---- */
+  --bg:         #1E1612;
+  --surface:    #2A1E14;
+  --surface2:   #3A2B1E;
+  --border:     rgba(247, 243, 236, 0.14);
+  --border-soft: rgba(247, 243, 236, 0.08);
+
+  /* ---- Ink ---- */
+  --text:       #F7F3EC;
+  --text-muted: #B8A996;   /* 7.8:1 on --bg */
+  --ink-faint:  #8A7D72;   /* 4.5:1 on --bg — do not go fainter */
+
+  /* ---- Accent ----
+   * Brand red #C0392B measures only 3.3:1 on warm black, so red TEXT is tinted.
+   * --accent-solid stays true brand red for large fills carrying cream text.
+   * This is reversed-colourway practice, not a second brand red. */
+  --accent:       #E86B57;   /* 4.9:1 on --bg — text, links, borders, small marks */
+  --accent-hover: #F08670;
+  --accent-solid: #C0392B;   /* large fills only, cream text on top */
+  --accent-wash:  rgba(232, 107, 87, 0.13);
+
+  /* ---- Semantic status ---- */
+  --success:      #4CAF7D;
+  --success-wash: rgba(76, 175, 125, 0.13);
+  --warning:      #E0A43C;
+  --warning-wash: rgba(224, 164, 60, 0.13);
+  --error:        #E86B57;   /* shares the accent hue — never signal by colour alone */
+  --error-wash:   rgba(232, 107, 87, 0.13);
+  --neutral:      #8A7D72;
+
+  /* ---- Type ---- */
+  --font:         'Lora', Georgia, 'Times New Roman', serif;
+  --font-display: 'Bebas Neue', Impact, 'Haettenschweiler', sans-serif;
+  --font-body:    'Lora', Georgia, 'Times New Roman', serif;
+  --font-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-script:  'Caveat', cursive;
+
+  /* ---- Geometry ---- */
+  --radius: 0;      /* the brand is square. Only the app icon is rounded. */
+  --tap:    44px;   /* minimum touch target */
+
+  /* ---- Back-compat: still referenced in page CSS ---- */
+  --green: var(--success);
+  --red:   var(--error);
+  --sand:  #D4C8B8;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Nothing should ever push the page sideways on a phone. */
+html, body { overflow-x: hidden; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
 
 a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
 
+/* ---- Type roles ----
+ * Display: Bebas, caps, tight. Headlines, prices, lot titles.
+ * Body:    Lora. Descriptions, catalogue copy, anything read in sentences.
+ * Mono:    DM Mono, uppercase, letterspaced. Labels, metadata, status.
+ *
+ * The rule that keeps it coherent: never set body copy in Bebas, and never set
+ * a label in Lora.
+ *
+ * Bebas has no lowercase and runs far narrower than Inter, so sizes here are
+ * larger than the old theme's. Per-page headings may still need re-tuning.
+ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  font-weight: 400;
+}
+h1 { font-size: 2.6rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.2rem; }
+
+.wtf-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+}
+
+.wtf-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+/* Money. Premium is ALWAYS shown beside hammer — never a bare total.
+ * That isn't styling, it's what the terms of sale promise. */
+.wtf-price {
+  font-family: var(--font-display);
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+
+/* The signature gesture: condensed caps interrupted by a red script word.
+ * Once per page at most. It stops working the moment it repeats. */
+.wtf-script-accent {
+  font-family: var(--font-script);
+  color: var(--accent);
+  text-transform: none;
+  font-size: 1.18em;
+}
+
+/* ---- Controls ---- */
 button {
   cursor: pointer;
-  font-family: var(--font);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   border: none;
   border-radius: var(--radius);
-  font-weight: 600;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s, color 0.15s, opacity 0.15s, border-color 0.15s;
 }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Tap target applies to real buttons only, NOT to every <button>. A global
+ * min-height here would inflate small icon buttons that set their own size —
+ * e.g. .im-remove-img in ItemManager is a 20px circle. */
+.btn-primary, .btn-ghost, .btn-danger, .btn-green { min-height: var(--tap); }
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 input, textarea, select {
-  font-family: var(--font);
+  font-family: var(--font-body);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 11px 14px;
+  font-size: 15px;      /* 16px-ish keeps iOS from zooming on focus */
   outline: none;
   width: 100%;
+  min-height: var(--tap);
   transition: border-color 0.15s;
 }
+input::placeholder, textarea::placeholder { color: var(--ink-faint); }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+
+/* Checkboxes and radios are not text fields — the width/min-height rules above
+ * would blow them up. Three of these live in TermsAcknowledgementModal, which
+ * a buyer must complete before bidding, so this exclusion is load-bearing. */
+input[type="checkbox"], input[type="radio"] {
+  width: auto;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
 
 .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
 
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
-  padding: 10px 20px;
-  font-size: 14px;
+  background: var(--accent-solid);
+  color: #F7F3EC;
+  padding: 11px 22px;
+  font-size: 1rem;
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); color: var(--bg); }
 
 .btn-ghost {
-  background: var(--surface2);
+  background: transparent;
   color: var(--text);
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 11px 22px;
+  font-size: 1rem;
   border: 1px solid var(--border);
 }
-.btn-ghost:hover:not(:disabled) { background: var(--border); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 
 .btn-danger {
-  background: var(--red);
-  color: #fff;
-  padding: 10px 20px;
-  font-size: 14px;
+  background: var(--error);
+  color: var(--bg);
+  padding: 11px 22px;
+  font-size: 1rem;
 }
 .btn-danger:hover:not(:disabled) { opacity: 0.85; }
 
 .btn-green {
-  background: var(--green);
-  color: #fff;
-  padding: 10px 20px;
-  font-size: 14px;
+  background: var(--success);
+  color: var(--bg);
+  padding: 11px 22px;
+  font-size: 1rem;
 }
 .btn-green:hover:not(:disabled) { opacity: 0.85; }
 
@@ -90,19 +224,62 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); }
   padding: 20px;
 }
 
+/* ---- Badges. Square, per the brand. ---- */
 .badge {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.09em;
 }
-.badge-live { background: #ff4d0022; color: var(--accent); border: 1px solid var(--accent); }
-.badge-upcoming { background: #3b82f622; color: #60a5fa; border: 1px solid #3b82f6; }
-.badge-ended { background: #ffffff11; color: var(--text-muted); border: 1px solid var(--border); }
-.badge-draft { background: #eab30822; color: #eab308; border: 1px solid #eab308; }
+.badge-live     { background: var(--accent-wash);  color: var(--accent);  border: 1px solid var(--accent); }
+.badge-upcoming { background: transparent;         color: var(--sand);    border: 1px solid var(--sand); }
+.badge-ended    { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
+.badge-draft    { background: var(--warning-wash); color: var(--warning); border: 1px solid var(--warning); }
 
-.error-msg { color: var(--red); font-size: 13px; margin-top: 8px; }
-.success-msg { color: var(--green); font-size: 13px; margin-top: 8px; }
+/* ---- Messages ----
+ * --error and --accent share a hue, so errors are never signalled by colour
+ * alone: they get a block, a left rule and a word. Also works for colourblind
+ * buyers, which bare red text does not.
+ */
+.error-msg {
+  color: var(--error);
+  background: var(--error-wash);
+  border-left: 3px solid var(--error);
+  padding: 9px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.success-msg {
+  color: var(--success);
+  background: var(--success-wash);
+  border-left: 3px solid var(--success);
+  padding: 9px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Respect a user's motion setting — StandardAuctionRoom pulses the urgent
+ * countdown, which is exactly the kind of thing this setting exists for. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .page { padding: 22px 16px; }
+  h1 { font-size: 2.1rem; }
+  h2 { font-size: 1.7rem; }
+  h3 { font-size: 1.3rem; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 18px 14px; }
+  h1 { font-size: 1.85rem; }
+}

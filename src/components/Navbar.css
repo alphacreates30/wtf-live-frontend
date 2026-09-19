@@ -12,14 +12,33 @@
 }
 
 .navbar-logo {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text);
+  min-height: var(--tap);
 }
-.navbar-logo span {
-  color: var(--accent);
-  margin-left: 4px;
+.navbar-logo:hover { color: var(--text); }
+
+.navbar-mark {
+  width: 28px;
+  height: 28px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.navbar-wordmark {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 23px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Below 480px the mark carries it alone — see BRAND.md on minimum sizes. */
+@media (max-width: 480px) {
+  .navbar-wordmark { display: none; }
 }
 
 .navbar-right {
