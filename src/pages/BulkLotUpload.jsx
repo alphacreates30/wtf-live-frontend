@@ -173,6 +173,22 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [selected, groupSelected, clearSelection])
 
+  // Nothing here is saved server-side until "Create lots" succeeds - photos
+  // and every AI-catalogued field live only in this tab's memory. Warn
+  // before a close/refresh throws away a run that may represent real
+  // AI-cataloguing spend (measured ~$0.02/lot) and real time (~200 lots is
+  // ~25 min of sequential AI calls). commit() removes committed lots from
+  // `lots`, so this stops warning on its own once they're actually saved.
+  useEffect(() => {
+    function onBeforeUnload(e) {
+      if (!lots.some(l => l.analyzed || l.title)) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [lots])
+
   // Each remaining photo becomes its own lot.
   function groupRestIndividually() {
     if (!ungrouped.length) return
@@ -222,7 +238,17 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       const files = lot.photoIdxs.map(p => filesRef.current[p]).filter(Boolean).slice(0, 6)
       const images = []
       for (const f of files) images.push(await fileToDataUrl(f, ANALYSIS_MAX, 0.85))
-      const a = await api.analyzeLot(images, lot.condition)
+
+      // analyzeLot never throws on a malformed model response - it resolves
+      // with parse_failed: true, an empty title, and raw text as the
+      // description, so this can't be caught below without checking for it
+      // explicitly. One silent retry first: measured 1/20 on a real batch,
+      // and it's a one-off wording slip (a stray character breaking JSON),
+      // not something a repeat of the identical request usually repeats.
+      let a = await api.analyzeLot(images, lot.condition)
+      if (a.parse_failed) a = await api.analyzeLot(images, lot.condition)
+      if (a.parse_failed) throw new Error('AI response could not be parsed (tried twice)')
+
       updateLot(i, {
         title: a.title || '',
         description: a.description || '',
@@ -440,6 +466,14 @@ export default function BulkLotUpload({ auctionId, onDone }) {
               )}
             </div>
           </div>
+
+          {analyzedCount > 0 && (
+            <p className="blu-unsaved-warning">
+              Nothing here is saved yet - photos and AI catalogue results live only in this
+              browser tab. Don't close or refresh until you click "Create lots", or you'll lose
+              this batch (and re-run its AI cataloguing cost) and have to start over.
+            </p>
+          )}
 
           <div className="blu-lots">
             {lots.map((lot, i) => (

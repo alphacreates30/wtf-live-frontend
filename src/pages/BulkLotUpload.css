@@ -65,6 +65,12 @@
 }
 .blu-bucket-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 
+.blu-unsaved-warning {
+  background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+  color: #fbbf24; font-size: .78rem; line-height: 1.5;
+  padding: .55rem .75rem; border-radius: 6px; margin: 0 0 .9rem;
+}
+
 /* ---- Buttons ---- */
 .blu-btn, .blu-btn-ghost, .blu-btn-sm, .blu-btn-xs {
   border-radius: 7px; cursor: pointer; font-weight: 600;
