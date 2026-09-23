@@ -233,7 +233,12 @@ export default function BulkLotUpload({ auctionId, onDone }) {
         analyzed: true, analyzing: false, error: '',
       })
     } catch (err) {
-      updateLot(i, { analyzing: false, analyzed: true, error: err.message })
+      // Not analyzed: true - a failure (rate limit, network blip, a
+      // transient 5xx) must stay retryable, not become a dead end. Leaving
+      // analyzed false keeps this lot both in analyzeAll's next pass (no
+      // re-paying for lots that already succeeded) and eligible for the
+      // per-lot "Catalogue this lot" button.
+      updateLot(i, { analyzing: false, analyzed: false, error: err.message })
     }
   }
 
@@ -463,14 +468,16 @@ export default function BulkLotUpload({ auctionId, onDone }) {
                       Lot {i + 1}
                     </label>
                     {lot.confidence && <span className={`blu-conf ${lot.confidence}`}>{lot.confidence} confidence</span>}
-                    {lot.error && <span className="blu-lot-error">AI failed — fill in by hand</span>}
+                    {lot.error && <span className="blu-lot-error">AI failed — retry below, or fill in by hand</span>}
                     <button className="blu-btn-xs blu-ungroup" onClick={() => ungroupLot(i)}>Ungroup</button>
                   </div>
 
                   {!lot.analyzed && !lot.analyzing && (
                     <div className="blu-pending">
-                      Not catalogued yet.
-                      <button className="blu-btn-xs" onClick={() => analyzeOne(i)}>Catalogue this lot</button>
+                      {lot.error ? 'Retry needed.' : 'Not catalogued yet.'}
+                      <button className="blu-btn-xs" onClick={() => analyzeOne(i)}>
+                        {lot.error ? 'Retry cataloguing' : 'Catalogue this lot'}
+                      </button>
                     </div>
                   )}
                   {lot.analyzing && <div className="blu-pending">Cataloguing…</div>}
