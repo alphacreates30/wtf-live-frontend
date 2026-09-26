@@ -29,3 +29,22 @@ textarea { resize: vertical; }
 .host-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .host-modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; }
 .host-modal-close:hover { color: var(--text); }
+
+/* ---- AI spend ---- */
+.host-ai-spend { margin-bottom: 28px; }
+.host-ai-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.host-ai-refresh { background: none; border: 1px solid var(--border, #2a2d35); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+.host-ai-refresh:hover { color: var(--text); }
+.host-ai-figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
+.host-ai-figures div { display: flex; flex-direction: column; gap: 2px; }
+.host-ai-figures span { font-size: 12px; color: var(--text-muted); }
+.host-ai-figures strong { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.host-ai-note { font-size: 12px; color: var(--text-muted); margin: 0; }
+.host-ai-auctions { margin-top: 12px; font-size: 13px; }
+.host-ai-auctions summary { cursor: pointer; color: var(--text-muted); }
+.host-ai-auctions ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.host-ai-auctions li { display: flex; align-items: baseline; gap: 12px; }
+.host-ai-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.host-ai-calls { color: var(--text-muted); font-size: 12px; }
+.host-ai-auctions strong { font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .host-ai-figures strong { font-size: 18px; } }

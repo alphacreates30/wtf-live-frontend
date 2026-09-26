@@ -167,10 +167,14 @@ export const api = {
     request(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   // AI bulk lot creation - longer timeout than the default, this is genuine
   // vision-model processing, not a plain CRUD call.
-  analyzeLot: (images, condition) =>
-    request('/ai/analyze-lot', { method: 'POST', body: JSON.stringify({ images, condition }), timeoutMs: 45000 }),
-  regenerateDescription: (title, condition) =>
-    request('/ai/regenerate-description', { method: 'POST', body: JSON.stringify({ title, condition }), timeoutMs: 20000 }),
+  // auction_id only attributes the call's cost in the AI spend log.
+  analyzeLot: (images, condition, auction_id) =>
+    request('/ai/analyze-lot', { method: 'POST', body: JSON.stringify({ images, condition, auction_id }), timeoutMs: 45000 }),
+  regenerateDescription: (title, condition, auction_id) =>
+    request('/ai/regenerate-description', { method: 'POST', body: JSON.stringify({ title, condition, auction_id }), timeoutMs: 20000 }),
+  // Totals by day are bucketed in the browser's time zone, so "today" is the host's today.
+  getAiUsage: () =>
+    request(`/admin/ai-usage?tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')}`),
   bulkCreateItems: (auctionId, lots) =>
     request(`/auction/${auctionId}/items/bulk`, { method: 'POST', body: JSON.stringify({ lots }) }),
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import AiSpendCard from './AiSpendCard'
 import './HostDashboard.css'
 
 const EMPTY_FORM = {
@@ -134,6 +135,8 @@ export default function HostDashboard() {
     <div className="page host-page">
       <h1 className="host-title">Host Dashboard</h1>
       <p className="host-sub">Logged in as <strong>@{username}</strong></p>
+
+      <AiSpendCard />
 
       <div className="host-header-row">
         <h2 className="host-section-title" style={{ marginBottom: 0 }}>My Auctions</h2>

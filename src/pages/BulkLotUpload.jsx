@@ -372,8 +372,8 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       // explicitly. One silent retry first: measured 1/20 on a real batch,
       // and it's a one-off wording slip (a stray character breaking JSON),
       // not something a repeat of the identical request usually repeats.
-      let a = await api.analyzeLot(images, lot.condition)
-      if (a.parse_failed) a = await api.analyzeLot(images, lot.condition)
+      let a = await api.analyzeLot(images, lot.condition, auctionId)
+      if (a.parse_failed) a = await api.analyzeLot(images, lot.condition, auctionId)
       if (a.parse_failed) throw new Error('AI response could not be parsed (tried twice)')
 
       updateLot(i, {
@@ -400,7 +400,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     if (!lot.title?.trim()) { setError('Enter a title first, then regenerate.'); return }
     updateLot(i, { regenerating: true })
     try {
-      const r = await api.regenerateDescription(lot.title, lot.condition)
+      const r = await api.regenerateDescription(lot.title, lot.condition, auctionId)
       updateLot(i, {
         description: r.description || lot.description,
         category: r.category || lot.category,
