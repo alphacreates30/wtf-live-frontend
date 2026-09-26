@@ -72,6 +72,9 @@ function ProfileForm() {
           zip: profile.zip || '',
           country: profile.country || 'US',
         })
+      } else {
+        // New profile: start from the account's email rather than asking twice.
+        api.getMe().then(me => setForm(f => ({ ...f, email: f.email || me?.email || '' }))).catch(() => {})
       }
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
@@ -167,8 +170,8 @@ function ProfileForm() {
           <input id="pf-name" autoComplete="name" value={form.full_name} onChange={set('full_name')} required />
         </Field>
 
-        <Field id="pf-email" label="Email">
-          <input id="pf-email" type="email" autoComplete="email" inputMode="email" value={form.email} onChange={set('email')} />
+        <Field id="pf-email" label="Email *">
+          <input id="pf-email" type="email" autoComplete="email" inputMode="email" value={form.email} onChange={set('email')} required />
         </Field>
 
         <Field id="pf-phone" label="Phone *">

@@ -67,3 +67,10 @@
 }
 
 .login-submit { width: 100%; padding: 12px; font-size: 1.1rem; }
+
+.login-heading { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
+.login-sub-left { text-align: left; margin-bottom: 16px; line-height: 1.5; }
+.login-hint { font-size: 0.8rem; color: var(--text-muted); }
+.login-forgot { align-self: center; font-size: 0.9rem; color: var(--text-muted); text-decoration: underline; }
+.login-forgot:hover { color: var(--text); }
+.login-link-btn { display: block; text-align: center; text-decoration: none; }

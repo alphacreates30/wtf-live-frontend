@@ -66,8 +66,18 @@ export function apiError(data, res, fallback) {
 }
 
 export const api = {
-  register: (username, password) =>
-    request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  register: (username, password, email) =>
+    request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password, email }) }),
+  getMe: () => request('/auth/me'),
+  setEmail: (email, current_password) =>
+    request('/auth/email', { method: 'POST', body: JSON.stringify({ email, current_password }) }),
+  // identifier: a username or an email. The server answers the same either way.
+  forgotPassword: (identifier) =>
+    request('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ identifier }) }),
+  resetPassword: (token, new_password) =>
+    request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, new_password }) }),
+  adminSetPassword: (userId, new_password) =>
+    request(`/admin/users/${userId}/password`, { method: 'POST', body: JSON.stringify({ new_password }) }),
 
   login: (username, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),

@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import EmailGate from './components/EmailGate'
 import Listings from './pages/Listings'
 import AuctionRoomGate from './pages/AuctionRoomGate'
 import HostDashboard from './pages/HostDashboard'
@@ -100,6 +103,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
+      <EmailGate>
       <Routes>
         <Route path="/" element={
           <ProfileGate>
@@ -107,6 +111,8 @@ export default function App() {
           </ProfileGate>
         } />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/auction/:id" element={
           <ProfileGate>
@@ -167,6 +173,7 @@ export default function App() {
                 <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </EmailGate>
       <Footer />
     </BrowserRouter>
   )

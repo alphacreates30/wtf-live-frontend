@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../api'
 import './Login.css'
 
@@ -7,6 +7,7 @@ export default function Login() {
   const [mode, setMode] = useState('login') // 'login' | 'register'
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -18,7 +19,7 @@ export default function Login() {
     try {
       const data = mode === 'login'
         ? await api.login(username, password)
-        : await api.register(username, password)
+        : await api.register(username, password, email)
 
       localStorage.setItem('wtf_token', data.token)
       localStorage.setItem('wtf_username', data.user.username)
@@ -66,6 +67,22 @@ export default function Login() {
               required
             />
           </div>
+          {mode === 'register' && (
+            <div className="form-group">
+              <label htmlFor="login-email">Email</label>
+              <input
+                id="login-email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+              <span className="login-hint">Used to reset your password if you forget it.</span>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="login-password">Password</label>
             <input
@@ -82,6 +99,7 @@ export default function Login() {
           <button type="submit" className="btn-primary login-submit" disabled={loading}>
             {loading ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}
           </button>
+          {mode === 'login' && <Link to="/forgot-password" className="login-forgot">Forgot password?</Link>}
         </form>
       </div>
     </div>

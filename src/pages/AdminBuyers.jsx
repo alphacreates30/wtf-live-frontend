@@ -25,6 +25,49 @@ function StatusBadge({ status, paymentStatus }) {
   )
 }
 
+// Fallback for a buyer who has lost access to their email: set a random
+// temporary password and read it to them. Shown once - it isn't stored
+// anywhere but as a hash. No 0/O/1/l/I, so it survives being read aloud.
+const TEMP_ALPHABET = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
+function tempPassword(len = 10) {
+  const bytes = crypto.getRandomValues(new Uint8Array(len))
+  return Array.from(bytes, b => TEMP_ALPHABET[b % TEMP_ALPHABET.length]).join('')
+}
+
+function TempPasswordButton({ buyer }) {
+  const [shown, setShown] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  async function reset() {
+    if (!confirm(`Set a temporary password for ${buyer.full_name}? Their current password will stop working.`)) return
+    const pw = tempPassword()
+    setBusy(true)
+    try {
+      await api.adminSetPassword(buyer.user_id, pw)
+      setShown(pw)
+    } catch (e) {
+      alert('Failed: ' + e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (shown) {
+    return (
+      <span style={{ fontSize: '0.8rem', display: 'inline-flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        Temporary password: <code style={{ fontSize: '0.95rem', padding: '2px 6px', border: '1px solid var(--border)', borderRadius: '4px', userSelect: 'all' }}>{shown}</code>
+        <span style={{ color: 'var(--text-muted)' }}>Give it to the buyer now; it won't be shown again.</span>
+        <button className="btn-ghost" style={{ padding: '2px 8px', fontSize: '0.75rem' }} onClick={() => setShown(null)}>Done</button>
+      </span>
+    )
+  }
+  return (
+    <button className="btn-ghost" style={{ padding: '4px 12px', fontSize: '0.8rem' }} disabled={busy} onClick={reset}>
+      {busy ? '…' : '🔑 Temporary password'}
+    </button>
+  )
+}
+
 export default function AdminBuyers() {
   const navigate = useNavigate()
   const [buyers, setBuyers] = useState([])
@@ -170,6 +213,7 @@ export default function AdminBuyers() {
                       {actionLoading === buyer.user_id + 'approved' ? '…' : '↩ Unblock'}
                     </button>
                   )}
+                  <TempPasswordButton buyer={buyer} />
                 </div>
               </div>
             </div>
