@@ -55,6 +55,57 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([arr], { type: mime })
 }
 
+// ---- Incoming files (picker and drag-and-drop share this) ----
+
+// Chrome/Edge on Windows can't decode HEIC (the iPhone default), and Windows
+// often reports it with an empty MIME type - so match the extension too.
+const isHeic = f => /\.(heic|heif)$/i.test(f.name) || /^image\/hei[cf]/i.test(f.type)
+// OS clutter that rides along when a whole folder is dropped. Ignored silently
+// rather than reported as "skipped", since the host never chose them.
+const isJunk = f => f.name.startsWith('.') || /^(thumbs\.db|desktop\.ini)$/i.test(f.name)
+
+// Grouping assumes shooting order (each lot is a burst, range-selected first
+// to last). A drop's order is whatever the OS hands over, so every batch is
+// sorted. lastModified is the shutter time on camera copies, or the copy time
+// on downloads/exports (which still copy in sequence); the numeric name
+// tie-break (IMG_0712 < IMG_0713, 9 < 10) covers identical timestamps.
+const byShootingOrder = (a, b) =>
+  a.lastModified - b.lastModified || a.name.localeCompare(b.name, undefined, { numeric: true })
+
+function entryFile(entry) {
+  return new Promise((resolve, reject) => entry.file(resolve, reject))
+}
+
+async function entryFiles(entry) {
+  if (entry.isFile) return [await entryFile(entry)]
+  if (!entry.isDirectory) return []
+  const reader = entry.createReader()
+  const out = []
+  // readEntries hands back at most ~100 per call; keep going until empty.
+  for (;;) {
+    const batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject))
+    if (!batch.length) break
+    for (const child of batch) out.push(...await entryFiles(child))
+  }
+  return out
+}
+
+// Files from a drop, recursing into any folders. Entries must be taken
+// synchronously inside the drop event - the DataTransfer is emptied after it.
+function droppedFiles(dataTransfer) {
+  const items = [...(dataTransfer.items || [])].filter(i => i.kind === 'file')
+  const entries = items.map(i => i.webkitGetAsEntry?.())
+  if (!entries.length || entries.some(e => !e)) {
+    return Promise.resolve({ files: [...(dataTransfer.files || [])], hadFolder: false })
+  }
+  const hadFolder = entries.some(e => e.isDirectory)
+  return Promise.all(entries.map(entryFiles)).then(lists => ({ files: lists.flat(), hadFolder }))
+}
+
+const canDecode = file => fileToDataUrl(file, 16).then(() => true, () => false)
+
+const isFileDrag = e => [...(e.dataTransfer?.types || [])].includes('Files')
+
 const newLot = (photoIdxs, condition) => ({
   photoIdxs,
   condition,
@@ -83,18 +134,48 @@ export default function BulkLotUpload({ auctionId, onDone }) {
   const [progress, setProgress] = useState({ done: 0, total: 0, label: '' })
   const [error, setError] = useState('')
   const [doneCount, setDoneCount] = useState(0)
+  const [notice, setNotice] = useState('')        // non-fatal: skipped files, HEIC
+  const [dragging, setDragging] = useState(false)
+  const dragDepth = useRef(0)
+  const dropRef = useRef(null)
   const filesRef = useRef([])
   const fileInputRef = useRef(null)
   const containerRef = useRef(null)
 
   // ---- Load files ----
-  async function handleFiles(e) {
-    const files = [...(e.target.files || [])]
-    if (!files.length) return
+  // Picker and drop both land here, so filtering, the cap, ordering and the
+  // reading progress are identical either way.
+  async function handleFiles(incoming, { hadFolder = false } = {}) {
+    if (busy && busy !== 'done') return
+    const candidates = incoming.filter(f => !isJunk(f))
+    const heic = candidates.filter(isHeic)
+    let files = candidates.filter(f => !isHeic(f) && f.type.startsWith('image/'))
+    const skipped = candidates.length - heic.length - files.length
+
+    // Probe one HEIC rather than let them all become broken thumbnails the AI
+    // can't read either. Safari decodes them; Chrome on Windows won't.
+    let heicSkipped = 0
+    if (heic.length) {
+      if (await canDecode(heic[0])) files = files.concat(heic)
+      else heicSkipped = heic.length
+    }
+
+    const notes = []
+    if (skipped) notes.push(`${skipped} file${skipped !== 1 ? 's' : ''} skipped (not photos).`)
+    if (heicSkipped) notes.push(`${heicSkipped} photo${heicSkipped !== 1 ? 's are' : ' is'} HEIC, which this browser can't read. On the iPhone set Settings › Camera › Formats to Most Compatible, or export them as JPEG.`)
+
+    if (!files.length) {
+      setNotice('')
+      if (notes.length) setError(`No photos loaded. ${notes.join(' ')}`)
+      else if (hadFolder) setError('That folder has no photos in it.')
+      return
+    }
     if (files.length > PHOTO_SOFT_CAP) {
       setError(`That's ${files.length} photos. Keep batches at or under ${PHOTO_SOFT_CAP} and split the rest into a second batch.`)
       return
     }
+    files.sort(byShootingOrder)
+    setNotice(notes.join(' '))
     setError(''); setBusy('reading')
     setProgress({ done: 0, total: files.length, label: 'Reading photos' })
     filesRef.current = files
@@ -116,6 +197,52 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     setBusy('')
     fileInputRef.current?.blur()
   }
+
+  // ---- Drag and drop ----
+  // dragenter/leave fire for every child the pointer crosses, so count depth
+  // instead of toggling, or the highlight flickers.
+  function onDragEnter(e) {
+    if (!isFileDrag(e)) return
+    e.preventDefault()
+    dragDepth.current++
+    setDragging(true)
+  }
+  function onDragOver(e) {
+    if (!isFileDrag(e)) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }
+  function onDragLeave(e) {
+    if (!isFileDrag(e)) return
+    dragDepth.current = Math.max(0, dragDepth.current - 1)
+    if (!dragDepth.current) setDragging(false)
+  }
+  function onDrop(e) {
+    if (!isFileDrag(e)) return
+    e.preventDefault()
+    dragDepth.current = 0
+    setDragging(false)
+    droppedFiles(e.dataTransfer)
+      .then(({ files, hadFolder }) => handleFiles(files, { hadFolder }))
+      .catch(() => setError("Couldn't read what was dropped. Try Choose photos instead."))
+  }
+
+  // A file dropped anywhere else on the page makes the browser open it and
+  // navigate away, taking every grouped lot with it. Swallow file drags
+  // outside the drop zone; text drags (e.g. into a description) pass through.
+  useEffect(() => {
+    function guard(e) {
+      if (!isFileDrag(e)) return
+      e.preventDefault()
+      if (e.type === 'dragover' && !dropRef.current?.contains(e.target)) e.dataTransfer.dropEffect = 'none'
+    }
+    window.addEventListener('dragover', guard)
+    window.addEventListener('drop', guard)
+    return () => {
+      window.removeEventListener('dragover', guard)
+      window.removeEventListener('drop', guard)
+    }
+  }, [])
 
   // ---- Range selection ----
   // Click the first photo of a lot, then click the last: everything between
@@ -336,7 +463,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
 
   function reset() {
     setPhotos([]); setUngrouped([]); setLots([]); setSelected(new Set())
-    setAnchor(null); setError(''); setBusy(''); setDoneCount(0)
+    setAnchor(null); setError(''); setNotice(''); setBusy(''); setDoneCount(0)
     filesRef.current = []
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -360,6 +487,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       </div>
 
       {error && <div className="blu-error" onClick={() => setError('')}>{error}</div>}
+      {notice && <div className="blu-notice" onClick={() => setNotice('')}>{notice}</div>}
 
       {busy === 'done' && (
         <div className="blu-success">
@@ -370,10 +498,21 @@ export default function BulkLotUpload({ auctionId, onDone }) {
 
       {/* ---------- Upload ---------- */}
       {photos.length === 0 && busy !== 'reading' && (
-        <label className="blu-drop">
-          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFiles} hidden />
+        <label
+          ref={dropRef}
+          className={`blu-drop${dragging ? ' blu-drop-active' : ''}`}
+          onDragEnter={onDragEnter}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+        >
+          <input
+            ref={fileInputRef} type="file" accept="image/*" multiple hidden
+            onChange={e => { handleFiles([...(e.target.files || [])]); e.target.value = '' }}
+          />
           <div className="blu-drop-icon">📷</div>
-          <div className="blu-drop-main">Choose photos</div>
+          <div className="blu-drop-main">{dragging ? 'Drop to add' : 'Choose photos'}</div>
+          <div className="blu-drop-or">or drag photos (or a folder of them) here</div>
           <div className="blu-drop-sub">
             Shoot each lot as a burst — the item, its box, any damage — then move to the next.
             Up to {PHOTO_SOFT_CAP} per batch. Nothing is saved until you create the lots.
