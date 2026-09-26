@@ -111,9 +111,16 @@ export default function HostDashboard() {
     }
   }
 
-  async function deleteAuction(auctionId) {
-    if (!confirm('Delete this auction permanently?')) return;
-    try { await api.deleteAuction(auctionId); await loadAuctions(); } catch (err) { alert(err.message); }
+  // Any status can be deleted. The server refuses an auction that has
+  // produced orders, so what a buyer owes can't be lost this way.
+  async function deleteAuction(a) {
+    const lots = lotStats[a.id]?.count || 0
+    const bidLots = lotStats[a.id]?.soldCount || 0  // lots with a leading bidder
+    const lines = [`Delete "${a.title}"${lots ? ` and its ${lots} lot${lots !== 1 ? 's' : ''}` : ''} permanently?`]
+    if (a.status !== 'ended' && bidLots) lines.push(`${bidLots} lot${bidLots !== 1 ? 's have' : ' has'} bids. Those bids will be deleted too.`)
+    lines.push("This can't be undone.")
+    if (!confirm(lines.join('\n\n'))) return;
+    try { await api.deleteAuction(a.id); await loadAuctions(); } catch (err) { alert(err.message); }
   }
 
   async function publishAuction(auctionId) {
@@ -164,7 +171,7 @@ export default function HostDashboard() {
                 )}
               </div>
               <div style={{display:'flex',gap:'0.5rem',marginTop:'0.5rem'}}>
-                {a.status === 'ended' && <button className="btn-danger" style={{fontSize:'0.75rem',padding:'0.3rem 0.6rem'}} onClick={() => deleteAuction(a.id)}>Delete</button>}
+                <button className="btn-danger" style={{fontSize:'0.75rem',padding:'0.3rem 0.6rem'}} onClick={() => deleteAuction(a)}>Delete</button>
                 {a.status === 'draft' && (
                   <button
                     className="btn-primary host-go-btn"
