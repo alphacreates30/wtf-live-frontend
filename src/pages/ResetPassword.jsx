@@ -38,20 +38,20 @@ export default function ResetPassword() {
           </>
         ) : done ? (
           <>
-            <p className="login-sub login-sub-left">Your password has been changed. Log in as <strong>{done}</strong> with your new password.</p>
+            <p className="login-sub login-sub-left">Your password has been changed and any devices signed in to your account have been signed out. Log in as <strong>{done}</strong> with your new password.</p>
             <Link to="/login" className="btn-primary login-submit login-link-btn">Log in</Link>
           </>
         ) : (
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label htmlFor="reset-pw">New password</label>
-              <input id="reset-pw" type="password" autoComplete="new-password" minLength={6}
+              <input id="reset-pw" type="password" autoComplete="new-password" minLength={8}
                 value={password} onChange={e => setPassword(e.target.value)} required />
-              <span className="login-hint">At least 6 characters.</span>
+              <span className="login-hint">At least 8 characters.</span>
             </div>
             <div className="form-group">
               <label htmlFor="reset-pw2">Confirm new password</label>
-              <input id="reset-pw2" type="password" autoComplete="new-password" minLength={6}
+              <input id="reset-pw2" type="password" autoComplete="new-password" minLength={8}
                 value={confirm} onChange={e => setConfirm(e.target.value)} required />
             </div>
             {error && <p className="error-msg">{error}</p>}

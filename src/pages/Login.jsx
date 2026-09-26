@@ -92,8 +92,10 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              minLength={mode === 'register' ? 8 : undefined}
               required
             />
+            {mode === 'register' && <span className="login-hint">At least 8 characters.</span>}
           </div>
           {error && <p className="error-msg">{error}</p>}
           <button type="submit" className="btn-primary login-submit" disabled={loading}>

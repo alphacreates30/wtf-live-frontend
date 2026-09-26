@@ -33,7 +33,14 @@ async function request(path, { timeoutMs = DEFAULT_TIMEOUT_MS, ...options } = {}
     // something readable instead of a raw JSON parse error.
     throw new Error(`Server error (${res.status}). Try again in a moment.`)
   }
-  if (!res.ok) throw apiError(data, res, 'Request failed')
+  if (!res.ok) {
+    if (res.status === 401 && data?.code === 'session_revoked') {
+      localStorage.removeItem('wtf_token')
+      localStorage.removeItem('wtf_username')
+      if (window.location.pathname !== '/login') window.location.assign('/login')
+    }
+    throw apiError(data, res, 'Request failed')
+  }
   return data
 }
 

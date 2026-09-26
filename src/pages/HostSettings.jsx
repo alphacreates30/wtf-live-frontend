@@ -23,7 +23,10 @@ export default function HostSettings() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to change password')
-      setPwSuccess('Password updated!')
+      // A password change signs out every session, this one included; the
+      // server hands back a fresh token so this browser stays signed in.
+      if (data.token) localStorage.setItem('wtf_token', data.token)
+      setPwSuccess('Password updated! Any other devices signed in as you have been signed out.')
       setPwForm({ current_password: '', new_password: '', confirm_password: '' })
     } catch (err) {
       setPwError(err.name === 'TimeoutError' ? 'The server is taking too long to respond. Check your connection and try again.' : err.message)
@@ -40,7 +43,7 @@ export default function HostSettings() {
         <h2 className="host-section-title">Change Password</h2>
         <form onSubmit={handlePasswordChange} className="host-form">
           <div className="form-group"><label>Current Password</label><input type="password" value={pwForm.current_password} onChange={e=>setPwForm(p=>({...p,current_password:e.target.value}))} required /></div>
-          <div className="form-group"><label>New Password</label><input type="password" value={pwForm.new_password} onChange={e=>setPwForm(p=>({...p,new_password:e.target.value}))} required minLength={6} /></div>
+          <div className="form-group"><label>New Password</label><input type="password" value={pwForm.new_password} onChange={e=>setPwForm(p=>({...p,new_password:e.target.value}))} required minLength={8} /></div>
           <div className="form-group"><label>Confirm New Password</label><input type="password" value={pwForm.confirm_password} onChange={e=>setPwForm(p=>({...p,confirm_password:e.target.value}))} required /></div>
           {pwError && <p className="error-msg">{pwError}</p>}
           {pwSuccess && <p className="success-msg">{pwSuccess}</p>}
