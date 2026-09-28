@@ -417,7 +417,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     const keep = lots.filter(l => l.include)
     if (!keep.length) { setError('No lots selected to create.'); return }
     const bad = keep.findIndex(l => !l.title?.trim())
-    if (bad !== -1) { setError(`Lot ${bad + 1} needs a title before it can be created.`); return }
+    if (bad !== -1) { setError(`Group ${bad + 1} needs a title before it can be created.`); return }
 
     setError(''); setBusy('committing')
     const totalPhotos = keep.reduce((s, l) => s + l.photoIdxs.length, 0)
@@ -638,7 +638,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
                         checked={lot.include}
                         onChange={e => updateLot(i, { include: e.target.checked })}
                       />
-                      Lot {i + 1}
+                      Group {i + 1}
                     </label>
                     {lot.confidence && <span className={`blu-conf ${lot.confidence}`}>{lot.confidence} confidence</span>}
                     {lot.error && <span className="blu-lot-error">AI failed — retry below, or fill in by hand</span>}

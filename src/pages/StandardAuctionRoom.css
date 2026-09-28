@@ -481,6 +481,7 @@
 }
 
 .sar-modal-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.sar-modal-lot { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
 
 .sar-status-badge {
   font-family: var(--font-mono);

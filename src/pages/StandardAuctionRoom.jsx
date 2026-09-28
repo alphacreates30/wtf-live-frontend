@@ -154,6 +154,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
 
         <div className="sar-modal-details">
           <div className="sar-modal-badges">
+            {item.position != null && <span className="sar-status-badge sar-modal-lot">Lot {item.position + 1}</span>}
             <span className={`sar-status-badge sar-status-${item.status}`}>
               {item.status === 'open' ? 'Open' : item.status === 'sold' ? 'Sold' : 'Unsold'}
             </span>
