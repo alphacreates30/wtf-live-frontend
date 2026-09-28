@@ -2,6 +2,13 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { lotPriceLabel } from '../lotPrice'
+
+// Is the viewer this lot's leader (or, once sold, its winner)? Only a logged-in
+// viewer can be: logged out, username and leading_bidder can both be null, and
+// null === null showed "You're leading" on every open lot with no bids.
+function isViewerLeader(item, username, token) {
+  return Boolean(token && username && item.leading_bidder && item.leading_bidder === username)
+}
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import './StandardAuctionRoom.css'
 
@@ -81,7 +88,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
   }, [auctionId, item.id, item.image_url])
 
   const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
-  const isLeading = item.leading_bidder === username
+  const isLeading = isViewerLeader(item, username, token)
   const floor = parseFloat(item.current_bid || item.starting_bid || 0)
 
   const minIncrement = floor < 50 ? 1 : floor < 100 ? 2 : floor < 200 ? 5 : floor < 500 ? 10 : floor < 1000 ? 25 : 50
@@ -414,7 +421,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
         <div className="sar-grid">
           {sorted.map(item => {
             const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
-            const isLeading = item.leading_bidder === username
+            const isLeading = isViewerLeader(item, username, token)
             const floor = parseFloat(item.current_bid || item.starting_bid || 0)
             const timeLabel = !closed ? timeLeftLabel(item.ends_at, now) : null
             const urgentCountdown = timeLabel && /^\d+s$/.test(timeLabel)
@@ -504,7 +511,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     <p className="sar-card-leading-you">You're leading</p>
                   )}
                   {closed && item.status === 'sold' && item.leading_bidder && (
-                    item.leading_bidder === username ? (
+                    isLeading ? (
                       <p className="sar-card-winner sar-won-you">
                         <img src="/brand/state-won.svg" alt="" width="32" height="32" />
                         Won by you!
