@@ -1,5 +1,6 @@
+/* Video area. Tokens only. */
 .livestream {
-  background: #000;
+  background: var(--ground-media);
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
@@ -10,7 +11,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: #111;
+  background: var(--ground-media);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,7 +25,7 @@
 }
 
 .livestream-offline {
-  color: var(--text-muted);
+  color: var(--on-photo);
   font-size: 14px;
   text-align: center;
   padding: 20px;
@@ -35,12 +36,12 @@
   top: 12px;
   left: 12px;
   background: var(--red);
-  color: #fff;
+  color: var(--on-accent-tint);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.1em;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -50,7 +51,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-accent-tint);
   animation: pulse 1.2s ease-in-out infinite;
 }
 
@@ -77,7 +78,7 @@
 
 .btn-live {
   background: var(--red);
-  color: #fff;
+  color: var(--on-accent-tint);
   padding: 10px 24px;
   font-size: 14px;
   font-weight: 700;

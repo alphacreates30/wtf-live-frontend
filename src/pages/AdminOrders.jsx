@@ -3,13 +3,6 @@ import { api } from '../api'
 import PaymentControl from '../components/PaymentControl'
 import './AdminOrders.css'
 
-const STATUS_COLORS = {
-  pending: '#f59e0b',
-  label_created: '#3b82f6',
-  shipped: '#8b5cf6',
-  delivered: '#10b981',
-}
-
 const AUCTION_KEY = 'wtf_orders_auction'
 const ALL = '__all__'
 const SEARCH_DEBOUNCE_MS = 300
@@ -371,7 +364,7 @@ export default function AdminOrders({ auctionId } = {}) {
                       // Payment for a standard-auction lot is handled once, per invoice, in the
                       // Invoices section above - not repeated (and not chargeable) per lot.
                       <div className="ao-payment">
-                        <span className="ao-status" style={{ opacity: 0.6 }}>
+                        <span className="ao-status ao-status-note">
                           billed on an invoice - see Invoices
                         </span>
                       </div>
@@ -392,7 +385,7 @@ export default function AdminOrders({ auctionId } = {}) {
                         />
                       </div>
                     )}
-                    <span className="ao-status" style={{ background: STATUS_COLORS[order.status] + '22', color: STATUS_COLORS[order.status], border: '1px solid ' + STATUS_COLORS[order.status] }}>
+                    <span className={`ao-status ao-status-${order.status}`}>
                       {order.status.replace('_', ' ')}
                     </span>
                     <div className="ao-order-btns">

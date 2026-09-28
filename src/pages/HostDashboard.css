@@ -18,10 +18,14 @@ textarea { resize: vertical; }
 .host-auction-dates { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; flex-wrap: wrap; }
 .host-auction-stats { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; flex-wrap: wrap; }
 .host-go-btn { font-size: 13px; padding: 7px 14px; }
-.host-warn-badge { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b; }
+.host-warn-badge { background: var(--warning-wash); color: var(--warning); border: 1px solid var(--warning); }
+/* Auction mode. Outlines, so neither reads as the red LIVE status badge beside it. */
+.host-mode-badge { margin-left: 0.4rem; background: transparent; }
+.host-mode-standard { color: var(--text-muted); border: 1px solid var(--neutral); }
+.host-mode-live { color: var(--text); border: 1px solid var(--text); }
 
 .host-modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  position: fixed; inset: 0; background: var(--scrim);
   display: flex; align-items: center; justify-content: center;
   z-index: 1000; padding: 1rem; overflow-y: auto;
 }
@@ -33,8 +37,8 @@ textarea { resize: vertical; }
 /* ---- AI spend ---- */
 .host-ai-spend { margin-bottom: 28px; }
 .host-ai-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.host-ai-refresh { background: none; border: 1px solid var(--border, #2a2d35); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
-.host-ai-refresh:hover { color: var(--text); }
+.host-ai-refresh { background: none; border: 1px solid var(--border); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: var(--radius); cursor: pointer; }
+.host-ai-refresh:hover { color: var(--accent); border-color: var(--accent); }
 .host-ai-figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
 .host-ai-figures div { display: flex; flex-direction: column; gap: 2px; }
 .host-ai-figures span { font-size: 12px; color: var(--text-muted); }

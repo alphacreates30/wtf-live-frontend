@@ -1,0 +1,25 @@
+/* Buyer management. Tokens only - no hardcoded colours.
+ * Every status carries its word; colour is the second signal. */
+.ab-status          { border: 1px solid var(--border); color: var(--text-muted); background: transparent; }
+.ab-status-pending  { background: var(--warning-wash); color: var(--warning); border-color: var(--warning); }
+.ab-status-approved { background: var(--success-wash); color: var(--success); border-color: var(--success); }
+.ab-status-rejected { background: var(--error-wash);   color: var(--error);   border-color: var(--error); }
+.ab-status-blocked  { background: var(--surface2);     color: var(--text);    border-color: var(--text); }
+.ab-payfail         { background: var(--error-wash);   color: var(--error);   border: 1px solid var(--error); }
+
+/* Filter tabs: compact admin controls, deliberately below --tap. */
+.ab-filter {
+  padding: 4px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: transparent; color: var(--text-muted); font-size: 0.85rem;
+}
+.ab-filter:hover:not(.ab-filter-on) { border-color: var(--accent); color: var(--accent); }
+.ab-filter-on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--on-accent); }
+
+.ab-ok  { color: var(--success); }
+.ab-bad { color: var(--error); font-weight: 600; }
+
+.ab-block {
+  padding: 4px 12px; font-size: 0.8rem; border-radius: var(--radius);
+  background: transparent; color: var(--error); border: 1px solid var(--error);
+}
+.ab-block:hover:not(:disabled) { background: var(--error-wash); }

@@ -153,7 +153,7 @@ export default function LiveStream({ auctionId, token, livekitUrl, isHost }) {
   if (error && !isConnected) {
     return (
       <div className="livestream-loading" style={{flexDirection:'column',gap:'1rem'}}>
-        <p style={{color:'#f87171',textAlign:'center'}}>{error}</p>
+        <p className="error-msg" style={{textAlign:'center'}}>{error}</p>
         <button className="btn-live" onClick={() => window.location.reload()}>Reload</button>
       </div>
     )

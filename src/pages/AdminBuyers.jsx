@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import './AdminBuyers.css'
 
-const STATUS_COLORS = {
-  pending:  { bg: '#2a2000', color: '#f5c842', label: 'Pending' },
-  approved: { bg: '#002a10', color: '#42f580', label: 'Approved' },
-  rejected: { bg: '#2a0000', color: '#f54242', label: 'Rejected' },
-  blocked:  { bg: '#1a001a', color: '#cc44ff', label: 'Blocked' },
-}
+const STATUS_LABELS = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected', blocked: 'Blocked' }
 
 function StatusBadge({ status, paymentStatus }) {
-  const s = STATUS_COLORS[status] || { bg: '#222', color: '#aaa', label: status }
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-      <span style={{ background: s.bg, color: s.color, padding: '2px 8px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600 }}>
-        {s.label}
+      <span className={`badge ab-status ab-status-${status}`}>
+        {STATUS_LABELS[status] || status}
       </span>
       {paymentStatus === 'failed' && (
-        <span style={{ background: '#2a1000', color: '#ff8c00', padding: '2px 8px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 600 }}>
+        <span className="badge ab-payfail">
           ⚠ Payment failed
         </span>
       )}
@@ -124,12 +119,7 @@ export default function AdminBuyers() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            style={{
-              padding: '4px 12px', borderRadius: '999px', border: '1px solid var(--border, #333)',
-              background: filter === f ? 'var(--accent, #7c3aed)' : 'transparent',
-              color: filter === f ? '#fff' : 'var(--text-muted)',
-              cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500,
-            }}
+            className={`ab-filter${filter === f ? ' ab-filter-on' : ''}`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
             {f !== 'all' && counts[f] ? ` (${counts[f]})` : ''}
@@ -165,9 +155,9 @@ export default function AdminBuyers() {
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                     Submitted {new Date(buyer.created_at).toLocaleDateString()}
                     {buyer.stripe_payment_method_id && ' · Card on file ✓'}
-                    {buyer.card_verified_at && <span style={{ color: '#42f580' }}> · Card verified ✓</span>}
+                    {buyer.card_verified_at && <span className="ab-ok"> · Card verified ✓</span>}
                     {buyer.card_verify_error && (
-                      <span style={{ color: '#f54242' }}> · Card verify failed: {buyer.card_verify_error}</span>
+                      <span className="ab-bad"> · Card verify failed: {buyer.card_verify_error}</span>
                     )}
                   </div>
                 </div>
@@ -196,7 +186,7 @@ export default function AdminBuyers() {
                   )}
                   {buyer.status === 'approved' && (
                     <button
-                      style={{ padding: '4px 12px', fontSize: '0.8rem', background: '#1a001a', color: '#cc44ff', border: '1px solid #cc44ff', borderRadius: '4px', cursor: 'pointer' }}
+                      className="ab-block"
                       disabled={actionLoading === buyer.user_id + 'blocked'}
                       onClick={() => { if (confirm(`Block ${buyer.full_name}?`)) setStatus(buyer.user_id, 'blocked') }}
                     >

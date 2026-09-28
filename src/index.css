@@ -39,6 +39,7 @@
                                 now DARK, so the text is LIGHT. #1E1612 here would be 2.6:1 on
                                 the button hover. Same value as --on-accent, different role. */
   --accent-wash:  rgba(192, 57, 43, 0.06);   /* brief: 0.10. Red text on its own wash (LIVE badge) was 4.26:1 */
+  --accent-veil:  rgba(192, 57, 43, 0.28);   /* selection overlay on a PHOTO (bulk upload grid). Never behind text */
 
   /* ---- Semantic status: every fill darkens for a light ground ---- */
   --success:      #2E6B4C;   /* 5.7:1 (the dark-ground #4CAF7D is 2.5:1 on cream) */
@@ -56,6 +57,7 @@
   /* Chips and controls that sit on top of PHOTOGRAPHS. Fixed, like --on-accent:
      a photo doesn't change with the colourway, so neither can what's on it. */
   --scrim-photo: rgba(20, 13, 9, 0.78);
+  --ground-media: #140D09;   /* solid ground behind video (LiveStream letterbox). Text on it uses --on-photo */
   --on-photo:    #F7F3EC;
 
   /* ---- Type ---- */

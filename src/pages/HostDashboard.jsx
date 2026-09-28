@@ -154,7 +154,7 @@ export default function HostDashboard() {
               <div className="host-auction-top">
                 <span className={`badge badge-${a.status}`}>{a.status}</span>
                 <span className="host-auction-category">{a.category}</span>
-                <span className="badge" style={{ background: a.mode === 'standard' ? '#555' : '#7a3', marginLeft: '0.4rem' }}>{a.mode === 'standard' ? 'Standard' : 'Live'}
+                <span className={`badge host-mode-badge ${a.mode === 'standard' ? 'host-mode-standard' : 'host-mode-live'}`}>{a.mode === 'standard' ? 'Standard' : 'Live'}
                 </span>
                 {stats && stats.count === 0 && <span className="badge host-warn-badge">⚠ No lots yet</span>}
               </div>

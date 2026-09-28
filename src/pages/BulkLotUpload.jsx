@@ -36,7 +36,7 @@ function fileToDataUrl(file, maxEdge, quality = 0.85) {
       const canvas = document.createElement('canvas')
       canvas.width = width; canvas.height = height
       const ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#fff'
+      ctx.fillStyle = '#fff'   // not UI: white matte under transparent photos when converting to JPEG
       ctx.fillRect(0, 0, width, height)
       ctx.drawImage(img, 0, 0, width, height)
       resolve(canvas.toDataURL('image/jpeg', quality))
