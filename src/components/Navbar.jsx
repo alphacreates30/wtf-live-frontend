@@ -54,7 +54,7 @@ export default function Navbar() {
           risk note in BRAND.md. Mark-only is acceptable below 480px, where
           .navbar-wordmark is hidden. */}
       <Link to="/" className="navbar-logo" onClick={closeMenu}>
-        <img src="/logo-mark.svg" alt="" className="navbar-mark" width="28" height="28" />
+        <img src="/favicon.svg" alt="" className="navbar-mark" width="28" height="28" />
         <span className="navbar-wordmark">What The Find</span>
       </Link>
       <div className="navbar-right">
