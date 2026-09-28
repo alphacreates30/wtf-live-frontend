@@ -46,9 +46,12 @@ export default function HostDashboard() {
       const entries = await Promise.all(mine.map(async a => {
         try {
           const items = await api.getAuctionItems(a.id)
-          const sold = items.filter(it => it.leading_bidder)
+          // Sold means status 'sold'. A lot with a leading bidder that closed
+          // below its reserve is 'unsold': it is neither counted nor grossed.
+          const sold = items.filter(it => it.status === 'sold')
           const gross = sold.reduce((s, it) => s + Number(it.current_bid || 0), 0)
-          return [a.id, { count: items.length, soldCount: sold.length, gross }]
+          const bidCount = items.filter(it => it.leading_bidder).length
+          return [a.id, { count: items.length, soldCount: sold.length, bidCount, gross }]
         } catch {
           return [a.id, null]
         }
@@ -116,7 +119,7 @@ export default function HostDashboard() {
   // produced orders, so what a buyer owes can't be lost this way.
   async function deleteAuction(a) {
     const lots = lotStats[a.id]?.count || 0
-    const bidLots = lotStats[a.id]?.soldCount || 0  // lots with a leading bidder
+    const bidLots = lotStats[a.id]?.bidCount || 0  // lots with a leading bidder
     const lines = [`Delete "${a.title}"${lots ? ` and its ${lots} lot${lots !== 1 ? 's' : ''}` : ''} permanently?`]
     if (a.status !== 'ended' && bidLots) lines.push(`${bidLots} lot${bidLots !== 1 ? 's have' : ' has'} bids. Those bids will be deleted too.`)
     lines.push("This can't be undone.")
