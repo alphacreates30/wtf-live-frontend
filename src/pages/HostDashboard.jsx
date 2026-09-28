@@ -167,7 +167,10 @@ export default function HostDashboard() {
               )}
               <div className="host-auction-stats">
                 {stats && stats.count > 0 && <span>{stats.count} lot{stats.count !== 1 ? 's' : ''}</span>}
-                {hasLots && <span>Current bid: <strong>${a.current_bid.toLocaleString()}</strong></span>}
+                {/* Only a running live-mode auction has one auction-level price. A standard
+                    auction's current_bid is stale (every lot has its own), and an ended
+                    auction shows its sold count and gross below. */}
+                {hasLots && a.mode !== 'standard' && a.status !== 'ended' && <span>Current bid: <strong>${a.current_bid.toLocaleString()}</strong></span>}
                 {a.leading_bidder && <span>Leader: <strong>@{a.leading_bidder}</strong></span>}
                 {a.status === 'ended' && hasLots && (
                   <span>{stats.soldCount} of {stats.count} sold · Gross: <strong>{fmtMoney(stats.gross)}</strong></span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import { lotPriceLabel } from '../lotPrice'
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import './StandardAuctionRoom.css'
 
@@ -164,10 +165,12 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
           {item.description && <p className="sar-modal-desc">{item.description}</p>}
 
           <div className="sar-modal-stats">
-            <div className="sar-modal-stat">
-              <span className="sar-modal-stat-label">Current Bid</span>
-              <span className="sar-modal-stat-val">${floor.toFixed(2)}</span>
-            </div>
+            {lotPriceLabel(item) && (
+              <div className="sar-modal-stat">
+                <span className="sar-modal-stat-label">{lotPriceLabel(item)}</span>
+                <span className="sar-modal-stat-val">${floor.toFixed(2)}</span>
+              </div>
+            )}
             <div className="sar-modal-stat">
               <span className="sar-modal-stat-label">Bids</span>
               <span className="sar-modal-stat-val">{item.bid_count || 0}</span>
@@ -182,14 +185,14 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
 
           <p className="sar-premium-note">+{premiumPct}% buyer's premium applies to the winning bid.</p>
 
-          {item.leading_bidder && (
+          {item.leading_bidder && !(closed && item.status === 'unsold') && (
             <p className={`sar-modal-leading ${isLeading ? 'you' : ''}`}>
               {closed && item.status === 'sold' ? 'Won by' : 'Leading'}:{' '}
               <strong>{isLeading ? 'You' : `@${item.leading_bidder}`}</strong>
             </p>
           )}
-          {!item.leading_bidder && closed && item.status === 'unsold' && (
-            <p className="sar-modal-leading">No bids — item unsold</p>
+          {closed && item.status === 'unsold' && (
+            <p className="sar-modal-leading">{item.bid_count > 0 ? 'Reserve not met — item unsold' : 'No bids — item unsold'}</p>
           )}
 
           {!closed && !isAdmin && (
@@ -464,11 +467,13 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                   )}
                   <h3 className="sar-card-title">{item.title}</h3>
                   <div className="sar-card-stats">
-                    <div className="sar-card-stat">
-                      <span className="sar-card-stat-label">Current Bid</span>
-                      <span className="sar-card-stat-val">${floor.toFixed(2)}</span>
-                      <span className="sar-prem">+{premiumPct}% prem.</span>
-                    </div>
+                    {lotPriceLabel(item) && (
+                      <div className="sar-card-stat">
+                        <span className="sar-card-stat-label">{lotPriceLabel(item)}</span>
+                        <span className="sar-card-stat-val">${floor.toFixed(2)}</span>
+                        {item.status !== 'unsold' && <span className="sar-prem">+{premiumPct}% prem.</span>}
+                      </div>
+                    )}
                     <div className="sar-card-stat">
                       <span className="sar-card-stat-label">Bids</span>
                       <span className="sar-card-stat-val">{item.bid_count || 0}</span>
@@ -492,7 +497,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     </p>
                   )}
                   {closed && item.status === 'unsold' && (
-                    <p className="sar-card-unsold">No bids placed</p>
+                    <p className="sar-card-unsold">{item.bid_count > 0 ? 'Reserve not met' : 'No bids placed'}</p>
                   )}
                   <p className="sar-card-hint">Click for details →</p>
                 </div>

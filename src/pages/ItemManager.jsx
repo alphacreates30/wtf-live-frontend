@@ -1,5 +1,6 @@
    import { useState, useEffect, useRef } from 'react'
 import { api } from '../api'
+import { lotPriceLabel } from '../lotPrice'
 import './ItemManager.css'
 import BulkLotUpload from './BulkLotUpload'
 
@@ -333,7 +334,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
               <div className="im-meta">
                 Start: ${parseFloat(item.starting_bid).toFixed(2)}
                 {!isStandard && item.pre_bid_count > 0 && <span className="im-prebids"> · {item.pre_bid_count} pre-bid{item.pre_bid_count > 1 ? 's' : ''} · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</span>}
-                {isStandard && <span> · Current bid: ${parseFloat(item.current_bid || item.starting_bid).toFixed(2)} · {item.bid_count || 0} bid{item.bid_count === 1 ? '' : 's'}</span>}
+                {isStandard && <span>{lotPriceLabel(item) && <> · {lotPriceLabel(item)}: ${parseFloat(item.current_bid || item.starting_bid).toFixed(2)}</>} · {item.bid_count || 0} bid{item.bid_count === 1 ? '' : 's'}</span>}
               </div>
               {isStandard && (
                 <div className="im-meta">
