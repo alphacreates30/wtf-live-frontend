@@ -154,6 +154,10 @@ export default function Listings() {
       {error && <p className="error-msg">{error}</p>}
       {!loading && !error && auctions.length === 0 && (
         <div className="listings-empty">
+          {/* The Glint, asleep: nothing live to look at. Only where "no auction is live" is the message. */}
+          {(filter === 'all' || filter === 'live') && (
+            <img src="/brand/state-asleep.svg" alt="" width="56" height="56" className="listings-empty-mark" />
+          )}
           <p>No {filter === 'all' ? '' : filter} auctions yet.</p>
           {isAdmin && (
             <Link to="/host"><button className="btn-primary" style={{ marginTop: 12 }}>Start one</button></Link>

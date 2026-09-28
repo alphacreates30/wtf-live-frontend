@@ -125,3 +125,4 @@
 
 .listings-status { color: var(--text-muted); font-size: 0.95rem; }
 .listings-empty { text-align: center; padding: 60px 0; color: var(--text-muted); }
+.listings-empty-mark { display: block; margin: 0 auto 14px; }

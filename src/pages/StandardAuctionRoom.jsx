@@ -178,14 +178,23 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
             {!closed && timeLabel && (
               <div className="sar-modal-stat">
                 <span className="sar-modal-stat-label">Closes In</span>
-                <span className="sar-modal-stat-val sar-countdown">{timeLabel}</span>
+                <span className="sar-countdown-row">
+                  {/^\d+s$/.test(timeLabel) && <img src="/brand/state-closing.svg" alt="" width="20" height="20" className="sar-state-closing" />}
+                  <span className="sar-modal-stat-val sar-countdown">{timeLabel}</span>
+                </span>
               </div>
             )}
           </div>
 
           <p className="sar-premium-note">+{premiumPct}% buyer's premium applies to the winning bid.</p>
 
-          {item.leading_bidder && !(closed && item.status === 'unsold') && (
+          {closed && item.status === 'sold' && isLeading && (
+            <p className="sar-modal-leading you sar-won-you sar-won-you-lg">
+              <img src="/brand/state-won.svg" alt="" width="48" height="48" />
+              Won by you!
+            </p>
+          )}
+          {item.leading_bidder && !(closed && item.status === 'unsold') && !(closed && item.status === 'sold' && isLeading) && (
             <p className={`sar-modal-leading ${isLeading ? 'you' : ''}`}>
               {closed && item.status === 'sold' ? 'Won by' : 'Leading'}:{' '}
               <strong>{isLeading ? 'You' : `@${item.leading_bidder}`}</strong>
@@ -481,8 +490,11 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     {timeLabel && (
                       <div className="sar-card-stat">
                         <span className="sar-card-stat-label">Closes</span>
-                        <span className={`sar-card-stat-val sar-countdown${urgentCountdown ? ' sar-urgent' : ''}`}>
-                          {timeLabel}
+                        <span className="sar-countdown-row">
+                          {urgentCountdown && <img src="/brand/state-closing.svg" alt="" width="18" height="18" className="sar-state-closing" />}
+                          <span className={`sar-card-stat-val sar-countdown${urgentCountdown ? ' sar-urgent' : ''}`}>
+                            {timeLabel}
+                          </span>
                         </span>
                       </div>
                     )}
@@ -492,9 +504,14 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     <p className="sar-card-leading-you">You're leading</p>
                   )}
                   {closed && item.status === 'sold' && item.leading_bidder && (
-                    <p className="sar-card-winner">
-                      Won by {item.leading_bidder === username ? 'you!' : `@${item.leading_bidder}`}
-                    </p>
+                    item.leading_bidder === username ? (
+                      <p className="sar-card-winner sar-won-you">
+                        <img src="/brand/state-won.svg" alt="" width="32" height="32" />
+                        Won by you!
+                      </p>
+                    ) : (
+                      <p className="sar-card-winner">Won by @{item.leading_bidder}</p>
+                    )
                   )}
                   {closed && item.status === 'unsold' && (
                     <p className="sar-card-unsold">{item.bid_count > 0 ? 'Reserve not met' : 'No bids placed'}</p>
