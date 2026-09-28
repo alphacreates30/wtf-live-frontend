@@ -36,9 +36,13 @@
   white-space: nowrap;
 }
 
-/* Below 480px the mark carries it alone — see BRAND.md on minimum sizes. */
+/* The name always travels with the mark: the eyes are new and nobody knows
+ * them yet (BRAND.md). On phones the wordmark scales down instead of hiding.
+ * Measured 2026-09-28: at 19px it leaves 76px spare beside Log in at 320px
+ * (56px at 300px), so no width needs it hidden. */
 @media (max-width: 480px) {
-  .navbar-wordmark { display: none; }
+  .navbar-logo { gap: 8px; }
+  .navbar-wordmark { font-size: 19px; }
 }
 
 .navbar-right {

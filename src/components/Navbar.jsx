@@ -50,9 +50,9 @@ export default function Navbar() {
 
   return (
     <nav className={`navbar${isAdmin ? ' navbar--admin' : ''}`}>
-      {/* The wordmark travels with the mark wherever there's room — see the
-          risk note in BRAND.md. Mark-only is acceptable below 480px, where
-          .navbar-wordmark is hidden. */}
+      {/* The wordmark travels with the mark, phones included (BRAND.md): the
+          eyes are new, so the name has to show. Below 480px it scales down
+          (Navbar.css) rather than hiding; it fits down to 300px. */}
       <Link to="/" className="navbar-logo" onClick={closeMenu}>
         <img src="/favicon.svg" alt="" className="navbar-mark" width="28" height="28" />
         <span className="navbar-wordmark">What The Find</span>
