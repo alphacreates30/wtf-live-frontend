@@ -140,7 +140,7 @@ export default function ItemQueue({ auctionId, isHost, token, gateBid }) {
               <div className="iq-details">
                 ${parseFloat(item.starting_bid).toFixed(2)} start
                 {item.pre_bid_count > 0 && (
-                  <span className="iq-prebid-info"> · {item.pre_bid_count} pre-bid{item.pre_bid_count !== 1 ? 's' : ''} · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</span>
+                  <span className="iq-prebid-info"> · {item.pre_bid_count} pre-bid{item.pre_bid_count !== 1 ? 's' : ''}{isHost && item.top_pre_bid != null && <> · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</>}</span>
                 )}
               </div>
               {myPrebids[item.id] && (
@@ -166,7 +166,7 @@ export default function ItemQueue({ auctionId, isHost, token, gateBid }) {
             <h3>Pre-Bid on "{prebidModal.title}"</h3>
             <p className="iq-modal-sub">Set your maximum bid. We'll bid up to this amount automatically when this item goes live.</p>
             {prebidModal.pre_bid_count > 0 && (
-              <p className="iq-modal-info">{prebidModal.pre_bid_count} pre-bid{prebidModal.pre_bid_count !== 1 ? 's' : ''} · Current top: ${parseFloat(prebidModal.top_pre_bid).toFixed(2)}</p>
+              <p className="iq-modal-info">{prebidModal.pre_bid_count} pre-bid{prebidModal.pre_bid_count !== 1 ? 's' : ''}</p>
             )}
             {error && <p className="error-msg">{error}</p>}
             <form onSubmit={handlePrebid}>
