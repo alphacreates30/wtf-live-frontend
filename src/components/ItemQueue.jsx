@@ -131,9 +131,9 @@ export default function ItemQueue({ auctionId, isHost, token, gateBid }) {
       )}
 
       <div className="iq-list">
-        {items.map((item, idx) => (
+        {items.map(item => (
           <div key={item.id} className={"iq-item iq-" + item.status}>
-            <div className="iq-num">{idx + 1}</div>
+            <div className="iq-num">{item.position + 1}</div>
             {item.image_url && <img src={item.image_url} alt={item.title} className="iq-thumb" />}
             <div className="iq-info">
               <div className="iq-title">{item.title}</div>

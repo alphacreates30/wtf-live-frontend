@@ -77,9 +77,9 @@ export default function AuctionSchedule({ auctionId, auctionStatus, auctionMode 
       {error && <p className="error-msg" style={{ margin: '0.5rem 0' }}>{error}</p>}
 
       <div className="im-list">
-        {items.map((item, idx) => (
+        {items.map(item => (
           <div key={item.id} className={`im-item im-${item.status}`}>
-            <div className="im-pos">{idx + 1}</div>
+            <div className="im-pos">{item.position + 1}</div>
             <div className="im-info">
               <div className="im-name">{item.title}</div>
               <div className="im-meta">

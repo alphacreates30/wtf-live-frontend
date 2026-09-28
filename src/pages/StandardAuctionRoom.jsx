@@ -399,7 +399,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
         <p className="sar-empty">No items listed yet.</p>
       ) : (
         <div className="sar-grid">
-          {sorted.map((item, idx) => {
+          {sorted.map(item => {
             const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
             const isLeading = item.leading_bidder === username
             const floor = parseFloat(item.current_bid || item.starting_bid || 0)
@@ -422,7 +422,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                         <span>Photography to follow</span>
                       </div>
                   }
-                  <span className="sar-card-lot">Lot {idx + 1}</span>
+                  <span className="sar-card-lot">Lot {item.position + 1}</span>
                   <span className={`sar-card-status-badge sar-status-${item.status}`}>
                     {item.status === 'open' ? 'Open' : item.status === 'sold' ? 'Sold' : 'Unsold'}
                   </span>

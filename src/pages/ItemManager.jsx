@@ -321,7 +321,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
         {items.length === 0 && <p className="im-empty">No items yet. Add items below or upload a CSV.</p>}
         {items.map((item, idx) => (
           <div key={item.id} className={`im-item im-${item.status}`}>
-            <div className="im-pos">{idx + 1}</div>
+            <div className="im-pos">{item.position + 1}</div>
             {item.image_url ? (
               <img src={item.image_url} alt={item.title} className="im-img" onError={e => { e.target.style.display='none' }} />
             ) : (
