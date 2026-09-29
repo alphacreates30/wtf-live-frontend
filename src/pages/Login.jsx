@@ -66,6 +66,11 @@ export default function Login() {
               onChange={e => setUsername(e.target.value)}
               required
             />
+            {mode === 'register' && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>
+                3–30 characters: lowercase letters, numbers and _
+              </p>
+            )}
           </div>
           {mode === 'register' && (
             <div className="form-group">
