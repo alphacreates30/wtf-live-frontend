@@ -1,39 +1,72 @@
+/* Dark footer (BRAND.md dark ground: cream text, red text tinted to #E86B57).
+ * The dark-ground values are set on .site-footer in components/home/home.css. */
 .site-footer {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 32px 20px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  border-top: 1px solid var(--border-soft);
+  background: #1E1612;
+  color: #C9BDB2;
+  margin-top: 8px;
 }
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 16px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px 20px;
+}
+.footer-brand-col { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 
 .footer-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  min-height: var(--tap);
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   line-height: 1;
-  color: var(--text-muted);
+  color: #F7F3EC;
 }
-.footer-brand:hover { color: var(--text); }
-.footer-mark { width: 22px; height: 22px; display: block; flex-shrink: 0; }
+.footer-brand:hover { color: #F7F3EC; }
+.footer-mark { width: 24px; height: 24px; display: block; flex-shrink: 0; }
+.footer-tagline { font-family: var(--font-body); font-style: italic; font-size: 0.95rem; }
 
+.footer-signup-link {
+  min-height: var(--tap);
+  padding: 0;
+  background: transparent;
+  color: #E86B57;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  text-align: left;
+}
+.footer-signup-link:hover { color: #F7F3EC; }
+.footer-signup { width: 100%; max-width: 440px; }
+
+.footer-col { display: flex; flex-direction: column; }
+.footer-col-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #F7F3EC;
+  margin-bottom: 2px;
+}
 .footer-link {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  letter-spacing: 0.1em;
+  color: #C9BDB2;
 }
-.footer-link:hover { color: var(--text); }
+.footer-link:hover { color: #F7F3EC; }
+.site-footer a:focus-visible, .site-footer button:focus-visible { outline-color: #E86B57; }
+
+@media (min-width: 900px) {
+  .footer-inner { grid-template-columns: 1.6fr 1fr 1fr; padding: 40px 32px 48px; }
+  .footer-brand-col { grid-column: auto; }
+}

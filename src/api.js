@@ -94,6 +94,10 @@ export const api = {
     request(`/auctions${status ? `?status=${status}` : ''}`),
 
   getAuction: (id) => request(`/auction/${id}`),
+  // Homepage (API.md): public, the same calls a future app makes.
+  getHome: () => request('/home'),
+  searchLots: (q) => request(`/search?q=${encodeURIComponent(q)}`),
+  signup: (email, website = '') => request('/signup', { method: 'POST', body: JSON.stringify({ email, website }) }),
   updateAuction: (id, data) =>
     request(`/auction/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 

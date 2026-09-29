@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import { lotPriceLabel } from '../lotPrice'
 
@@ -246,6 +246,9 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
 
 export default function StandardAuctionRoom({ initialAuction = null }) {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const deepLinkLot = searchParams.get('lot')
+  const deepLinkDone = useRef(false)
   const navigate = useNavigate()
   const token = localStorage.getItem('wtf_token')
   const username = localStorage.getItem('wtf_username')
@@ -292,6 +295,15 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [])
+
+  // /auction/:id?lot=<lot id> (homepage and search cards) opens that lot once
+  // the lots have loaded. Once only: closing it must not reopen it on the next poll.
+  useEffect(() => {
+    if (deepLinkDone.current || !deepLinkLot || !items.length) return
+    deepLinkDone.current = true
+    const lot = items.find(i => i.id === deepLinkLot)
+    if (lot) setSelectedItem(lot)
+  }, [items, deepLinkLot])
 
   useEffect(() => {
     setSelectedItem(prev => {

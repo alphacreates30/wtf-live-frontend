@@ -1,24 +1,29 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import EmailGate from './components/EmailGate'
 import Listings from './pages/Listings'
-import AuctionRoomGate from './pages/AuctionRoomGate'
-import HostDashboard from './pages/HostDashboard'
-import AuctionWorkspace from './pages/AuctionWorkspace'
-import HostSettings from './pages/HostSettings'
-import ProfileSetup from './pages/ProfileSetup'
-import AdminBuyers from './pages/AdminBuyers'
-import AdminOrders from './pages/AdminOrders'
+import Home from './pages/Home'
+import SearchResults from './pages/SearchResults'
 import { api } from './api'
-import MyBids from './pages/MyBids'
-import MyOrders from './pages/MyOrders'
-import Terms from './pages/Terms'
-import AccountDeleted from './pages/AccountDeleted'
 import Footer from './components/Footer'
+
+// Split out of the main bundle: the homepage shouldn't download the auction
+// rooms (LiveKit), card setup (Stripe.js loads on import) or the admin pages.
+const AuctionRoomGate = lazy(() => import('./pages/AuctionRoomGate'))
+const HostDashboard = lazy(() => import('./pages/HostDashboard'))
+const AuctionWorkspace = lazy(() => import('./pages/AuctionWorkspace'))
+const HostSettings = lazy(() => import('./pages/HostSettings'))
+const ProfileSetup = lazy(() => import('./pages/ProfileSetup'))
+const AdminBuyers = lazy(() => import('./pages/AdminBuyers'))
+const AdminOrders = lazy(() => import('./pages/AdminOrders'))
+const MyBids = lazy(() => import('./pages/MyBids'))
+const MyOrders = lazy(() => import('./pages/MyOrders'))
+const Terms = lazy(() => import('./pages/Terms'))
+const AccountDeleted = lazy(() => import('./pages/AccountDeleted'))
 import './pages/Buyer.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -105,10 +110,22 @@ export default function App() {
     <BrowserRouter>
       <Navbar />
       <EmailGate>
+      <Suspense fallback={<div className="page"><p className="buyer-note">Loading…</p></div>}>
       <Routes>
         <Route path="/" element={
           <ProfileGate>
+            <Home />
+          </ProfileGate>
+        } />
+        {/* The auctions list (the old homepage): the header's "Auctions" link. */}
+        <Route path="/auctions" element={
+          <ProfileGate>
             <Listings />
+          </ProfileGate>
+        } />
+        <Route path="/search" element={
+          <ProfileGate>
+            <SearchResults />
           </ProfileGate>
         } />
         <Route path="/login" element={<Login />} />
@@ -175,6 +192,7 @@ export default function App() {
                 <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       </EmailGate>
       <Footer />
     </BrowserRouter>
