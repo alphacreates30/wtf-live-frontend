@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import { resizeImageToBlob } from '../imageResize'
 import AiSpendCard from './AiSpendCard'
 import './HostDashboard.css'
 
@@ -247,15 +248,17 @@ export default function HostDashboard() {
                     const file = e.target.files?.[0]
                     if (!file) return
                     setImgUploading(true)
+                    setError('')
+                    // Same path as lot photos: resized on a canvas (no EXIF/GPS) and sent as the raw image the
+                    // server expects. This used to post multipart form data, which the server refused (400) and
+                    // the page ignored, so a cover photo never actually uploaded.
                     try {
-                      const fd = new FormData()
-                      fd.append('file', file)
-                      const base = import.meta.env.VITE_API_URL
-                      const tok = localStorage.getItem('wtf_token')
-                      const r = await fetch(base + '/upload-image', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: fd, signal: AbortSignal.timeout(30000) })
-                      const data = await r.json()
-                      if (data.url) setForm(prev => ({ ...prev, image_url: data.url }))
-                    } catch (e) { console.error('Upload failed', e) }
+                      const blob = await resizeImageToBlob(file, 1600)
+                      const data = await api.uploadImage(blob, blob.type)
+                      setForm(prev => ({ ...prev, image_url: data.url }))
+                    } catch (err) {
+                      setError(`Cover image: ${err.message || 'upload failed'}`)
+                    }
                     setImgUploading(false)
                   }}
                 />

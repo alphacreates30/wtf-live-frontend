@@ -1,6 +1,7 @@
    import { useState, useEffect, useRef } from 'react'
 import { api } from '../api'
 import { lotPriceLabel } from '../lotPrice'
+import { resizeImageToBlob } from '../imageResize'
 import './ItemManager.css'
 import BulkLotUpload from './BulkLotUpload'
 
@@ -32,31 +33,6 @@ function downloadTemplate() {
 function dateTimeLocal(offsetMinutes = 60) {
   const d = new Date(Date.now() + offsetMinutes * 60000)
   return d.toISOString().slice(0, 16)
-}
-
-function resizeImageToBlob(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const objUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objUrl)
-      const MAX = 800
-      let { width, height } = img
-      if (width > MAX || height > MAX) {
-        if (width > height) { height = Math.round(height * MAX / width); width = MAX }
-        else { width = Math.round(width * MAX / height); height = MAX }
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = width; canvas.height = height
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('Image conversion failed'))
-        resolve(blob)
-      }, file.type || 'image/jpeg', 0.85)
-    }
-    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Failed to load image')) }
-    img.src = objUrl
-  })
 }
 
 export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
@@ -191,7 +167,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
     setError('')
     try {
       const blob = await resizeImageToBlob(file)
-      const result = await api.uploadImage(blob, file.type || 'image/jpeg')
+      const result = await api.uploadImage(blob, blob.type)
       await api.addItemImage(auctionId, itemId, result.url, null)
       await loadItems()
     } catch (err) { setError(err.message) }
@@ -213,7 +189,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
         setUploadingImage(true)
         const primaryFile = imageFilesRef.current[0]
         const blob = await resizeImageToBlob(primaryFile)
-        const result = await api.uploadImage(blob, primaryFile.type || 'image/jpeg')
+        const result = await api.uploadImage(blob, blob.type)
         image_url = result.url
         setUploadingImage(false)
       }
@@ -225,7 +201,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
           try {
             const f = extraFiles[xi]
             const b = await resizeImageToBlob(f)
-            const ru = await api.uploadImage(b, f.type || 'image/jpeg')
+            const ru = await api.uploadImage(b, b.type)
             await api.addItemImage(auctionId, newItem.id, ru.url, xi + 1)
           } catch (_) {}
         }
