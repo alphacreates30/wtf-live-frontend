@@ -64,6 +64,7 @@ export default function Navbar() {
               <span className="navbar-user">@{username}</span>
               {username !== 'whatthefind' && <Link to="/my-bids" className="navbar-link">My Bids</Link>}
               {username !== 'whatthefind' && <Link to="/my-orders" className="navbar-link">My Orders</Link>}
+              {username !== 'whatthefind' && <Link to="/profile-setup" className="navbar-link">Account</Link>}
               {username === 'whatthefind' && (
                 <>
                   <Link to="/host" className={`navbar-link ${location.pathname === '/host' || location.pathname.startsWith('/host/auction') ? 'active' : ''}`}>
@@ -113,6 +114,7 @@ export default function Navbar() {
               <Link to="/my-bids" className="navbar-mobile-link" onClick={closeMenu} ref={firstLinkRef}>My Bids</Link>
             )}
             {username !== 'whatthefind' && <Link to="/my-orders" className="navbar-mobile-link" onClick={closeMenu}>My Orders</Link>}
+            {username !== 'whatthefind' && <Link to="/profile-setup" className="navbar-mobile-link" onClick={closeMenu}>Account</Link>}
             {username === 'whatthefind' && (
               <>
                 <Link to="/host" className={`navbar-mobile-link ${location.pathname === '/host' || location.pathname.startsWith('/host/auction') ? 'active' : ''}`} onClick={closeMenu} ref={firstLinkRef}>

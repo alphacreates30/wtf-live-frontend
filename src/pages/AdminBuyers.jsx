@@ -135,7 +135,15 @@ export default function AdminBuyers() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {filtered.map(buyer => (
+          {filtered.map(buyer => buyer.deleted ? (
+            // Deleted by the buyer (A5): no personal data left, and nothing to act on - it can't be undone.
+            <div key={buyer.user_id} className="card" style={{ padding: '1rem 1.25rem', opacity: 0.7 }}>
+              <div style={{ fontWeight: 600 }}>Deleted account</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                Joined {new Date(buyer.created_at).toLocaleDateString()} · personal details removed at the buyer's request
+              </div>
+            </div>
+          ) : (
             <div key={buyer.user_id} className="card" style={{ padding: '1rem 1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                 <div>

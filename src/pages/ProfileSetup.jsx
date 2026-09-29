@@ -4,6 +4,7 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { api } from '../api'
 import './Buyer.css'
+import DeleteAccount from '../components/DeleteAccount'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
@@ -223,9 +224,12 @@ function ProfileForm() {
 }
 
 export default function ProfileSetup() {
+  // Any signed-in buyer can delete their account from here, whatever their profile status; not the host.
+  const isHost = localStorage.getItem('wtf_username') === 'whatthefind'
   return (
     <Elements stripe={stripePromise}>
       <ProfileForm />
+      {!isHost && <div className="page profile-page" style={{ paddingTop: 0 }}><DeleteAccount /></div>}
     </Elements>
   )
 }

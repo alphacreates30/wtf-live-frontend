@@ -69,6 +69,7 @@ export function apiError(data, res, fallback) {
   const err = new Error(detail && !base.includes(detail) ? `${base} — ${detail}` : base)
   err.status = res.status
   err.detail = detail
+  if (Array.isArray(data?.reasons)) err.reasons = data.reasons   // e.g. why an account can't be deleted yet
   return err
 }
 
@@ -194,6 +195,9 @@ export const api = {
     request(`/admin/ai-usage?tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')}`),
   bulkCreateItems: (auctionId, lots) =>
     request(`/auction/${auctionId}/items/bulk`, { method: 'POST', body: JSON.stringify({ lots }) }),
+
+  deleteAccount: (password, confirm) =>
+    request('/account/delete', { method: 'POST', body: JSON.stringify({ password, confirm }) }),
 
   uploadImage: async (blob, mimeType) => {
     const token = localStorage.getItem('wtf_token')

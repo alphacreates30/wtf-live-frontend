@@ -17,6 +17,7 @@ import { api } from './api'
 import MyBids from './pages/MyBids'
 import MyOrders from './pages/MyOrders'
 import Terms from './pages/Terms'
+import AccountDeleted from './pages/AccountDeleted'
 import Footer from './components/Footer'
 import './pages/Buyer.css'
 
@@ -114,6 +115,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/account-deleted" element={<AccountDeleted />} />
         <Route path="/auction/:id" element={
           <ProfileGate>
             <AuctionRoomGate />
