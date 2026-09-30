@@ -427,7 +427,7 @@ export default function AuctionRoom() {
                   placeholder={`Min $${minBid}`}
                 />
                 {bidError && <p className="error-msg">{bidError}</p>}
-                <button type="submit" className="btn-primary ar-bid-btn" disabled={bidLoading || (itemTimeLeft !== null && itemTimeLeft <= 0)}>
+                <button type="submit" className="btn-bid ar-bid-btn" disabled={bidLoading || (itemTimeLeft !== null && itemTimeLeft <= 0)}>
                   {bidLoading ? 'Placing...' : (itemTimeLeft !== null && itemTimeLeft <= 0) ? 'Time\'s up!' : token ? `Bid ${bidAmount || '?'}` : 'Log in to bid'}
                 </button>
               </form>

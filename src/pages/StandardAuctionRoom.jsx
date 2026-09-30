@@ -226,7 +226,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
                   onChange={e => { setBidInput(e.target.value); setBidError('') }}
                 />
                 <button
-                  className="btn-primary"
+                  className="btn-bid"
                   disabled={bidLoading || !token}
                   onClick={token ? placeBid : () => navigate('/login')}
                 >
@@ -385,7 +385,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
         <div className="card" style={{ textAlign: 'center', maxWidth: 420, padding: '2.5rem' }}>
           <h2>Auction Not Found</h2>
-          <p style={{ color: 'var(--text-muted)' }}>{accessError}</p>
+          <p style={{ color: 'var(--muted)' }}>{accessError}</p>
           <button className="btn-ghost" onClick={() => navigate('/')}>Browse Auctions</button>
         </div>
       </div>
@@ -393,7 +393,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
   }
 
   if (!auction) {
-    return <div className="page"><p style={{ color: 'var(--text-muted)', padding: '2rem' }}>Loading…</p></div>
+    return <div className="page"><p style={{ color: 'var(--muted)', padding: '2rem' }}>Loading…</p></div>
   }
 
   const openItems = items
@@ -476,7 +476,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                         onClick={e => e.stopPropagation()}
                       />
                       <button
-                        className="btn-primary sar-quick-bid-btn"
+                        className="btn-bid sar-quick-bid-btn"
                         disabled={bidLoading[item.id] || !token}
                         onClick={e => token ? placeCardBid(e, item) : navigate('/login')}
                       >
@@ -512,7 +512,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                         <span className="sar-card-stat-label">Closes</span>
                         <span className="sar-countdown-row">
                           {urgentCountdown && <img src="/brand/state-closing.svg" alt="" width="18" height="18" className="sar-state-closing" />}
-                          <span className={`sar-card-stat-val sar-countdown${urgentCountdown ? ' sar-urgent' : ''}`}>
+                          <span className={`sar-card-stat-val sar-countdown${msLeft < 3600e3 ? ' sar-final-hour' : ''}${urgentCountdown ? ' sar-urgent' : ''}`}>
                             {timeLabel}
                           </span>
                         </span>

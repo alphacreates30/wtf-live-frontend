@@ -183,7 +183,7 @@ export default function ItemQueue({ auctionId, isHost, token, gateBid }) {
               </div>
               <div className="iq-modal-btns">
                 <button type="button" className="btn-ghost" onClick={() => setPrebidModal(null)}>Cancel</button>
-                <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Saving…' : 'Confirm Pre-Bid'}</button>
+                <button type="submit" className="btn-bid" disabled={loading}>{loading ? 'Saving…' : 'Confirm Pre-Bid'}</button>
               </div>
             </form>
           </div>

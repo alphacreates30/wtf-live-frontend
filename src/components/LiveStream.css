@@ -1,9 +1,9 @@
 /* Video area. Tokens only. */
 .livestream {
-  background: var(--ground-media);
-  border-radius: var(--radius);
+  background: var(--media-ground);
+  border-radius: var(--radius-control);
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   margin-bottom: 16px;
 }
 
@@ -11,7 +11,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: var(--ground-media);
+  background: var(--media-ground);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,13 +35,12 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  background: var(--red);
-  color: var(--on-accent-tint);
+  background: var(--danger);
+  color: var(--on-dark);
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.1em;
   padding: 4px 10px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -51,7 +50,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--on-accent-tint);
+  background: var(--on-dark);
   animation: pulse 1.2s ease-in-out infinite;
 }
 
@@ -62,7 +61,7 @@
 
 .livestream-loading {
   padding: 20px;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 13px;
   text-align: center;
 }
@@ -77,12 +76,12 @@
 }
 
 .btn-live {
-  background: var(--red);
-  color: var(--on-accent-tint);
+  background: var(--danger);
+  color: var(--on-dark);
   padding: 10px 24px;
   font-size: 14px;
   font-weight: 700;
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   border: none;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -90,13 +89,13 @@
 .btn-live:hover { opacity: 0.85; }
 
 .btn-stop {
-  background: var(--surface2);
-  color: var(--text);
+  background: var(--surface-2);
+  color: var(--ink);
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 600;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--line);
   cursor: pointer;
 }
-.btn-stop:hover { background: var(--border); }
+.btn-stop:hover { background: var(--line); }

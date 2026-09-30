@@ -125,10 +125,7 @@ export default function Listings() {
       <div className="listings-header">
         <div>
           <p className="wtf-label listings-eyebrow">Auctions</p>
-          {/* The signature gesture - once per page, and this is the page. */}
-          <h1 className="listings-title">
-            Every collection has a <span className="wtf-script-accent">story</span> worth telling
-          </h1>
+          <h1 className="listings-title">Every collection has a story worth telling</h1>
           <p className="listings-sub">Every lot photographed, catalogued and described.</p>
         </div>
         {isAdmin && (

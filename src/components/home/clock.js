@@ -22,6 +22,7 @@ export function useServerClock(serverNowIso) {
 }
 
 export const HOUR = 3600e3
+export const DAY = 24 * HOUR
 
 export function splitDuration(ms) {
   const total = Math.max(0, Math.floor(ms / 1000))
@@ -48,9 +49,28 @@ export function money(n) {
   return v.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 })
 }
 
-export function fmtDateTime(iso) {
+// Dates and times. `timeZone` is optional: the homepage's closing schedule uses
+// the site's zone (from /home) so its day groups and times agree.
+const fmt = (iso, opts, timeZone) => (iso ? new Date(iso).toLocaleString('en-US', { ...opts, ...(timeZone ? { timeZone } : {}) }) : '')
+export const fmtTime = (iso, tz) => fmt(iso, { hour: 'numeric', minute: '2-digit' }, tz)                        // 8:00 PM
+export const fmtDayTime = (iso, tz) => fmt(iso, { weekday: 'short', hour: 'numeric', minute: '2-digit' }, tz)   // Tue 8:00 PM
+export const fmtDateTime = (iso, tz) => fmt(iso, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }, tz) // Sat, Oct 10, 7:00 PM
+
+// "Ends Tue 8:00 PM" within the coming week, "Ends Sat, Oct 10, 7:00 PM" beyond it.
+export function endsLabel(iso, now) {
   if (!iso) return ''
-  return new Date(iso).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  return (Date.parse(iso) - now < 6 * DAY ? 'Ends ' + fmtDayTime(iso) : 'Ends ' + fmtDateTime(iso))
+}
+
+// The time-left chip on an auction card. Red ("act now") only in the final 24 hours.
+export function closingChip(iso, now) {
+  if (!iso) return null
+  const ms = Date.parse(iso) - now
+  if (ms <= 0) return { text: 'Closing now', urgent: true }
+  const sameDay = new Date(iso).toDateString() === new Date(now).toDateString()
+  if (ms < DAY) return { text: sameDay ? 'Closing today' : 'Closing tomorrow', urgent: true }
+  const days = Math.ceil(ms / DAY)
+  return { text: `${days} days left`, urgent: false }
 }
 
 // Where a lot links to: its auction, with the lot opened.

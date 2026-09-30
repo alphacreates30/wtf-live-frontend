@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignupForm from './home/SignupForm'
+import { CONTACT_MAILTO, CONSIGN_MAILTO } from './home/links'
 import './Footer.css'
 
-const CONTACT_MAILTO = 'mailto:whatthefind.co@gmail.com'
 
 // Only pages that exist are linked. The TODO slots below get their links when
 // those pages are built - never a link to nothing.
@@ -38,8 +38,9 @@ export default function Footer() {
           <h2 id="footer-help" className="footer-col-title">Help</h2>
           <Link to="/terms" className="footer-link">Terms of sale</Link>
           <a href={CONTACT_MAILTO} className="footer-link">Contact</a>
+          <a href={CONSIGN_MAILTO} className="footer-link">Consign a collection</a>
+          {/* TODO(Consign): link the consign page instead of email when it's built. */}
           {/* TODO(FAQ), TODO(Privacy: A4 privacy policy), TODO(About): link each when its page exists. */}
-          {/* TODO(Consign): a "Sell" column with the consign page, when built. */}
         </nav>
       </div>
     </footer>

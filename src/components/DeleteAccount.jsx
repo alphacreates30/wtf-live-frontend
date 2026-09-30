@@ -29,7 +29,7 @@ export default function DeleteAccount() {
   }
 
   return (
-    <section className="card" style={{ marginTop: '2rem', borderColor: 'var(--danger, #b3261e)' }} aria-labelledby="delete-account-title">
+    <section className="card" style={{ marginTop: '2rem', borderColor: 'var(--danger)' }} aria-labelledby="delete-account-title">
       <h3 id="delete-account-title" style={{ marginTop: 0 }}>Delete my account</h3>
       <p style={{ fontSize: '0.9rem' }}>
         This removes your name, email, phone, address and saved card, signs you out everywhere, and replaces your

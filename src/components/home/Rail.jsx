@@ -31,13 +31,13 @@ export default function Rail({ id, title, note, viewAllHref, count, children }) 
 
   return (
     <section className="rail" aria-labelledby={`${id}-h`}>
-      <div className="rail-head">
-        <h2 id={`${id}-h`} className="rail-title">
+      <div className="section-head">
+        <h2 id={`${id}-h`} className="section-title">
           {title}
-          {note && <span className="rail-note">{note}</span>}
+          {note && <span className="section-note">{note}</span>}
         </h2>
         <div className="rail-tools">
-          {viewAllHref && <Link to={viewAllHref} className="rail-all">View all →</Link>}
+          {viewAllHref && <Link to={viewAllHref} className="section-link">View all →</Link>}
           {edge.scrolls && <>
             <button type="button" className="rail-arrow" aria-label={`Scroll ${title} back`} onClick={() => step(-1)} disabled={edge.start}>‹</button>
             <button type="button" className="rail-arrow" aria-label={`Scroll ${title} forward`} onClick={() => step(1)} disabled={edge.end}>›</button>

@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import './Navbar.css'
 import { disconnectSocket } from '../socket'
+import { CONSIGN_MAILTO } from './home/links'
 
-// Buyers and visitors: mark + wordmark · search · Auctions · How it works ·
+// Buyers and visitors: mark + wordmark · search · Auctions · How it works · Consign ·
 // Log in / account menu. Phones: mark + wordmark · search icon (opens a
 // full-width bar) · menu. The admin's nav is its own (host links), unchanged.
 export default function Navbar() {
@@ -124,6 +125,7 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/auctions" className={`navbar-link ${location.pathname === '/auctions' ? 'active' : ''}`}>Auctions</Link>
           <Link to="/#how-it-works" className="navbar-link">How it works</Link>
+          <a href={CONSIGN_MAILTO} className="navbar-link navbar-link-consign">Consign</a>
           {token ? (
             <div className="navbar-account" ref={accountRef}>
               <button
@@ -187,6 +189,7 @@ export default function Navbar() {
           <div className="navbar-mobile-menu" id="navbar-mobile-menu">
             <Link to="/auctions" className="navbar-mobile-link" onClick={closeMenu} ref={firstLinkRef}>Auctions</Link>
             <Link to="/#how-it-works" className="navbar-mobile-link" onClick={closeMenu}>How it works</Link>
+            <a href={CONSIGN_MAILTO} className="navbar-mobile-link" onClick={closeMenu}>Consign a collection</a>
             {token ? (
               <>
                 <div className="navbar-mobile-user">@{username}</div>

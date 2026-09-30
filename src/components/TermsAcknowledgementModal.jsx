@@ -108,7 +108,7 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
 
         <div className="terms-modal-actions">
           <button type="button" className="btn-ghost" onClick={onCancel} disabled={submitting}>Cancel</button>
-          <button type="button" className="btn-primary" onClick={handleAccept} disabled={!canAccept}>
+          <button type="button" className="btn-bid" onClick={handleAccept} disabled={!canAccept}>
             {submitting ? 'Placing bid…' : 'Agree and place bid'}
           </button>
         </div>

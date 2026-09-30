@@ -1,6 +1,5 @@
-/* Terms of Sale - long-form reading. Lora on a dark ground wants air: 1rem
- * body, 1.7 line-height, and a measure of ~66 characters (a full 780px line
- * of Lora runs past 90, which is too long to track). Headings are Bebas. */
+/* Terms of Sale - long-form reading. Inter at 16px, line-height 1.7, and a measure
+ * of ~66 characters so long lines stay easy to track. Headings are Fraunces. */
 
 .terms-page { max-width: 760px; }
 
@@ -8,7 +7,7 @@
   background: var(--warning-wash);
   border: 1px solid var(--warning);
   border-left-width: 3px;
-  color: var(--text);
+  color: var(--ink);
   padding: 0.85rem 1rem;
   font-size: 0.95rem;
   line-height: 1.55;
@@ -16,7 +15,7 @@
 }
 
 .terms-content {
-  color: var(--text);
+  color: var(--ink);
   line-height: 1.7;
   font-size: 1rem;
   max-width: 66ch;
@@ -32,7 +31,7 @@
   font-size: clamp(1.7rem, 4.5vw, 2.1rem);
   margin: 2.5rem 0 0.75rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
 }
 
 .terms-content h3 {
@@ -48,16 +47,16 @@
 
 .terms-content li { margin: 0.4rem 0; }
 
-.terms-content strong { color: var(--text); }
+.terms-content strong { color: var(--ink); }
 
-.terms-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.terms-content a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
 .terms-content blockquote {
-  border-left: 3px solid var(--accent);
-  background: var(--surface2);
+  border-left: 3px solid var(--ink);
+  background: var(--surface-2);
   padding: 0.85rem 1.1rem;
   margin: 1.25rem 0;
-  color: var(--text-muted);
+  color: var(--muted);
 }
 .terms-content blockquote p { margin: 0.3rem 0; }
 
@@ -70,29 +69,29 @@
   margin: 1rem 0;
 }
 .terms-content td, .terms-content th {
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   padding: 0.55rem 0.8rem;
   text-align: left;
 }
 .terms-content th {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 0.7rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 .terms-content hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   margin: 2rem 0;
 }
 
 .terms-content code {
-  background: var(--surface2);
+  background: var(--surface-2);
   padding: 0.1rem 0.35rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 0.85em;
 }
 

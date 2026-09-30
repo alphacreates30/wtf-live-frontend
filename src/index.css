@@ -1,90 +1,38 @@
-/* What The Find — base layer.
+/* What The Find: base layer, design direction B "Gallery" (wtf-handoff
+ * DESIGN_B_GALLERY_BRIEF.md, BRAND.md).
  *
- * Colourway: WARM BLACK (the brand's dark ground). See wtf-handoff/brand/BRAND.md.
- * Fonts are loaded in index.html, not @imported here — an @import blocks render.
+ * Every colour, font, size, radius and space comes from src/design/tokens.css,
+ * which is GENERATED from src/design/tokens.json (npm run tokens) - the same
+ * JSON the future app imports. No raw colour values in components.
  *
- * Variable names are unchanged from the pre-brand theme on purpose: 200+
- * references across the app already use them. Values change, names don't.
- * New names are added alongside.
+ * Rules that keep the look coherent:
+ *   - Red (--accent) means "act now": bid buttons, time running out, outbid,
+ *     the live dot. Never prices, dates, headings, panels or badges.
+ *     --brand-red is only the Glint logo tile.
+ *   - Fraunces for page/section headings and auction titles, sentence case.
+ *     Inter for everything else. Bebas Neue for the wordmark only.
+ *   - Hairline borders, no drop shadows, no gradients. Radius 10 on cards,
+ *     8 on buttons and inputs.
  */
+@import './design/tokens.css';
+/* Self-hosted, font-display: swap (@fontsource). Inter is ONE variable file for
+ * every weight (400-600); unicode-range means a browser fetches only the latin
+ * file. Fraunces: one weight (600) for every heading, to keep the page light
+ * (Lighthouse mobile must stay >= 91). Bebas: the wordmark only. */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource/fraunces/latin-600.css';
+@import '@fontsource/bebas-neue/latin-400.css';
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  color-scheme: light;   /* native scrollbars, checkboxes and pickers follow the ground */
-
-  /* ---- Surfaces: cream (moved from warm black, Sep 19 - see COLOURWAY_SWAP_BRIEF) ---- */
-  --bg:         #F7F3EC;
-  --surface:    #FDF9F3;
-  --surface2:   #F0EADF;   /* brief: #EFE8DD. Lightened ~0.5% so --accent text clears 4.5 on it (4.47 -> 4.54) */
-  --border:     rgba(30, 22, 18, 0.14);    /* flips: ink-alpha on cream, was cream-alpha on black */
-  --border-soft: rgba(30, 22, 18, 0.08);
-
-  /* ---- Ink ---- */
-  --text:       #1E1612;
-  --text-muted: #4A3F37;   /* 9.2:1 on --bg */
-  --ink-faint:  #72675D;   /* labels/metadata. Moves DARKER on cream; the dark-ground value
-                              (#92857A) must NOT be carried across - it is 3:1 here. The brief's
-                              #766A60 is 4.75 on --bg but 4.31 on --surface2 (placeholders and
-                              image-less cards sit there), so it is 3% darker: 4.98 / 5.25 / 4.5. */
-
-  /* ---- Accent: true brand red, no tint needed on cream ---- */
-  --accent:       #C0392B;   /* text, links, borders, fills */
-  --accent-hover: #A32F23;   /* DARKER on hover: a lighter red loses contrast on cream */
-  --accent-solid: #C0392B;   /* fills carrying --on-accent text */
-  --on-accent:    #F7F3EC;   /* text on --accent-solid fills. Cream on #C0392B is 4.9:1 on
-                                either ground, so this is fixed - never --text, which inverts. */
-  --on-accent-tint: #F7F3EC; /* text on a tinted or STATUS fill (--accent-hover, --success,
-                                --error, --warning). INVERTED from the dark ground: fills are
-                                now DARK, so the text is LIGHT. #1E1612 here would be 2.6:1 on
-                                the button hover. Same value as --on-accent, different role. */
-  --accent-wash:  rgba(192, 57, 43, 0.06);   /* brief: 0.10. Red text on its own wash (LIVE badge) was 4.26:1 */
-  --accent-veil:  rgba(192, 57, 43, 0.28);   /* selection overlay on a PHOTO (bulk upload grid). Never behind text */
-
-  /* ---- Semantic status: every fill darkens for a light ground ---- */
-  --success:      #2E6B4C;   /* 5.7:1 (the dark-ground #4CAF7D is 2.5:1 on cream) */
-  --success-wash: rgba(46, 107, 76, 0.12);
-  --warning:      #8A5D12;   /* 5.2:1 (the dark-ground #E0A43C is 2.2:1 on cream) */
-  --warning-wash: rgba(138, 93, 18, 0.10);   /* brief: 0.12. Warning text on its wash was 4.43:1 */
-  --error:        #8A2B20;   /* 7.8:1. Now a visibly deeper oxblood than --accent; errors
-                                still get the alert block, so hue is a second signal. */
-  --error-wash:   rgba(138, 43, 32, 0.10);
-  --neutral:      #72675D;   /* = --ink-faint */
-
-  /* ---- Overlays ---- */
-  --scrim:      rgba(20, 13, 9, 0.62);        /* modal / menu backdrops */
-  --shadow-pop: 0 12px 24px rgba(20, 13, 9, 0.45);
-  /* Chips and controls that sit on top of PHOTOGRAPHS. Fixed, like --on-accent:
-     a photo doesn't change with the colourway, so neither can what's on it. */
-  --scrim-photo: rgba(20, 13, 9, 0.78);
-  --ground-media: #140D09;   /* solid ground behind video (LiveStream letterbox). Text on it uses --on-photo */
-  --on-photo:    #F7F3EC;
-
-  /* ---- Type ---- */
-  --font:       'Lora', Georgia, 'Times New Roman', serif;
-  --font-display: 'Bebas Neue', Impact, 'Haettenschweiler', sans-serif;
-  --font-body:    'Lora', Georgia, 'Times New Roman', serif;
-  --font-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-script:  'Caveat', cursive;
-
-  /* ---- Geometry ---- */
-  --radius: 0;      /* the brand is square. Only the app icon is rounded. */
-  --tap:    44px;   /* minimum touch target */
-
-  /* ---- Back-compat: still referenced in page CSS ---- */
-  --green: var(--success);
-  --red:   var(--error);
-  --sand:  #D4C8B8;   /* dividers and placeholder fills - NEVER text (1.5:1 on cream) */
-  --bg-card: var(--surface);   /* referenced 11x by ItemManager/AdminOrders/ItemQueue but never defined,
-                                  so they fell back to a hardcoded #1a1a1a - near-black rows on cream */
-}
+:root { color-scheme: light; }
 
 body {
   background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.6;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-16);
+  line-height: var(--lh-body);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -98,105 +46,80 @@ html, body { overflow-x: clip; }
 img, video, canvas, svg { max-width: 100%; height: auto; }
 
 a { color: inherit; text-decoration: none; }
-a:hover { color: var(--accent); }
+a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---- Type roles ----
- * Display: Bebas, caps, tight. Headlines, prices, lot titles.
- * Body:    Lora. Descriptions, catalogue copy, anything read in sentences.
- * Mono:    DM Mono, uppercase, letterspaced. Labels, metadata, status.
- *
- * The rule that keeps it coherent: never set body copy in Bebas, and never set
- * a label in Lora.
- *
- * Bebas has no lowercase and runs far narrower than Inter, so sizes here are
- * larger than the old theme's. Per-page headings may still need re-tuning.
- */
+/* ---- Type ---- */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 0.95;
-  font-weight: 400;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-heading);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
-h1 { font-size: 2.6rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.2rem; }
+h1 { font-size: var(--fs-40); }
+h2 { font-size: var(--fs-32); }
+h3 { font-size: var(--fs-24); }
+h4 { font-size: var(--fs-20); }
+h5, h6 { font-size: var(--fs-16); font-family: var(--font-ui); letter-spacing: 0; }
 
-.wtf-display {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 0.95;
-}
-
+/* Small label: "Lot 12", "Ends in", table headers. Inter, small caps-style. */
 .wtf-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.7rem;
-  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
-/* Money. Premium is ALWAYS shown beside hammer — never a bare total.
- * That isn't styling, it's what the terms of sale promise. */
-.wtf-price {
-  font-family: var(--font-display);
-  color: var(--accent);
-  letter-spacing: 0.01em;
-}
-
-/* The signature gesture: condensed caps interrupted by a red script word.
- * Once per page at most. It stops working the moment it repeats. */
-.wtf-script-accent {
-  font-family: var(--font-script);
-  color: var(--accent);
-  text-transform: none;
-  font-size: 1.18em;
-}
+/* Money and countdowns: Inter, tabular figures. Premium is ALWAYS shown beside
+ * hammer - never a bare total (that is what the terms of sale promise). */
+.wtf-price, .tabular { font-variant-numeric: tabular-nums; }
+.wtf-price { font-family: var(--font-ui); font-weight: var(--fw-semibold); color: var(--ink); }
 
 /* ---- Controls ---- */
 button {
   cursor: pointer;
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: var(--font-ui);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-control);
   transition: background 0.15s, color 0.15s, opacity 0.15s, border-color 0.15s;
 }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* Tap target applies to real buttons only, NOT to every <button>. A global
- * min-height here would inflate small icon buttons that set their own size —
+ * min-height here would inflate small icon buttons that set their own size -
  * e.g. .im-remove-img in ItemManager is a 20px circle. */
-.btn-primary, .btn-ghost, .btn-danger, .btn-green { min-height: var(--tap); }
+.btn-primary, .btn-bid, .btn-ghost, .btn-danger, .btn-green { min-height: var(--tap); }
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 input, textarea, select {
-  font-family: var(--font-body);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  padding: 11px 14px;
-  font-size: 15px;      /* 16px-ish keeps iOS from zooming on focus */
+  font-family: var(--font-ui);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  padding: 10px 14px;
+  font-size: var(--fs-16);   /* 16px keeps iOS from zooming on focus */
   outline: none;
   width: 100%;
   min-height: var(--tap);
   transition: border-color 0.15s;
 }
-input::placeholder, textarea::placeholder { color: var(--text-muted); }
-input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+input:focus, textarea:focus, select:focus { border-color: var(--ink); }
 
-/* Checkboxes and radios are not text fields — the width/min-height rules above
+/* Checkboxes and radios are not text fields - the width/min-height rules above
  * would blow them up. Three of these live in TermsAcknowledgementModal, which
  * a buyer must complete before bidding, so this exclusion is load-bearing. */
 input[type="checkbox"], input[type="radio"] {
@@ -204,108 +127,121 @@ input[type="checkbox"], input[type="radio"] {
   min-height: 0;
   min-width: 0;
   padding: 0;
-  accent-color: var(--accent);
+  accent-color: var(--ink);
 }
 
-.page { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+.page { max-width: 1200px; margin: 0 auto; padding: var(--space-8) var(--space-5); }
 
+/* Primary: dark ink. Most buttons. */
 .btn-primary {
-  background: var(--accent-solid);
-  color: var(--on-accent);
-  padding: 11px 22px;
-  font-size: 1rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  background: var(--ink);
+  color: var(--on-dark);
+  padding: 10px 20px;
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); color: var(--on-accent-tint); }
+.btn-primary:hover:not(:disabled) { background: var(--ink-hover); color: var(--on-dark); text-decoration: none; }
+
+/* Bid: the one red button. Only for placing a bid. */
+.btn-bid {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  background: var(--accent);
+  color: var(--on-dark);
+  padding: 10px 20px;
+}
+.btn-bid:hover:not(:disabled) { background: var(--accent-hover); color: var(--on-dark); text-decoration: none; }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--text);
-  padding: 11px 22px;
-  font-size: 1rem;
-  border: 1px solid var(--border);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 10px 20px;
+  border: 1px solid var(--line-strong);
 }
-.btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); text-decoration: none; }
 
 .btn-danger {
-  background: var(--error);
-  color: var(--on-accent-tint);
-  padding: 11px 22px;
-  font-size: 1rem;
+  background: var(--danger);
+  color: var(--on-dark);
+  padding: 10px 20px;
 }
-.btn-danger:hover:not(:disabled) { opacity: 0.85; }
+.btn-danger:hover:not(:disabled) { opacity: 0.88; }
 
 .btn-green {
   background: var(--success);
-  color: var(--on-accent-tint);
-  padding: 11px 22px;
-  font-size: 1rem;
+  color: var(--on-dark);
+  padding: 10px 20px;
 }
-.btn-green:hover:not(:disabled) { opacity: 0.85; }
+.btn-green:hover:not(:disabled) { opacity: 0.88; }
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
 }
 
-/* ---- Badges. Square, per the brand. ---- */
+/* ---- Badges ---- */
 .badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
 }
-.badge-live     { background: var(--accent-wash);  color: var(--accent);  border: 1px solid var(--accent); }
+/* Live: the dot is the red ("act now"); the word stays ink. */
+.badge-live::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .badge-upcoming,
-.badge-scheduled { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
-.badge-ended    { background: transparent;         color: var(--ink-faint); border: 1px solid var(--border); }
-.badge-draft    { background: var(--warning-wash); color: var(--warning); border: 1px solid var(--warning); }
+.badge-scheduled,
+.badge-ended { color: var(--muted); }
+.badge-draft { background: var(--warning-wash); color: var(--warning); border-color: var(--warning-wash); }
 
 /* ---- Messages ----
- * --error and --accent share a hue, so errors are never signalled by colour
- * alone: they get a block, a left rule and a word. Also works for colourblind
- * buyers, which bare red text does not.
- */
+ * Errors are never signalled by colour alone: they get a block, a left rule
+ * and a word. */
 .error-msg {
-  color: var(--error);
-  background: var(--error-wash);
-  border-left: 3px solid var(--error);
+  color: var(--danger);
+  background: var(--danger-wash);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-control);
   padding: 9px 12px;
-  font-size: 14px;
+  font-size: var(--fs-14);
   margin-top: 10px;
 }
 .success-msg {
   color: var(--success);
   background: var(--success-wash);
   border-left: 3px solid var(--success);
+  border-radius: var(--radius-control);
   padding: 9px 12px;
-  font-size: 14px;
+  font-size: var(--fs-14);
   margin-top: 10px;
 }
 
-/* Respect a user's motion setting — StandardAuctionRoom pulses the urgent
- * countdown, which is exactly the kind of thing this setting exists for. */
+/* Respect a user's motion setting. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 @media (max-width: 768px) {
-  .page { padding: 22px 16px; }
-  h1 { font-size: 2.1rem; }
-  h2 { font-size: 1.7rem; }
-  h3 { font-size: 1.3rem; }
+  .page { padding: var(--space-6) var(--space-4); }
+  h1 { font-size: var(--fs-32); }
+  h2 { font-size: var(--fs-24); }
+  h3 { font-size: var(--fs-20); }
 }
 
-@media (max-width: 480px) {
-  .page { padding: 18px 14px; }
-  h1 { font-size: 1.85rem; }
+/* For screen readers only. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }

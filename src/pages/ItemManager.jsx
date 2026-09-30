@@ -412,7 +412,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
             )}          </div>
           <input placeholder="Description (optional)" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
           <button type="submit" className="btn-primary" disabled={adding || uploadingImage}>{uploadingImage ? 'Uploading photo...' : adding ? 'Adding...' : 'Add Item'}</button>
-          <p style={{fontSize:'0.78rem',color:'var(--text-muted)',marginTop:'0.25rem'}}>After adding, use the 🖼 button on each item to attach extra images shown in the detail modal.</p>
+          <p style={{fontSize:'0.78rem',color:'var(--muted)',marginTop:'0.25rem'}}>After adding, use the 🖼 button on each item to attach extra images shown in the detail modal.</p>
         </form>
       )}
     </div>

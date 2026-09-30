@@ -1,0 +1,63 @@
+/* GENERATED from tokens.json by scripts/tokens.mjs - do not edit by hand. */
+:root {
+  /* colour */
+  --bg: #FBFAF7;
+  --surface: #FFFFFF;
+  --surface-2: #F3F1ED;
+  --ink: #1A1A1A;
+  --ink-hover: #3A3633;
+  --muted: #6E6A64;
+  --line: #E8E4DD;
+  --line-strong: #CFC9BF;
+  --accent: #9E2B20;
+  --accent-hover: #7F2219;
+  --accent-wash: #F8EEEC;
+  --on-dark: #FFFFFF;
+  --panel: #2A2320;
+  --on-panel: #F5F1EA;
+  --on-panel-muted: #C9C1B6;
+  --brand-red: #C0392B;
+  --success: #2E6B4C;
+  --success-wash: #EDF3EF;
+  --warning: #855A12;
+  --warning-wash: #F8F2E7;
+  --danger: #B42318;
+  --danger-wash: #FBEDEB;
+  --scrim: rgba(20, 17, 15, 0.55);
+  --scrim-photo: rgba(20, 17, 15, 0.72);
+  --on-photo: #FFFFFF;
+  --photo-veil: rgba(26, 26, 26, 0.35);
+  --media-ground: #14110F;
+  /* type */
+  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-wordmark: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-32: 32px;
+  --fs-40: 40px;
+  --lh-body: 1.5;
+  --lh-heading: 1.15;
+  /* shape and space */
+  --radius-card: 10px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --tap: 44px;
+  --header-h: 64px;
+}

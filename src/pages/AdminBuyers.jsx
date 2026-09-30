@@ -50,8 +50,8 @@ function TempPasswordButton({ buyer }) {
   if (shown) {
     return (
       <span style={{ fontSize: '0.8rem', display: 'inline-flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        Temporary password: <code style={{ fontSize: '0.95rem', padding: '2px 6px', border: '1px solid var(--border)', borderRadius: '4px', userSelect: 'all' }}>{shown}</code>
-        <span style={{ color: 'var(--text-muted)' }}>Give it to the buyer now; it won't be shown again.</span>
+        Temporary password: <code style={{ fontSize: '0.95rem', padding: '2px 6px', border: '1px solid var(--line)', borderRadius: '4px', userSelect: 'all' }}>{shown}</code>
+        <span style={{ color: 'var(--muted)' }}>Give it to the buyer now; it won't be shown again.</span>
         <button className="btn-ghost" style={{ padding: '2px 8px', fontSize: '0.75rem' }} onClick={() => setShown(null)}>Done</button>
       </span>
     )
@@ -106,7 +106,7 @@ export default function AdminBuyers() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Buyer Management</h1>
-          <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0', fontSize: '0.85rem' }}>
+          <p style={{ color: 'var(--muted)', margin: '0.25rem 0 0', fontSize: '0.85rem' }}>
             {buyers.length} total · {counts.pending || 0} pending · {counts.approved || 0} approved
           </p>
         </div>
@@ -128,9 +128,9 @@ export default function AdminBuyers() {
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+        <p style={{ color: 'var(--muted)' }}>Loading…</p>
       ) : filtered.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
           No buyers in this category.
         </div>
       ) : (
@@ -139,7 +139,7 @@ export default function AdminBuyers() {
             // Deleted by the buyer (A5): no personal data left, and nothing to act on - it can't be undone.
             <div key={buyer.user_id} className="card" style={{ padding: '1rem 1.25rem', opacity: 0.7 }}>
               <div style={{ fontWeight: 600 }}>Deleted account</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
                 Joined {new Date(buyer.created_at).toLocaleDateString()} · personal details removed at the buyer's request
               </div>
             </div>
@@ -148,19 +148,19 @@ export default function AdminBuyers() {
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontWeight: 600, marginBottom: '0.2rem' }}>{buyer.full_name}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
                     {buyer.email && <span>{buyer.email} · </span>}
                     {buyer.phone} · {buyer.city}, {buyer.state} {buyer.zip}
                   </div>
                   <div style={{ marginTop: '0.4rem' }}>
                     <StatusBadge status={buyer.status} paymentStatus={buyer.payment_status} />
                     {buyer.reviewed_by && (
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--muted)', marginLeft: '0.5rem' }}>
                         by @{buyer.reviewed_by}
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
                     Submitted {new Date(buyer.created_at).toLocaleDateString()}
                     {buyer.stripe_payment_method_id && ' · Card on file ✓'}
                     {buyer.card_verified_at && <span className="ab-ok"> · Card verified ✓</span>}

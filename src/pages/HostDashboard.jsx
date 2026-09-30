@@ -262,7 +262,7 @@ export default function HostDashboard() {
                     setImgUploading(false)
                   }}
                 />
-                {imgUploading && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>Uploading…</p>}
+                {imgUploading && <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.25rem 0 0' }}>Uploading…</p>}
               </div>
               <div className="form-row">
                 <div className="form-group">

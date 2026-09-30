@@ -1,47 +1,49 @@
 /* Live-mode lot queue: host controls AND the buyer's pre-bid list. Tokens only - no hardcoded colours. */
-.item-queue { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.item-queue { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
 .iq-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .iq-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
 .iq-next { font-size: 0.85rem; padding: 0.4rem 0.9rem; }
-.iq-active { background: var(--accent-wash); border: 1px solid var(--accent); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; text-align: center; }
-.iq-active-label { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
-.iq-active-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: var(--radius); margin-bottom: 0.5rem; }
+.iq-active { background: var(--surface-2); border: 1px solid var(--ink); border-radius: var(--radius-control); padding: 1rem; margin-bottom: 1rem; text-align: center; }
+.iq-active-label { font-family: var(--font-ui); font-size: 0.7rem; font-weight: 500; color: var(--ink); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.iq-active-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: var(--radius-control); margin-bottom: 0.5rem; }
 .iq-active-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
-.iq-active-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-.iq-active-bid { font-size: 0.9rem; color: var(--accent); font-weight: 600; }
+.iq-active-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; }
+.iq-active-bid { font-size: 0.9rem; color: var(--ink); font-weight: 600; }
 .iq-list { display: flex; flex-direction: column; gap: 0.5rem; }
-.iq-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); }
-.iq-active { border-color: var(--accent); }
-.iq-sold { background: var(--surface2); }
-.iq-sold .iq-title { color: var(--text-muted); }
-.iq-num { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); min-width: 18px; }
-.iq-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius); }
+.iq-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--surface); border-radius: var(--radius-control); border: 1px solid var(--line); }
+.iq-active { border-color: var(--ink); }
+.iq-sold { background: var(--surface-2); }
+.iq-sold .iq-title { color: var(--muted); }
+.iq-num { font-family: var(--font-ui); font-size: 0.8rem; color: var(--muted); min-width: 18px; }
+.iq-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-control); }
 .iq-info { flex: 1; min-width: 0; }
 .iq-title { font-size: 0.9rem; font-weight: 600; }
-.iq-details { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-.iq-prebid-info { color: var(--text-muted); }
+.iq-details { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.iq-prebid-info { color: var(--muted); }
 .iq-my-prebid { font-size: 0.78rem; color: var(--success); margin-top: 3px; display: flex; align-items: center; gap: 0.5rem; }
-.iq-cancel-prebid { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: 0.75rem; color: var(--error); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+.iq-cancel-prebid { font-family: var(--font-ui); text-transform: none; letter-spacing: 0; font-size: 0.75rem; color: var(--danger); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
 .iq-prebid-btn { font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap; }
-.iq-badge { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.08em; padding: 0.15rem 0.4rem; border-radius: var(--radius); text-transform: uppercase; white-space: nowrap; border: 1px solid var(--border); color: var(--text-muted); }
-.iq-badge-active { background: var(--accent-wash); color: var(--accent); border-color: var(--accent); }
-.iq-badge-sold { background: var(--surface2); color: var(--text-muted); border-color: var(--border); }
+.iq-badge { font-family: var(--font-ui); font-size: 0.65rem; letter-spacing: 0.04em; padding: 0.15rem 0.4rem; border-radius: var(--radius-control); text-transform: uppercase; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); }
+.iq-badge-active { background: var(--surface-2); color: var(--ink); border-color: var(--ink); }
+.iq-badge-sold { background: var(--surface-2); color: var(--muted); border-color: var(--line); }
 .iq-modal-overlay { position: fixed; inset: 0; background: var(--scrim); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-.iq-modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 400px; box-shadow: var(--shadow-pop); }
+.iq-modal { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 1.5rem; width: 100%; max-width: 400px; }
 .iq-modal h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
-.iq-modal-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
-.iq-modal-info { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
-.iq-modal-input-wrap { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
-.iq-modal-input-wrap:focus-within { border-color: var(--accent); }
-.iq-dollar { padding: 0 0.75rem; align-self: stretch; display: flex; align-items: center; color: var(--text-muted); background: var(--surface2); border-right: 1px solid var(--border); }
-.iq-modal-input { flex: 1; padding: 0.6rem 0.75rem; background: var(--surface2); border: none; color: var(--text); font-size: 1rem; outline: none; }
+.iq-modal-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+.iq-modal-info { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+.iq-modal-input-wrap { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-control); overflow: hidden; margin-bottom: 1rem; }
+.iq-modal-input-wrap:focus-within { border-color: var(--ink); }
+.iq-dollar { padding: 0 0.75rem; align-self: stretch; display: flex; align-items: center; color: var(--muted); background: var(--surface-2); border-right: 1px solid var(--line); }
+.iq-modal-input { flex: 1; padding: 0.6rem 0.75rem; background: var(--surface-2); border: none; color: var(--ink); font-size: 1rem; outline: none; }
 .iq-modal-btns { display: flex; gap: 0.75rem; }
 .iq-modal-btns button { flex: 1; }
 
 .iq-active-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 .iq-active-label-row .iq-active-label { margin-bottom: 0; }
-.iq-item-timer { font-family: var(--font-display); font-size: 1.1rem; color: var(--accent); background: var(--accent-wash); border: 1px solid var(--accent); padding: 2px 12px; border-radius: var(--radius); }
-.iq-item-timer.urgent { color: var(--on-accent); background: var(--accent-solid); animation: iq-pulse 0.6s ease-in-out infinite; }
+.iq-item-timer { font-family: var(--font-ui);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums; font-size: 1.1rem; color: var(--ink); background: var(--surface-2); border: 1px solid var(--ink); padding: 2px 12px; border-radius: var(--radius-control); }
+.iq-item-timer.urgent { color: var(--on-dark); background: var(--accent); animation: iq-pulse 0.6s ease-in-out infinite; }
 @keyframes iq-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .iq-host-controls { display: flex; align-items: center; gap: 0.5rem; }
-.iq-timer-select { padding: 0.35rem 0.5rem; min-height: 0; width: auto; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.8rem; cursor: pointer; }
+.iq-timer-select { padding: 0.35rem 0.5rem; min-height: 0; width: auto; border-radius: var(--radius-control); border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 0.8rem; cursor: pointer; }

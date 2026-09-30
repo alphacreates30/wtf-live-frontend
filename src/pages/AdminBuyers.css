@@ -1,25 +1,25 @@
 /* Buyer management. Tokens only - no hardcoded colours.
  * Every status carries its word; colour is the second signal. */
-.ab-status          { border: 1px solid var(--border); color: var(--text-muted); background: transparent; }
+.ab-status          { border: 1px solid var(--line); color: var(--muted); background: transparent; }
 .ab-status-pending  { background: var(--warning-wash); color: var(--warning); border-color: var(--warning); }
 .ab-status-approved { background: var(--success-wash); color: var(--success); border-color: var(--success); }
-.ab-status-rejected { background: var(--error-wash);   color: var(--error);   border-color: var(--error); }
-.ab-status-blocked  { background: var(--surface2);     color: var(--text);    border-color: var(--text); }
-.ab-payfail         { background: var(--error-wash);   color: var(--error);   border: 1px solid var(--error); }
+.ab-status-rejected { background: var(--danger-wash);   color: var(--danger);   border-color: var(--danger); }
+.ab-status-blocked  { background: var(--surface-2);     color: var(--ink);    border-color: var(--ink); }
+.ab-payfail         { background: var(--danger-wash);   color: var(--danger);   border: 1px solid var(--danger); }
 
 /* Filter tabs: compact admin controls, deliberately below --tap. */
 .ab-filter {
-  padding: 4px 12px; border-radius: var(--radius); border: 1px solid var(--border);
-  background: transparent; color: var(--text-muted); font-size: 0.85rem;
+  padding: 4px 12px; border-radius: var(--radius-control); border: 1px solid var(--line);
+  background: transparent; color: var(--muted); font-size: 0.85rem;
 }
-.ab-filter:hover:not(.ab-filter-on) { border-color: var(--accent); color: var(--accent); }
-.ab-filter-on { background: var(--accent-solid); border-color: var(--accent-solid); color: var(--on-accent); }
+.ab-filter:hover:not(.ab-filter-on) { border-color: var(--ink); color: var(--ink); }
+.ab-filter-on { background: var(--ink); border-color: var(--ink); color: var(--on-dark); }
 
 .ab-ok  { color: var(--success); }
-.ab-bad { color: var(--error); font-weight: 600; }
+.ab-bad { color: var(--danger); font-weight: 600; }
 
 .ab-block {
-  padding: 4px 12px; font-size: 0.8rem; border-radius: var(--radius);
-  background: transparent; color: var(--error); border: 1px solid var(--error);
+  padding: 4px 12px; font-size: 0.8rem; border-radius: var(--radius-control);
+  background: transparent; color: var(--danger); border: 1px solid var(--danger);
 }
-.ab-block:hover:not(:disabled) { background: var(--error-wash); }
+.ab-block:hover:not(:disabled) { background: var(--danger-wash); }
