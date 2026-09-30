@@ -52,6 +52,8 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   const pollRef = useRef(null)
   const prevItemsRef = useRef([])
   const [closedToasts, setClosedToasts] = useState([])
+  // Watchers per lot (admin only; buyers never see counts). Refreshed with the lots.
+  const [watchCounts, setWatchCounts] = useState({})
 
   // Multi-image state
   const [itemImages, setItemImages] = useState({})
@@ -62,7 +64,9 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
   useEffect(() => {
     if (!auctionId) return
     loadItems()
-    pollRef.current = setInterval(loadItems, 30000)
+    const loadCounts = () => api.getWatchCounts(auctionId).then(c => setWatchCounts(c.lots || {})).catch(() => {})
+    loadCounts()
+    pollRef.current = setInterval(() => { loadItems(); loadCounts() }, 30000)
     return () => clearInterval(pollRef.current)
   }, [auctionId])
 
@@ -311,6 +315,7 @@ export default function ItemManager({ auctionId, auctionStatus, auctionMode }) {
                 Start: ${parseFloat(item.starting_bid).toFixed(2)}
                 {!isStandard && item.pre_bid_count > 0 && <span className="im-prebids"> · {item.pre_bid_count} pre-bid{item.pre_bid_count > 1 ? 's' : ''} · Top: ${parseFloat(item.top_pre_bid).toFixed(2)}</span>}
                 {isStandard && <span>{lotPriceLabel(item) && <> · {lotPriceLabel(item)}: ${parseFloat(item.current_bid || item.starting_bid).toFixed(2)}</>} · {item.bid_count || 0} bid{item.bid_count === 1 ? '' : 's'}</span>}
+                {watchCounts[item.id] > 0 && <span> · {watchCounts[item.id]} watching</span>}
               </div>
               {isStandard && (
                 <div className="im-meta">

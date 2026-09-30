@@ -73,6 +73,15 @@ export function apiError(data, res, fallback) {
   return err
 }
 
+// Started as the page script loads when the URL is the homepage (main.jsx), in
+// parallel with React rendering, and handed to the first api.getHome() call.
+let prefetchedHome = null
+export function prefetchHome() {
+  if (prefetchedHome) return
+  prefetchedHome = request('/home')
+  prefetchedHome.catch(() => { prefetchedHome = null })   // a failed early fetch is simply retried by the page
+}
+
 export const api = {
   register: (username, password, email) =>
     request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password, email }) }),
@@ -95,9 +104,26 @@ export const api = {
 
   getAuction: (id) => request(`/auction/${id}`),
   // Homepage (API.md): public, the same calls a future app makes.
-  getHome: () => request('/home'),
+  // The homepage's first /home is started by main.jsx before React renders
+  // (prefetchHome), so the first photos start loading sooner; use it once.
+  getHome: () => {
+    const early = prefetchedHome
+    prefetchedHome = null
+    return early || request('/home')
+  },
   searchLots: (q) => request(`/search?q=${encodeURIComponent(q)}`),
   signup: (email, website = '') => request('/signup', { method: 'POST', body: JSON.stringify({ email, website }) }),
+  // Watch list and reminders (API.md). Only ever the logged-in buyer's own.
+  watchLot: (itemId) => request(`/watch/${itemId}`, { method: 'POST' }),
+  unwatchLot: (itemId) => request(`/watch/${itemId}`, { method: 'DELETE' }),
+  followAuction: (auctionId) => request(`/follow/${auctionId}`, { method: 'POST' }),
+  unfollowAuction: (auctionId) => request(`/follow/${auctionId}`, { method: 'DELETE' }),
+  getWatching: () => request('/me/watching'),
+  getNotificationPrefs: () => request('/me/notification-prefs'),
+  setNotificationPrefs: (prefs) => request('/me/notification-prefs', { method: 'PUT', body: JSON.stringify(prefs) }),
+  unsubscribeInfo: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`),
+  unsubscribe: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`, { method: 'POST' }),
+  getWatchCounts: (auctionId) => request(`/admin/watch-counts?auction_id=${auctionId}`),
   updateAuction: (id, data) =>
     request(`/auction/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 

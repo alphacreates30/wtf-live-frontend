@@ -627,3 +627,8 @@
     z-index: 5;
   }
 }
+
+/* Watch / Follow (F3). */
+.sar-follow { margin-top: var(--space-3); }
+.sar-modal-watch { margin: 0 0 var(--space-3); }
+.sar-card-watch { position: absolute; right: 8px; bottom: 8px; z-index: 2; background: var(--surface); }

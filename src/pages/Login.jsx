@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import './Login.css'
 
@@ -11,6 +11,11 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  // ?next=/path: where to go back to after logging in (e.g. a lot the buyer tapped Watch on).
+  // Same-site paths only, never another origin.
+  const [params] = useSearchParams()
+  const nextParam = params.get('next') || ''
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') && !nextParam.includes('\\') ? nextParam : '/'
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -23,7 +28,7 @@ export default function Login() {
 
       localStorage.setItem('wtf_token', data.token)
       localStorage.setItem('wtf_username', data.user.username)
-      navigate('/')
+      navigate(next)
     } catch (err) {
       setError(err.message)
     } finally {

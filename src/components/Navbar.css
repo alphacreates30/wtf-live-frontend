@@ -383,3 +383,12 @@
   .navbar--public .navbar-search-desktop { min-width: 110px; }
   .navbar--public .navbar-account-btn { max-width: 130px; display: inline-block; line-height: var(--tap); }
 }
+
+/* "Watching (n)": the count as a small pill. Ink, not red: watching isn't urgent. */
+.navbar-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px; margin-left: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--ink); color: var(--on-dark);
+  font-size: var(--fs-12); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums;
+}

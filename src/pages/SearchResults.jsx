@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import { useServerClock } from '../components/home/clock'
 import LotCard from '../components/home/LotCard'
+import { WatchButton } from '../watch/WatchButtons'
 import '../components/home/home.css'
 
 // GET /search over lot titles in live and upcoming auctions, in the same cards
@@ -37,7 +38,7 @@ export default function SearchResults() {
               <p className="search-count" role="status">{lots.length === 1 ? '1 lot' : `${lots.length} lots`}{lots.length === 48 ? ' (first 48)' : ''}</p>
               {lots.length === 0
                 ? <p className="search-empty">No lots match that yet. Try a shorter word.</p>
-                : <div className="search-grid">{lots.map(l => <LotCard key={l.id} lot={l} premiumPct={result.premium_pct?.[l.auction_id]} now={now} />)}</div>}
+                : <div className="search-grid">{lots.map(l => <LotCard key={l.id} lot={l} premiumPct={result.premium_pct?.[l.auction_id]} now={now} extra={<div className="lc-watch"><WatchButton itemId={l.id} /></div>} />)}</div>}
             </>
       )}
     </div>

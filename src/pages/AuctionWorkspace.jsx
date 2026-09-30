@@ -51,6 +51,7 @@ export default function AuctionWorkspace() {
       <div className="aw-header">
         <span className={`badge badge-${auction.status}`}>{auction.status}</span>
         <h1 className="aw-title">{auction.title}</h1>
+        <FollowerCount auctionId={auction.id} />
       </div>
 
       <div className="aw-tabs">
@@ -77,4 +78,12 @@ export default function AuctionWorkspace() {
       </div>
     </div>
   )
+}
+
+// Followers of this auction (admin only; buyers never see counts).
+function FollowerCount({ auctionId }) {
+  const [n, setN] = useState(null)
+  useEffect(() => { api.getWatchCounts(auctionId).then(c => setN(c.followers ?? 0)).catch(() => setN(null)) }, [auctionId])
+  if (!n) return null
+  return <span className="aw-followers">{n} following</span>
 }

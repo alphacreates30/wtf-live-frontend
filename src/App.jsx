@@ -10,6 +10,7 @@ import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
 import { api } from './api'
 import Footer from './components/Footer'
+import { WatchProvider } from './watch/WatchContext'
 
 // Split out of the main bundle: the homepage shouldn't download the auction
 // rooms (LiveKit), card setup (Stripe.js loads on import) or the admin pages.
@@ -24,6 +25,9 @@ const MyBids = lazy(() => import('./pages/MyBids'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Terms = lazy(() => import('./pages/Terms'))
 const AccountDeleted = lazy(() => import('./pages/AccountDeleted'))
+const Watching = lazy(() => import('./pages/Watching'))
+const NotificationPrefs = lazy(() => import('./pages/NotificationPrefs'))
+const Unsubscribe = lazy(() => import('./pages/Unsubscribe'))
 import './pages/Buyer.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -108,6 +112,7 @@ function ProfileGate({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <WatchProvider>
       <Navbar />
       <EmailGate>
       <Suspense fallback={<div className="page"><p className="buyer-note">Loading…</p></div>}>
@@ -190,11 +195,16 @@ export default function App() {
         <Route path="/admin/orders" element={<Navigate to="/host/orders" replace />} />
                 <Route path="/my-bids" element={<ProtectedRoute><MyBids /></ProtectedRoute>} />
                 <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+                <Route path="/watching" element={<ProtectedRoute><Watching /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><NotificationPrefs /></ProtectedRoute>} />
+                {/* No login: the signed token in the email link says whose reminders these are. */}
+                <Route path="/unsubscribe" element={<Unsubscribe />} />
 <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>
       </EmailGate>
       <Footer />
+      </WatchProvider>
     </BrowserRouter>
   )
 }

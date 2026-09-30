@@ -7,6 +7,7 @@ import ClosingSchedule from '../components/home/ClosingSchedule'
 import Rail from '../components/home/Rail'
 import LotCard from '../components/home/LotCard'
 import SignupForm from '../components/home/SignupForm'
+import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import { CONSIGN_MAILTO } from '../components/home/links'
 import '../components/home/home.css'
 
@@ -40,7 +41,7 @@ function OpenNow({ auctions, now }) {
         <Link to="/auctions" className="section-link">All auctions →</Link>
       </div>
       <div className={`open-now-list open-now-${layout}`}>
-        {auctions.map((a, i) => <AuctionCard key={a.id} auction={a} now={now} wide={layout === 'one'} priority={i === 0} />)}
+        {auctions.map((a, i) => <AuctionCard key={a.id} auction={a} now={now} wide={layout === 'one'} priority={i === 0} extra={<FollowButton auctionId={a.id} />} />)}
       </div>
     </section>
   )
@@ -92,7 +93,7 @@ export default function Home() {
   }
 
   const { open_auctions: open = [], closing_schedule: schedule = [], rails, upcoming, premium_pct: prem = {}, timezone } = home
-  const cards = lots => lots.map(l => <LotCard key={l.id} lot={l} premiumPct={prem[l.auction_id]} now={now} />)
+  const cards = lots => lots.map(l => <LotCard key={l.id} lot={l} premiumPct={prem[l.auction_id]} now={now} extra={<div className="lc-watch"><WatchButton itemId={l.id} /></div>} />)
 
   return (
     <div className="home">
@@ -125,6 +126,7 @@ export default function Home() {
                 <p className="lc-opens">Opens {fmtDateTime(a.starts_at)}</p>
               </div>
             </Link>
+            <div className="lc-watch"><FollowButton auctionId={a.id} upcoming /></div>
           </div>
         ))}
       </Rail>

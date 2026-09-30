@@ -29,3 +29,4 @@
   border: 1px solid var(--line); border-radius: var(--radius-control);
   padding: 1px 6px; margin-left: 6px; vertical-align: middle;
 }
+.aw-followers { color: var(--muted); font-size: var(--fs-14); }

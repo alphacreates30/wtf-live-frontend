@@ -10,6 +10,7 @@ function isViewerLeader(item, username, token) {
   return Boolean(token && username && item.leading_bidder && item.leading_bidder === username)
 }
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
+import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import './StandardAuctionRoom.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -169,6 +170,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
           </div>
 
           <h2 className="sar-modal-title">{item.title}</h2>
+          {item.status === 'open' && !isAdmin && <div className="sar-modal-watch"><WatchButton itemId={item.id} /></div>}
           {item.description && <p className="sar-modal-desc">{item.description}</p>}
 
           <div className="sar-modal-stats">
@@ -424,6 +426,11 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           <span className="sar-sep">·</span>
           <span>{openItems.length} open</span>
         </div>
+        {!isAdmin && (auction.status === 'live' || auction.status === 'upcoming') && (
+          <div className="sar-follow">
+            <FollowButton auctionId={auction.id} upcoming={auction.status === 'upcoming' && !!auction.starts_at && Date.parse(auction.starts_at) > now} />
+          </div>
+        )}
         <FulfillmentNote auction={auction} />
       </div>
 
@@ -456,6 +463,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                       </div>
                   }
                   <span className="sar-card-lot">Lot {item.position + 1}</span>
+                  {!closed && !isAdmin && <WatchButton itemId={item.id} compact className="sar-card-watch" />}
                   <span className={`sar-card-status-badge sar-status-${item.status}`}>
                     {item.status === 'open' ? 'Open' : item.status === 'sold' ? 'Sold' : 'Unsold'}
                   </span>

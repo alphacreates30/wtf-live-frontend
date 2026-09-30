@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-do
 import './Navbar.css'
 import { disconnectSocket } from '../socket'
 import { CONSIGN_MAILTO } from './home/links'
+import { useWatch } from '../watch/WatchContext'
 
 // Buyers and visitors: mark + wordmark · search · Auctions · How it works · Consign ·
 // Log in / account menu. Phones: mark + wordmark · search icon (opens a
@@ -14,6 +15,7 @@ export default function Navbar() {
   const token = localStorage.getItem('wtf_token')
   const username = localStorage.getItem('wtf_username')
   const isAdmin = username === 'whatthefind'
+  const watch = useWatch()
   const [menuOpen, setMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -126,6 +128,11 @@ export default function Navbar() {
           <Link to="/auctions" className={`navbar-link ${location.pathname === '/auctions' ? 'active' : ''}`}>Auctions</Link>
           <Link to="/#how-it-works" className="navbar-link">How it works</Link>
           <a href={CONSIGN_MAILTO} className="navbar-link navbar-link-consign">Consign</a>
+          {token && (
+            <Link to="/watching" className={`navbar-link ${location.pathname === '/watching' ? 'active' : ''}`}>
+              Watching{watch?.count ? <span className="navbar-count">{watch.count}</span> : null}
+            </Link>
+          )}
           {token ? (
             <div className="navbar-account" ref={accountRef}>
               <button
@@ -142,6 +149,7 @@ export default function Navbar() {
                   <Link to="/my-bids" className="navbar-mobile-link">My Bids</Link>
                   <Link to="/my-orders" className="navbar-mobile-link">My Orders</Link>
                   <Link to="/profile-setup" className="navbar-mobile-link">Account</Link>
+                  <Link to="/notifications" className="navbar-mobile-link">Email reminders</Link>
                   <button className="navbar-mobile-logout" onClick={() => { setAccountOpen(false); logout() }}>Log out</button>
                 </div>
               )}
@@ -193,9 +201,11 @@ export default function Navbar() {
             {token ? (
               <>
                 <div className="navbar-mobile-user">@{username}</div>
+                <Link to="/watching" className="navbar-mobile-link" onClick={closeMenu}>Watching{watch?.count ? ` (${watch.count})` : ''}</Link>
                 <Link to="/my-bids" className="navbar-mobile-link" onClick={closeMenu}>My Bids</Link>
                 <Link to="/my-orders" className="navbar-mobile-link" onClick={closeMenu}>My Orders</Link>
                 <Link to="/profile-setup" className="navbar-mobile-link" onClick={closeMenu}>Account</Link>
+                <Link to="/notifications" className="navbar-mobile-link" onClick={closeMenu}>Email reminders</Link>
                 <button className="navbar-mobile-logout" onClick={() => { closeMenu(); logout(); }}>Log out</button>
               </>
             ) : (
