@@ -1,3 +1,4 @@
+import { lotPath } from '../../lot/slug'
 import { useState, useEffect } from 'react'
 
 // Countdowns run on the SERVER's clock, not the phone's: the API sends
@@ -73,5 +74,8 @@ export function closingChip(iso, now) {
   return { text: `${days} days left`, urgent: false }
 }
 
-// Where a lot links to: its auction, with the lot opened.
-export const lotHref = lot => `/auction/${lot.auction_id}?lot=${lot.id}`
+// Where a lot links to: its own page (/a/<auction slug>/lot/<n>). Without the auction's title, the older
+// /auction/:id?lot= link, which redirects there.
+export const lotHref = lot => (lot.auction_title != null && lot.position != null
+  ? lotPath(lot.auction_id, lot.auction_title, lot.position)
+  : `/auction/${lot.auction_id}?lot=${lot.id}`)

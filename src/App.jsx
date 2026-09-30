@@ -16,6 +16,7 @@ import { PreviewProvider } from './preview/PreviewContext'
 // Split out of the main bundle: the homepage shouldn't download the auction
 // rooms (LiveKit), card setup (Stripe.js loads on import) or the admin pages.
 const AuctionRoomGate = lazy(() => import('./pages/AuctionRoomGate'))
+const LotPage = lazy(() => import('./pages/LotPage'))
 const HostDashboard = lazy(() => import('./pages/HostDashboard'))
 const AuctionWorkspace = lazy(() => import('./pages/AuctionWorkspace'))
 const HostSettings = lazy(() => import('./pages/HostSettings'))
@@ -117,7 +118,7 @@ export default function App() {
       <Navbar />
       <PreviewProvider>
       <EmailGate>
-      <Suspense fallback={<div className="page"><p className="buyer-note">Loading…</p></div>}>
+      <Suspense fallback={<div className="page" style={{ minHeight: '100vh' }}><p className="buyer-note">Loading…</p></div>}>
       <Routes>
         <Route path="/" element={
           <ProfileGate>
@@ -143,6 +144,12 @@ export default function App() {
         <Route path="/auction/:id" element={
           <ProfileGate>
             <AuctionRoomGate />
+          </ProfileGate>
+        } />
+        {/* A lot's own page: /a/<auction slug>/lot/<lot number>. /auction/:id?lot=<id> redirects here. */}
+        <Route path="/a/:slug/lot/:n" element={
+          <ProfileGate>
+            <LotPage />
           </ProfileGate>
         } />
         <Route

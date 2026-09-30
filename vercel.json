@@ -1,5 +1,12 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/a/:slug/lot/:n",
+      "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*(bot|crawler|spider|facebookexternalhit|facebookcatalog|meta-externalagent|slack|discord|whatsapp|telegram|twitterbot|linkedin|pinterest|embedly|skypeuripreview|applebot|google|bing|iframely|preview|vkshare|redditbot|mastodon|bluesky|signal).*" }],
+      "destination": "/api/lot-meta?slug=:slug&n=:n"
+    },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

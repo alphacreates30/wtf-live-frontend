@@ -82,6 +82,16 @@ export function prefetchHome() {
   prefetchedHome.catch(() => { prefetchedHome = null })   // a failed early fetch is simply retried by the page
 }
 
+// The same for a lot's page (/a/<slug>/lot/<n>): its public read starts before React renders and before the
+// page's own code has downloaded; api.getLotByNumber hands it to the page once.
+let prefetchedLot = null
+export function prefetchLot(slug, n) {
+  if (prefetchedLot) return
+  const p = request(`/lots/by-number/${encodeURIComponent(slug)}/${encodeURIComponent(n)}`)
+  prefetchedLot = { key: `${slug}/${n}`, p }
+  p.catch(() => { prefetchedLot = null })
+}
+
 export const api = {
   register: (username, password, email) =>
     request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password, email }) }),
@@ -112,6 +122,17 @@ export const api = {
     return early || request('/home')
   },
   searchLots: (q) => request(`/search?q=${encodeURIComponent(q)}`),
+  // The lot page (API.md). getLot / getLotByNumber are public and the same for everyone; getLotMe is the
+  // logged-in buyer's own status and max; getLotBids is the anonymised history ("You" when logged in).
+  getLot: (id) => request(`/lots/${id}`),
+  getLotByNumber: (slug, n) => {
+    const early = prefetchedLot && prefetchedLot.key === `${slug}/${n}` ? prefetchedLot.p : null
+    prefetchedLot = null
+    return early || request(`/lots/by-number/${encodeURIComponent(slug)}/${encodeURIComponent(n)}`)
+  },
+  getLotMe: (id) => request(`/lots/${id}/me`),
+  getLotBids: (id) => request(`/lots/${id}/bids`),
+  getLotRelated: (id) => request(`/lots/${id}/related`),
   signup: (email, website = '') => request('/signup', { method: 'POST', body: JSON.stringify({ email, website }) }),
   // Watch list and reminders (API.md). Only ever the logged-in buyer's own.
   watchLot: (itemId) => request(`/watch/${itemId}`, { method: 'POST' }),

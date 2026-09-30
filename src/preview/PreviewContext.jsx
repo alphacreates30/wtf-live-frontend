@@ -10,6 +10,7 @@ import './preview.css'
 // in sessionStorage. Everyone else - logged out, buyers, /?preview=sample in their
 // address bar - sees exactly the normal page.
 const KEY = 'wtf_preview'
+const SAMPLE_LOT_PATH = /^\/a\/sample-[a-z]+\/lot\/\d+$/
 const COUNTS = [1, 3, 5, 0]
 const Ctx = createContext({ active: false, isAdmin: false })
 
@@ -49,11 +50,12 @@ export function PreviewProvider({ children }) {
     isAdmin, active, count: COUNTS.includes(state.count) ? state.count : 3, counts: COUNTS,
     turnOn: () => save({ ...state, on: true }), turnOff: () => save({ ...state, on: false }),
     setCount: count => save({ ...state, count }),
-    // Taps on sample cards go nowhere real.
+    // Taps on sample cards go nowhere real, except a sample lot's own page (built in the browser, bids disabled).
     blockSampleClick: e => {
       if (!active) return
       const hit = e.target.closest('a[href], .watch-btn, .su button')
       if (!hit || hit.closest('.preview-bar, .preview-switch')) return
+      if (hit.matches('a') && SAMPLE_LOT_PATH.test(hit.getAttribute('href') || '')) return
       e.preventDefault(); e.stopPropagation()
       note(hit.matches('a') ? 'Sample lot, preview only' : 'Disabled in preview')
     },

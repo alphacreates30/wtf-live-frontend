@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { api } from '../api'
 import { lotPriceLabel } from '../lotPrice'
 
@@ -13,6 +13,7 @@ import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import './StandardAuctionRoom.css'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { lotPath } from '../lot/slug'
 
 const ADMIN_USERNAME = 'whatthefind'
 const POLL_MS = 4000
@@ -67,186 +68,6 @@ function timeLeftLabel(endsAt, now) {
   return `${s}s`
 }
 
-function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, gateBid, onClose, onBidSuccess }) {
-  const token = localStorage.getItem('wtf_token')
-  const navigate = useNavigate()
-  const [images, setImages] = useState([])
-  const [activeImg, setActiveImg] = useState(0)
-  const [bidInput, setBidInput] = useState('')
-  const [bidError, setBidError] = useState('')
-  const [bidLoading, setBidLoading] = useState(false)
-  const [bidSuccess, setBidSuccess] = useState(false)
-
-  useEffect(() => {
-    api.getItemImages(auctionId, item.id)
-      .then(imgs => {
-        if (imgs && imgs.length > 0) setImages(imgs)
-        else if (item.image_url) setImages([{ id: 'main', url: item.image_url }])
-        else setImages([])
-      })
-      .catch(() => {
-        if (item.image_url) setImages([{ id: 'main', url: item.image_url }])
-      })
-  }, [auctionId, item.id, item.image_url])
-
-  const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
-  const isLeading = isViewerLeader(item, username, token)
-  const floor = parseFloat(item.current_bid || item.starting_bid || 0)
-
-  const minIncrement = floor < 50 ? 1 : floor < 100 ? 2 : floor < 200 ? 5 : floor < 500 ? 10 : floor < 1000 ? 25 : 50
-  // The current leader may raise their own proxy without clearing the increment.
-  // This must stay in sync with the same rule in the backend bid endpoint.
-  const minBid = isLeading ? floor : floor + (item.bid_count > 0 ? minIncrement : 0)
-  const timeLabel = timeLeftLabel(item.ends_at, now)
-
-  async function submitBid(amount) {
-    setBidLoading(true); setBidError('')
-    try {
-      await api.placeStandardBid(auctionId, item.id, amount)
-      setBidSuccess(true)
-      setBidInput('')
-      onBidSuccess()
-      setTimeout(() => setBidSuccess(false), 2500)
-    } catch (e) {
-      setBidError(e.message || 'Bid failed')
-    } finally {
-      setBidLoading(false)
-    }
-  }
-
-  function placeBid() {
-    if (!token) { navigate('/login'); return }
-    const amount = parseFloat(bidInput)
-    if (!amount || amount < minBid) {
-      setBidError(`Min bid: $${minBid.toFixed(2)}`); return
-    }
-    gateBid(() => submitBid(amount))
-  }
-
-  function prevImg() { setActiveImg(i => Math.max(0, i - 1)) }
-  function nextImg() { setActiveImg(i => Math.min(images.length - 1, i + 1)) }
-
-  return (
-    <div className="sar-modal-backdrop" onClick={onClose}>
-      <div className="sar-modal" onClick={e => e.stopPropagation()}>
-        <button className="sar-modal-close" onClick={onClose} aria-label="Close">✕</button>
-
-        <div className="sar-modal-images">
-          {images.length > 0 ? (
-            <>
-              <div className="sar-modal-main-img-wrap">
-                {images.length > 1 && (
-                  <button className="sar-img-nav sar-img-prev" onClick={prevImg} disabled={activeImg === 0} aria-label="Previous photo">‹</button>
-                )}
-                <img src={images[activeImg]?.url} alt={item.title} className="sar-modal-main-img" />
-                {images.length > 1 && (
-                  <button className="sar-img-nav sar-img-next" onClick={nextImg} disabled={activeImg === images.length - 1} aria-label="Next photo">›</button>
-                )}
-              </div>
-              {images.length > 1 && (
-                <div className="sar-modal-thumbs">
-                  {images.map((img, i) => (
-                    <img
-                      key={img.id}
-                      src={img.url}
-                      alt=""
-                      className={`sar-modal-thumb ${i === activeImg ? 'active' : ''}`}
-                      onClick={() => setActiveImg(i)}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="sar-modal-no-img"><PhotoPlaceholder seed={item.id} /></div>
-          )}
-        </div>
-
-        <div className="sar-modal-details">
-          <div className="sar-modal-badges">
-            {item.position != null && <span className="sar-status-badge sar-modal-lot">Lot {item.position + 1}</span>}
-            <span className={`sar-status-badge sar-status-${item.status}`}>
-              {item.status === 'open' ? 'Open' : item.status === 'sold' ? 'Sold' : 'Unsold'}
-            </span>
-          </div>
-
-          <h2 className="sar-modal-title">{item.title}</h2>
-          {item.status === 'open' && !isAdmin && <div className="sar-modal-watch"><WatchButton itemId={item.id} /></div>}
-          {item.description && <p className="sar-modal-desc">{item.description}</p>}
-
-          <div className="sar-modal-stats">
-            {lotPriceLabel(item) && (
-              <div className="sar-modal-stat">
-                <span className="sar-modal-stat-label">{lotPriceLabel(item)}</span>
-                <span className="sar-modal-stat-val">${floor.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="sar-modal-stat">
-              <span className="sar-modal-stat-label">Bids</span>
-              <span className="sar-modal-stat-val">{item.bid_count || 0}</span>
-            </div>
-            {!closed && timeLabel && (
-              <div className="sar-modal-stat">
-                <span className="sar-modal-stat-label">Closes In</span>
-                <span className="sar-countdown-row">
-                  {/^\d+s$/.test(timeLabel) && <img src="/brand/state-closing.svg" alt="" width="20" height="20" className="sar-state-closing" />}
-                  <span className="sar-modal-stat-val sar-countdown">{timeLabel}</span>
-                </span>
-              </div>
-            )}
-          </div>
-
-          <p className="sar-premium-note">+{premiumPct}% buyer's premium applies to the winning bid.</p>
-
-          {closed && item.status === 'sold' && isLeading && (
-            <p className="sar-modal-leading you sar-won-you sar-won-you-lg">
-              <img src="/brand/state-won.svg" alt="" width="48" height="48" />
-              Won by you!
-            </p>
-          )}
-          {item.leading_bidder && !(closed && item.status === 'unsold') && !(closed && item.status === 'sold' && isLeading) && (
-            <p className={`sar-modal-leading ${isLeading ? 'you' : ''}`}>
-              {closed && item.status === 'sold' ? 'Won by' : 'Leading'}:{' '}
-              <strong>{isLeading ? 'You' : `@${item.leading_bidder}`}</strong>
-            </p>
-          )}
-          {closed && item.status === 'unsold' && (
-            <p className="sar-modal-leading">{item.bid_count > 0 ? 'Reserve not met — item unsold' : 'No bids — item unsold'}</p>
-          )}
-
-          {!closed && !isAdmin && (
-            <div className="sar-modal-bid-section">
-              <div className="sar-modal-bid-row">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={minBid}
-                  step="0.01"
-                  aria-label="Your maximum bid"
-                  placeholder={token ? 'Your max bid' : 'Log in to bid'}
-                  value={bidInput}
-                  disabled={!token || bidLoading}
-                  onChange={e => { setBidInput(e.target.value); setBidError('') }}
-                />
-                <button
-                  className="btn-bid"
-                  disabled={bidLoading || !token}
-                  onClick={token ? placeBid : () => navigate('/login')}
-                >
-                  {!token ? 'Log in' : bidLoading ? 'Placing…' : 'Place Max Bid'}
-                </button>
-              </div>
-              {bidError && <p className="error-msg">{bidError}</p>}
-              {bidSuccess && <p className="sar-success">Bid placed!</p>}
-              <p className="sar-hint">Minimum ${minBid.toFixed(2)}. We'll automatically bid up to your max to keep you in the lead.</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function StandardAuctionRoom({ initialAuction = null }) {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
@@ -265,7 +86,6 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
   const [bidErrors, setBidErrors] = useState({})
   const [bidLoading, setBidLoading] = useState({})
   const [bidSuccess, setBidSuccess] = useState({})
-  const [selectedItem, setSelectedItem] = useState(null)
   const [termsAccepted, setTermsAccepted] = useState(null)
   const [showTermsModal, setShowTermsModal] = useState(false)
   const pendingBidRef = useRef(null)
@@ -299,22 +119,14 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
     return () => clearInterval(t)
   }, [])
 
-  // /auction/:id?lot=<lot id> (homepage and search cards) opens that lot once
-  // the lots have loaded. Once only: closing it must not reopen it on the next poll.
+  // The old lot link, /auction/:id?lot=<lot id> (emails and bookmarks from before lots had their own page),
+  // moves to the lot's page once the lots have loaded. replace: Back skips the redirect.
   useEffect(() => {
-    if (deepLinkDone.current || !deepLinkLot || !items.length) return
+    if (deepLinkDone.current || !deepLinkLot || !items.length || !auction) return
     deepLinkDone.current = true
-    const lot = items.find(i => i.id === deepLinkLot)
-    if (lot) setSelectedItem(lot)
-  }, [items, deepLinkLot])
-
-  useEffect(() => {
-    setSelectedItem(prev => {
-      if (!prev) return prev
-      const updated = items.find(i => i.id === prev.id)
-      return updated || prev
-    })
-  }, [items])
+    const lot = items.find(i => i.id === String(deepLinkLot).toLowerCase())
+    if (lot) navigate(lotPath(auction.id, auction.title, lot.position), { replace: true })
+  }, [items, deepLinkLot, auction, navigate])
 
   // A different auction always needs a fresh acknowledgement, so this resets
   // (and re-checks with the server) whenever `id` changes.
@@ -452,7 +264,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
               <div
                 key={item.id}
                 className={`sar-card${closed ? ' sar-card-closed' : ''}${closingSoon && !urgentCountdown ? ' sar-closing-soon' : ''}${urgentCountdown ? ' sar-urgent-item' : ''}`}
-                onClick={() => setSelectedItem(item)}
+                onClick={() => navigate(lotPath(auction.id, auction.title, item.position))}
               >
                 <div className="sar-card-img-wrap">
                   {item.image_url
@@ -500,7 +312,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                       {urgentCountdown ? 'Closing now' : 'Closing'}
                     </span>
                   )}
-                  <h3 className="sar-card-title">{item.title}</h3>
+                  <h3 className="sar-card-title"><Link to={lotPath(auction.id, auction.title, item.position)} onClick={e => e.stopPropagation()}>{item.title}</Link></h3>
                   <div className="sar-card-stats">
                     {lotPriceLabel(item) && (
                       <div className="sar-card-stat">
@@ -542,7 +354,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                   {closed && item.status === 'unsold' && (
                     <p className="sar-card-unsold">{item.bid_count > 0 ? 'Reserve not met' : 'No bids placed'}</p>
                   )}
-                  <p className="sar-card-hint">Click for details →</p>
+                  <p className="sar-card-hint">View lot →</p>
                 </div>
               </div>
             )
@@ -550,19 +362,6 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
         </div>
       )}
 
-      {selectedItem && (
-        <ItemDetailModal
-          item={selectedItem}
-          auctionId={id}
-          username={username}
-          isAdmin={isAdmin}
-          now={now}
-          premiumPct={premiumPct}
-          gateBid={gateBid}
-          onClose={() => setSelectedItem(null)}
-          onBidSuccess={loadItems}
-        />
-      )}
 
       {showTermsModal && (
         <TermsAcknowledgementModal
