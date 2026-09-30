@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api'
+import { defaultPickupWindow, PICKUP_DAYS } from '../pickupWindow'
 import './HostDashboard.css'
 
 function toDateTimeLocal(iso) {
@@ -12,7 +13,13 @@ function toDateTimeLocal(iso) {
 }
 
 export default function AuctionDetails({ auction, onSaved }) {
-  const [form, setForm] = useState({
+  // An auction that offers pickup but has no window yet gets the default (its close -> close + 7 days), shown here
+  // and saved with the settings. A window already saved, or edited here, is left alone.
+  const closeLocal = toDateTimeLocal(auction.ends_at)
+  const offersPickup = m => m === 'pickup' || m === 'both'
+  const savedWindow = !!(auction.pickup_starts_at || auction.pickup_ends_at)
+  const [pickupEdited, setPickupEdited] = useState(savedWindow)
+  const [form, setForm] = useState(() => ({
     title: auction.title || '',
     description: auction.description || '',
     category: auction.category || '',
@@ -22,14 +29,20 @@ export default function AuctionDetails({ auction, onSaved }) {
     pickup_town: auction.pickup_town || '',
     pickup_starts_at: toDateTimeLocal(auction.pickup_starts_at),
     pickup_ends_at: toDateTimeLocal(auction.pickup_ends_at),
-  })
+    ...(!savedWindow && offersPickup(auction.fulfillment_mode) ? defaultPickupWindow(closeLocal) || {} : {}),
+  }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   function handleChange(e) {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    if (name === 'pickup_starts_at' || name === 'pickup_ends_at') setPickupEdited(true)
+    setForm(prev => {
+      const next = { ...prev, [name]: value }
+      if (name === 'fulfillment_mode' && offersPickup(value) && !pickupEdited) Object.assign(next, defaultPickupWindow(closeLocal) || {})
+      return next
+    })
     setSuccess('')
   }
 
@@ -105,6 +118,7 @@ export default function AuctionDetails({ auction, onSaved }) {
           <div className="form-group">
             <label>Pickup Window Ends</label>
             <input name="pickup_ends_at" type="datetime-local" value={form.pickup_ends_at} onChange={handleChange} required />
+            {!pickupEdited && closeLocal && <p className="form-hint">Pre-filled from the auction's close to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>}
           </div>
         </>
       )}

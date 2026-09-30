@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import { defaultPickupWindow, toLocalInput, PICKUP_DAYS } from '../pickupWindow'
 import { resizeImageToBlob } from '../imageResize'
 import AiSpendCard from './AiSpendCard'
 import './HostDashboard.css'
@@ -10,9 +11,10 @@ const EMPTY_FORM = {
   fulfillment_mode: '', pickup_address: '', pickup_town: '', pickup_starts_at: '', pickup_ends_at: '',
 }
 
+// datetime-local wants LOCAL wall-clock time. (This used toISOString(), which is UTC: the default end showed
+// 4-5 hours off in Miami and was saved that way.)
 function dateTimeLocal(offsetMinutes = 30) {
-  const d = new Date(Date.now() + offsetMinutes * 60000)
-  return d.toISOString().slice(0, 16)
+  return toLocalInput(new Date(Date.now() + offsetMinutes * 60000))
 }
 
 function fmtDate(iso) {
@@ -63,8 +65,19 @@ export default function HostDashboard() {
 
   useEffect(() => { loadAuctions() }, [])
 
+  // The pickup window follows the auction's close (close -> close + 7 days) until the admin edits either date.
+  const [pickupEdited, setPickupEdited] = useState(false)
   function handleChange(e) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    const { name, value } = e.target
+    if (name === 'pickup_starts_at' || name === 'pickup_ends_at') setPickupEdited(true)
+    setForm(prev => {
+      const next = { ...prev, [name]: value }
+      const offersPickup = next.fulfillment_mode === 'pickup' || next.fulfillment_mode === 'both'
+      if ((name === 'fulfillment_mode' || name === 'ends_at') && offersPickup && !pickupEdited) {
+        Object.assign(next, defaultPickupWindow(next.ends_at) || {})
+      }
+      return next
+    })
   }
 
   function closeCreate() {
@@ -109,6 +122,7 @@ export default function HostDashboard() {
       }
       setShowCreate(false)
       setForm({ ...EMPTY_FORM, ends_at: dateTimeLocal(STANDARD_DEFAULT_OFFSET) })
+      setPickupEdited(false)
       navigate(`/host/auction/${created.id}/lots`)
     } catch (err) {
       setError(err.message)
@@ -305,6 +319,7 @@ export default function HostDashboard() {
                     <div className="form-group">
                       <label>Pickup Window Ends *</label>
                       <input name="pickup_ends_at" type="datetime-local" value={form.pickup_ends_at} onChange={handleChange} required />
+                      <p className="form-hint">Pre-filled from the auction's close to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>
                     </div>
                   </div>
                   <p style={{fontSize:'0.8rem',opacity:0.7}}>Pickup must end after the auction closes.</p>

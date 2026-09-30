@@ -90,7 +90,7 @@ At the close of each auction you choose **local pickup** or **shipping**.
 
 Pickup is in [PICKUP TOWN] during the pickup window stated on the auction. The
 exact address is in your winning-bid email and on your order page.
-**The pickup window is 3 days from the close of the auction**, with exact dates
+**The pickup window is 7 days from the close of the auction**, with exact dates
 and times shown on the auction page before you bid and repeated in your
 winning-bid email.
 
