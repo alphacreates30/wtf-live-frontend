@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { api } from '../api'
 import './BulkLotUpload.css'
+import { sortFilesByShootingOrder, moveInOrder } from '../photoOrder'
 
 // Bulk lot creation.
 //
@@ -66,11 +67,10 @@ const isJunk = f => f.name.startsWith('.') || /^(thumbs\.db|desktop\.ini)$/i.tes
 
 // Grouping assumes shooting order (each lot is a burst, range-selected first
 // to last). A drop's order is whatever the OS hands over, so every batch is
-// sorted. lastModified is the shutter time on camera copies, or the copy time
-// on downloads/exports (which still copy in sequence); the numeric name
-// tie-break (IMG_0712 < IMG_0713, 9 < 10) covers identical timestamps.
-const byShootingOrder = (a, b) =>
-  a.lastModified - b.lastModified || a.name.localeCompare(b.name, undefined, { numeric: true })
+// sorted by the photo's own date taken (EXIF, read here before the upload
+// strips it), then file name (IMG_8101 before IMG_8102), then last-modified -
+// see photoOrder.js. Last-modified alone broke for Drive copies, whose file
+// times are sync times. The host can still drag photos into any order.
 
 function entryFile(entry) {
   return new Promise((resolve, reject) => entry.file(resolve, reject))
@@ -128,7 +128,11 @@ const newLot = (photoIdxs, condition) => ({
 
 export default function BulkLotUpload({ auctionId, onDone }) {
   const [photos, setPhotos] = useState([])        // { thumb, name }
-  const [ungrouped, setUngrouped] = useState([])  // photo indices, upload order
+  const [ungrouped, setUngrouped] = useState([])  // photo indices, in display order
+  // Display order of every photo (indices). Starts as shooting order; dragging a photo changes it. Photos returned
+  // from a lot go back to their place in it, so a manual reorder survives ungrouping.
+  const [order, setOrder] = useState([])
+  const byOrder = useCallback(o => { const rank = new Map(o.map((id, i) => [id, i])); return (a, b) => rank.get(a) - rank.get(b) }, [])
   const [lots, setLots] = useState([])
   const [selected, setSelected] = useState(new Set())
   const [anchor, setAnchor] = useState(null)
@@ -177,9 +181,10 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       setError(`That's ${files.length} photos. Keep batches at or under ${PHOTO_SOFT_CAP} and split the rest into a second batch.`)
       return
     }
-    files.sort(byShootingOrder)
-    setNotice(notes.join(' '))
     setError(''); setBusy('reading')
+    setProgress({ done: 0, total: files.length, label: 'Sorting by date taken' })
+    files = await sortFilesByShootingOrder(files)
+    setNotice(notes.join(' '))
     setProgress({ done: 0, total: files.length, label: 'Reading photos' })
     filesRef.current = files
 
@@ -194,6 +199,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     }
     setPhotos(thumbs)
     setUngrouped(thumbs.map((_, i) => i))
+    setOrder(thumbs.map((_, i) => i))
     setLots([])
     setSelected(new Set())
     setAnchor(null)
@@ -284,6 +290,94 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     setAnchor(null)
   }, [])
 
+  // ---- Reordering (before grouping) ----
+  // Drag a photo onto another to put it before or after it. Mouse: press and move. Touch: press and hold, then
+  // move (a quick swipe still scrolls). Keyboard: Alt + arrow keys on a focused photo.
+  const reorder = useCallback((id, targetId, after) => {
+    setOrder(prev => {
+      const next = moveInOrder(prev, id, targetId, after)
+      setUngrouped(u => [...u].sort(byOrder(next)))
+      return next
+    })
+  }, [byOrder])
+
+  const gridRef = useRef(null)
+  const drag = useRef(null)          // { id, pointerId, type, x0, y0, active, timer, target, after }
+  const suppressClick = useRef(false)
+  const [dragView, setDragView] = useState(null)   // { id, x, y, target, after } while dragging
+
+  function dropTargetAt(x, y) {
+    const el = document.elementFromPoint(x, y)?.closest?.('.blu-cell[data-idx]')
+    if (!el || !gridRef.current?.contains(el)) return null
+    const r = el.getBoundingClientRect()
+    return { target: Number(el.dataset.idx), after: x > r.left + r.width / 2 }
+  }
+  function startDrag(d) {
+    d.active = true
+    try { gridRef.current?.setPointerCapture?.(d.pointerId) } catch { /* not all browsers */ }
+    if (d.type === 'touch') navigator.vibrate?.(15)
+    setDragView({ id: d.id, x: d.x, y: d.y, target: null, after: false })
+  }
+  function onCellPointerDown(e, idx) {
+    if (e.button !== undefined && e.button !== 0) return
+    const d = { id: idx, pointerId: e.pointerId, type: e.pointerType, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, active: false }
+    if (e.pointerType === 'touch') d.timer = setTimeout(() => { if (drag.current === d) startDrag(d) }, 350)
+    drag.current = d
+  }
+  function onGridPointerMove(e) {
+    const d = drag.current
+    if (!d || e.pointerId !== d.pointerId) return
+    d.x = e.clientX; d.y = e.clientY
+    const moved = Math.hypot(e.clientX - d.x0, e.clientY - d.y0)
+    if (!d.active) {
+      if (d.type === 'touch') { if (moved > 10) { clearTimeout(d.timer); drag.current = null } return }   // a swipe: let it scroll
+      if (moved > 6) startDrag(d); else return
+    }
+    const t = dropTargetAt(e.clientX, e.clientY)
+    d.target = t && t.target !== d.id ? t.target : null
+    d.after = t ? t.after : false
+    setDragView({ id: d.id, x: e.clientX, y: e.clientY, target: d.target, after: d.after })
+    // Near the grid's top or bottom edge: scroll it, so a long batch can be crossed in one drag.
+    const g = gridRef.current
+    if (g) {
+      const r = g.getBoundingClientRect()
+      if (e.clientY < r.top + 40) g.scrollTop -= 12
+      else if (e.clientY > r.bottom - 40) g.scrollTop += 12
+    }
+  }
+  function onGridPointerUp(e) {
+    const d = drag.current
+    if (!d || e.pointerId !== d.pointerId) return
+    clearTimeout(d.timer)
+    drag.current = null
+    if (d.active) {
+      suppressClick.current = true               // the click that follows a drag is not a selection
+      setTimeout(() => { suppressClick.current = false }, 0)
+      if (d.target != null) reorder(d.id, d.target, d.after)
+      setDragView(null)
+    }
+  }
+  // While a touch drag is on, the page must not scroll under the finger.
+  useEffect(() => {
+    const g = gridRef.current
+    if (!g) return
+    const stop = e => { if (drag.current?.active) e.preventDefault() }
+    g.addEventListener('touchmove', stop, { passive: false })
+    return () => g.removeEventListener('touchmove', stop)
+  })
+  function onCellKeyDown(e, idx) {
+    // Space selects the focused photo. Enter does too, but only when nothing is selected yet: with a selection,
+    // Enter must reach the screen's own "Enter groups" (click first, click last, Enter).
+    if (e.key === ' ' || (e.key === 'Enter' && !selected.size)) { e.preventDefault(); e.stopPropagation(); toggleSelect(idx); return }
+    if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return
+    e.preventDefault()
+    const pos = ungrouped.indexOf(idx)
+    const other = ungrouped[pos + (e.key === 'ArrowLeft' ? -1 : 1)]
+    if (other == null) return
+    reorder(idx, other, e.key === 'ArrowRight')
+    requestAnimationFrame(() => gridRef.current?.querySelector(`[data-idx="${idx}"]`)?.focus())
+  }
+
   // Enter groups, Escape clears. At hundreds of lots per batch, reaching for
   // the mouse after every range selection adds up. Only suppressed when focus
   // is on a text field inside this component (e.g. a lot's title/description) -
@@ -329,7 +423,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
   }
 
   function ungroupLot(li) {
-    setUngrouped(prev => [...prev, ...lots[li].photoIdxs].sort((a, b) => a - b))
+    setUngrouped(prev => [...prev, ...lots[li].photoIdxs].sort(byOrder(order)))
     setLots(prev => prev.filter((_, i) => i !== li))
   }
 
@@ -338,7 +432,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       const next = prev.map((l, i) => i === li ? { ...l, photoIdxs: l.photoIdxs.filter(p => p !== pi) } : l)
       return next.filter(l => l.photoIdxs.length)
     })
-    setUngrouped(prev => [...prev, pi].sort((a, b) => a - b))
+    setUngrouped(prev => [...prev, pi].sort(byOrder(order)))
   }
 
   function updateLot(i, patch) {
@@ -550,7 +644,8 @@ export default function BulkLotUpload({ auctionId, onDone }) {
               <strong>{ungrouped.length} ungrouped photo{ungrouped.length !== 1 ? 's' : ''}</strong>
               <span className="blu-bucket-hint">
                 Click the first photo of a lot, then click the last — everything between selects.
-                Press <b>Enter</b> to group, <b>Esc</b> to clear.
+                Press <b>Enter</b> to group, <b>Esc</b> to clear. Sorted by date taken; drag a photo to move it
+                (on a phone, press and hold, then drag).
               </span>
             </div>
             <div className="blu-bucket-actions">
@@ -576,20 +671,44 @@ export default function BulkLotUpload({ auctionId, onDone }) {
             </div>
           </div>
 
-          <div className="blu-grid">
-            {ungrouped.map(idx => (
+          <div
+            className={`blu-grid${dragView ? ' is-dragging' : ''}`}
+            ref={gridRef}
+            onPointerMove={onGridPointerMove}
+            onPointerUp={onGridPointerUp}
+            onPointerCancel={onGridPointerUp}
+          >
+            {ungrouped.map((idx, pos) => (
               <div
                 key={idx}
-                className={`blu-cell ${selected.has(idx) ? 'sel' : ''} ${anchor === idx ? 'anchor' : ''}`}
-                onClick={() => toggleSelect(idx)}
+                data-idx={idx}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selected.has(idx)}
+                aria-label={`Photo ${pos + 1}: ${photos[idx]?.name || ''}. Alt and arrow keys move it.`}
+                className={[
+                  'blu-cell', selected.has(idx) && 'sel', anchor === idx && 'anchor',
+                  dragView?.id === idx && 'dragging',
+                  dragView?.target === idx && (dragView.after ? 'drop-after' : 'drop-before'),
+                ].filter(Boolean).join(' ')}
+                onPointerDown={e => onCellPointerDown(e, idx)}
+                onClick={() => { if (!suppressClick.current) toggleSelect(idx) }}
+                onKeyDown={e => onCellKeyDown(e, idx)}
+                onContextMenu={e => { if (drag.current) e.preventDefault() }}
               >
-                {photos[idx]?.thumb
-                  ? <img src={photos[idx].thumb} alt={photos[idx].name} draggable={false} />
-                  : <div className="blu-cell-fail">!</div>}
-                <span className="blu-cell-n">{idx + 1}</span>
+                <div className="blu-cell-img">
+                  {photos[idx]?.thumb
+                    ? <img src={photos[idx].thumb} alt="" draggable={false} />
+                    : <div className="blu-cell-fail">!</div>}
+                  <span className="blu-cell-n">{pos + 1}</span>
+                </div>
+                <span className="blu-cell-name" title={photos[idx]?.name}>{photos[idx]?.name}</span>
               </div>
             ))}
           </div>
+          {dragView && photos[dragView.id]?.thumb && (
+            <img className="blu-drag-ghost" src={photos[dragView.id].thumb} alt="" style={{ left: dragView.x, top: dragView.y }} />
+          )}
         </div>
       )}
 
