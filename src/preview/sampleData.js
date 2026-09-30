@@ -104,8 +104,8 @@ export function sampleAuctions(open, nowMs = Date.now()) {
   ]
 }
 
-// The lot page for a sample lot (/a/sample-<key>/lot/<n>), shaped exactly like GET /lots/:id, /lots/:id/bids and
-// /lots/:id/related. null for anything that isn't a lot of a sample open auction. The page disables bidding.
+// The lot page for a sample lot (/a/sample-<key>/lot/<n>), shaped exactly like GET /lots/:id and /lots/:id/related
+// (no bid list: the public never sees one). null for anything that isn't a lot of a sample open auction. The page disables bidding.
 const inc = p => (p < 50 ? 1 : p < 100 ? 2 : p < 200 ? 5 : p < 500 ? 10 : p < 1000 ? 25 : 50)
 const cents = n => Math.round(n * 100) / 100
 export function sampleLotPage(slug, n, nowMs = Date.now()) {
@@ -118,12 +118,6 @@ export function sampleLotPage(slug, n, nowMs = Date.now()) {
   const prem = Math.round(Math.round(shown * 100) * 15 / 100)
   const first = lot.bid_count > 0 ? cents(lot.current_bid + inc(lot.current_bid)) : 1
   const nav = l => (l ? { id: l.id, number: l.position + 1, title: l.title } : null)
-  // Two sample bidders taking turns, the last bid at the current price.
-  const bids = Array.from({ length: lot.bid_count }, (_, i) => ({
-    amount: i === lot.bid_count - 1 ? lot.current_bid : Math.max(1, Math.round((lot.current_bid * (i + 1)) / lot.bid_count)),
-    at: iso(nowMs - (lot.bid_count - i) * 47 * MIN),
-    bidder: (lot.bid_count - 1 - i) % 2 === 0 ? 'Bidder A' : 'Bidder B', you: false,
-  })).reverse()
   return {
     sample: true,
     lot: {
@@ -137,12 +131,11 @@ export function sampleLotPage(slug, n, nowMs = Date.now()) {
       price: { current_bid: current, opening_bid: current == null ? 1 : null, bid_count: lot.bid_count, premium_pct: 15,
         premium_amount: prem / 100, total_with_premium: (Math.round(shown * 100) + prem) / 100, next_bids: [first, cents(first + inc(first))] },
       time: { ends_at: lot.ends_at, soft_close_minutes: 2 },
-      fulfilment: { pickup: { free: true, city: 'Sample City', starts_at: null, ends_at: null },
+      fulfilment: { pickup: { free: true, town: 'Sample Town', starts_at: null, ends_at: null },
         shipping: { priced: 'after_auction', estimate: null, carrier: 'USPS', country: 'US' } },
       nav: { prev: nav(lots[n - 2]), next: nav(lots[n]) },
       contact_email: 'sample@example.invalid',
     },
-    bids: { bid_count: lot.bid_count, bids },
     related: {
       server_now: iso(nowMs),
       more_from_auction: lots.filter(l => l.id !== lot.id).sort((x, y) => Date.parse(x.ends_at) - Date.parse(y.ends_at)).slice(0, 8),

@@ -77,12 +77,6 @@ function AuctionCard({ auction }) {
               <div className="auction-countdown">{countdown}</div>
             </div>
           )}
-          {auction.mode !== 'standard' && auction.leading_bidder && (
-            <div>
-              <div className="auction-label">Leading</div>
-              <div className="auction-leader">@{auction.leading_bidder}</div>
-            </div>
-          )}
         </div>
       </div>
     </Link>

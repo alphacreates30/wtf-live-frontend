@@ -607,3 +607,6 @@
 .sar-follow { margin-top: var(--space-3); }
 .sar-modal-watch { margin: 0 0 var(--space-3); }
 .sar-card-watch { position: absolute; right: 8px; bottom: 8px; z-index: 2; background: var(--surface); }
+
+/* The viewer's own standing on a card (B7: never anyone else's). Outbid is "act now": red. */
+.sar-card-outbid-you { font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--accent); margin-top: var(--space-2); }

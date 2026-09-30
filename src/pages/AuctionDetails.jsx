@@ -19,6 +19,7 @@ export default function AuctionDetails({ auction, onSaved }) {
     buyers_premium_pct: auction.buyers_premium_pct ?? 15,
     fulfillment_mode: auction.fulfillment_mode || 'shipping',
     pickup_address: auction.pickup_address || '',
+    pickup_town: auction.pickup_town || '',
     pickup_starts_at: toDateTimeLocal(auction.pickup_starts_at),
     pickup_ends_at: toDateTimeLocal(auction.pickup_ends_at),
   })
@@ -37,8 +38,8 @@ export default function AuctionDetails({ auction, onSaved }) {
   async function handleSave(e) {
     e.preventDefault()
     setSaving(true); setError(''); setSuccess('')
-    if (needsPickup && (!form.pickup_address || !form.pickup_starts_at || !form.pickup_ends_at)) {
-      setError('Pickup address, start, and end are required for this fulfilment method')
+    if (needsPickup && (!form.pickup_address || !form.pickup_town || !form.pickup_starts_at || !form.pickup_ends_at)) {
+      setError('Pickup address, town, start, and end are required for this fulfilment method')
       setSaving(false)
       return
     }
@@ -50,6 +51,7 @@ export default function AuctionDetails({ auction, onSaved }) {
         buyers_premium_pct: Number(form.buyers_premium_pct),
         fulfillment_mode: form.fulfillment_mode,
         pickup_address: needsPickup ? form.pickup_address : '',
+        pickup_town: needsPickup ? form.pickup_town : '',
         pickup_starts_at: needsPickup ? new Date(form.pickup_starts_at).toISOString() : '',
         pickup_ends_at: needsPickup ? new Date(form.pickup_ends_at).toISOString() : '',
       })
@@ -89,6 +91,12 @@ export default function AuctionDetails({ auction, onSaved }) {
           <div className="form-group">
             <label>Pickup Address</label>
             <input name="pickup_address" value={form.pickup_address} onChange={handleChange} placeholder="123 Main St, City, ST" required />
+            <p className="form-hint">Only winners who chose pickup get the street address (their win email and order page).</p>
+          </div>
+          <div className="form-group">
+            <label>Pickup Town</label>
+            <input name="pickup_town" value={form.pickup_town} onChange={handleChange} placeholder="Miami, FL" maxLength={80} required />
+            <p className="form-hint">What everyone else sees before the auction ends.</p>
           </div>
           <div className="form-group">
             <label>Pickup Window Starts</label>

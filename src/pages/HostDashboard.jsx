@@ -7,7 +7,7 @@ import './HostDashboard.css'
 
 const EMPTY_FORM = {
   title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
-  fulfillment_mode: '', pickup_address: '', pickup_starts_at: '', pickup_ends_at: '',
+  fulfillment_mode: '', pickup_address: '', pickup_town: '', pickup_starts_at: '', pickup_ends_at: '',
 }
 
 function dateTimeLocal(offsetMinutes = 30) {
@@ -80,7 +80,7 @@ export default function HostDashboard() {
       return
     }
     const needsPickup = form.fulfillment_mode === 'pickup' || form.fulfillment_mode === 'both'
-    if (needsPickup && (!form.pickup_address || !form.pickup_starts_at || !form.pickup_ends_at)) {
+    if (needsPickup && (!form.pickup_address || !form.pickup_town || !form.pickup_starts_at || !form.pickup_ends_at)) {
       setError('Pickup address, start, and end are required for this fulfilment method')
       return
     }
@@ -102,6 +102,7 @@ export default function HostDashboard() {
       if (needsPickup) {
         await api.updateAuction(created.id, {
           pickup_address: form.pickup_address,
+          pickup_town: form.pickup_town,
           pickup_starts_at: new Date(form.pickup_starts_at).toISOString(),
           pickup_ends_at: new Date(form.pickup_ends_at).toISOString(),
         })
@@ -291,6 +292,10 @@ export default function HostDashboard() {
                   <div className="form-group">
                     <label>Pickup Address *</label>
                     <input name="pickup_address" value={form.pickup_address} onChange={handleChange} placeholder="123 Main St, City, ST" required />
+                  </div>
+                  <div className="form-group">
+                    <label>Pickup Town * <span className="form-hint">(public; the street goes only to pickup winners)</span></label>
+                    <input name="pickup_town" value={form.pickup_town} onChange={handleChange} placeholder="Miami, FL" maxLength={80} required />
                   </div>
                   <div className="form-row">
                     <div className="form-group">

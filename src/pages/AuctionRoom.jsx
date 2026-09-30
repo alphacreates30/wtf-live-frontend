@@ -94,14 +94,16 @@ export default function AuctionRoom() {
     socket.on('chat_history', setChat)
     socket.on('viewer_count', setViewers)
 
+    // B7: a new bid carries the amount and whether it is YOU who now leads - never who else.
     socket.on('new_bid', (bid) => {
       currentItemBidRef.current = true
-      if (activeItemRef.current) activeItemRef.current = { ...activeItemRef.current, current_bid: bid.amount, leading_bidder: bid.username }
-      setBids(prev => [bid, ...prev])
-      setAuction(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
+      const lead = { current_bid: bid.amount, has_bid: true, you_lead: !!bid.you_lead }
+      if (activeItemRef.current) activeItemRef.current = { ...activeItemRef.current, ...lead }
+      if (isAdmin) setBids(prev => [bid, ...prev])
+      setAuction(prev => prev ? { ...prev, ...lead } : prev)
       setBidAmount(String(bid.amount + 1))
-      setActiveItem(prev => prev ? { ...prev, current_bid: bid.amount, leading_bidder: bid.username } : prev)
-      setRecentBidders(prev => [{ username: bid.username, amount: bid.amount }, ...prev.filter(b => b.username !== bid.username)].slice(0, 2))
+      setActiveItem(prev => prev ? { ...prev, ...lead } : prev)
+      setRecentBidders([{ you: !!bid.you_lead, amount: bid.amount }])
     })
 
     socket.on('new_chat', (msg) => {
@@ -115,11 +117,11 @@ export default function AuctionRoom() {
       setBidLoading(false)
     })
 
-    socket.on('auction_ended', ({ winner, final_bid }) => {
-      setAuction(prev => prev ? { ...prev, status: 'ended' } : prev)
+    socket.on('auction_ended', ({ final_bid, you_won }) => {
+      setAuction(prev => prev ? { ...prev, status: 'ended', you_lead: !!you_won } : prev)
       setChat(prev => [...prev, {
         id: 'ended', type: 'system',
-        text: `Auction ended! Winner: @${winner} with $${final_bid}`,
+        text: `Auction ended at $${final_bid}${you_won ? '. You won!' : '.'}`,
         created_at: new Date().toISOString()
       }])
     })
@@ -133,15 +135,17 @@ export default function AuctionRoom() {
       setAuction(prev => prev ? { ...prev, ends_at: new_ends_at } : prev)
     })
 
-    socket.on('item_activated', ({ item }) => {
+    socket.on('item_activated', ({ item: row, you_lead, pre_bid_count }) => {
       const prevItem = activeItemRef.current
-      if (prevItem && currentItemBidRef.current && prevItem.leading_bidder) {
-        setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), winner: prevItem.leading_bidder }])
+      if (prevItem && currentItemBidRef.current && prevItem.has_bid) {
+        setSoldItems(s => [...s, { title: prevItem.title, amount: Number(prevItem.current_bid), you: !!prevItem.you_lead }])
       }
-      currentItemBidRef.current = !!(item.leading_bidder)
+      // A lot opens with a leader only when it had pre-bids (live mode opens at the top one).
+      const item = { ...row, has_bid: pre_bid_count > 0, you_lead: !!you_lead }
+      currentItemBidRef.current = item.has_bid
       activeItemRef.current = item
       setActiveItem(item)
-      setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, leading_bidder: item.leading_bidder || null } : prev)
+      setAuction(prev => prev ? { ...prev, current_bid: item.current_bid || item.starting_bid, has_bid: item.has_bid, you_lead: item.you_lead } : prev)
       setBids([])
       setBidAmount(String(Math.floor(item.current_bid || item.starting_bid) + 1))
       setRecentBidders([])
@@ -154,8 +158,8 @@ export default function AuctionRoom() {
 
     socket.on('items_finished', () => {
       const lastItem = activeItemRef.current
-      if (lastItem && currentItemBidRef.current && lastItem.leading_bidder) {
-        setSoldItems(s => [...s, { title: lastItem.title, amount: Number(lastItem.current_bid), winner: lastItem.leading_bidder }])
+      if (lastItem && currentItemBidRef.current && lastItem.has_bid) {
+        setSoldItems(s => [...s, { title: lastItem.title, amount: Number(lastItem.current_bid), you: !!lastItem.you_lead }])
       }
       currentItemBidRef.current = false
       activeItemRef.current = null
@@ -334,8 +338,8 @@ export default function AuctionRoom() {
 
     // Include the currently active item in stats once its timer has ended
     // and it has a winning bid, so Gross Sales / Items Sold don't lag by one item.
-    const provisionalSoldItems = (activeItem && itemTimeLeft !== null && itemTimeLeft <= 0 && activeItem.leading_bidder)
-      ? [...soldItems, { title: activeItem.title, amount: Number(activeItem.current_bid), winner: activeItem.leading_bidder }]
+    const provisionalSoldItems = (activeItem && itemTimeLeft !== null && itemTimeLeft <= 0 && activeItem.has_bid)
+      ? [...soldItems, { title: activeItem.title, amount: Number(activeItem.current_bid), you: !!activeItem.you_lead }]
           : soldItems
 
   return (
@@ -391,8 +395,7 @@ export default function AuctionRoom() {
 <div className="ar-ns-center">
             {recentBidders.length > 0 ? (
               <div className="ar-ns-winner">
-                <span className="ar-ns-winner-label">Winning</span>
-                <span className="ar-ns-winner-name">@{recentBidders[0].username}</span>
+                <span className="ar-ns-winner-label">{recentBidders[0].you ? "You're winning" : 'Current bid'}</span>
                 <span className="ar-ns-winner-amt">${recentBidders[0].amount.toLocaleString()}</span>
               </div>
             ) : (
@@ -415,9 +418,7 @@ export default function AuctionRoom() {
           <div className="card ar-bid-panel">
             <div className="ar-current-label">Current Bid</div>
             <div className="ar-current-bid">${auction.current_bid.toLocaleString()}</div>
-            {auction.leading_bidder && (
-              <div className="ar-leading">Leading: <strong>@{auction.leading_bidder}</strong></div>
-            )}
+            {auction.you_lead && !isEnded && <div className="ar-leading"><strong>You're leading</strong></div>}
 
             {isLive && !isHost && (
               <form onSubmit={placeBid} className="ar-bid-form">
@@ -435,7 +436,7 @@ export default function AuctionRoom() {
 
             {isEnded && (
               <div className="ar-ended-msg">
-                Auction ended{auction.leading_bidder ? `  @${auction.leading_bidder} won${auction.current_bid.toLocaleString()}` : ''}
+                Auction ended{auction.you_lead ? `. You won at $${auction.current_bid.toLocaleString()}` : ''}
               </div>
             )}
           
@@ -486,8 +487,8 @@ export default function AuctionRoom() {
             </div>
           )}
 
-          {/* Bid history */}
-          <div className="card ar-bids">
+          {/* Bid history: the admin only (B7). */}
+          {isAdmin && <div className="card ar-bids">
             <h3 className="ar-section-title">Bid History</h3>
             {bids.length === 0 ? (
               <p className="ar-empty">No bids yet.</p>
@@ -495,13 +496,13 @@ export default function AuctionRoom() {
               <ul className="ar-bid-list">
                 {bids.map((bid, i) => (
                   <li key={bid.id || i} className={`ar-bid-item ${i === 0 ? 'top' : ''}`}>
-                    <span className="ar-bid-user">@{bid.username}</span>
+                    <span className="ar-bid-user">{bid.username ? `@${bid.username}` : 'Bid'}</span>
                     <span className="ar-bid-amount">${bid.amount.toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </div>}
         </div>
 
         {/* Right: chat */}

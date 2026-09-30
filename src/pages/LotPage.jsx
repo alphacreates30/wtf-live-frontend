@@ -12,8 +12,9 @@ import '../components/home/home.css'
 import './LotPage.css'
 
 // A lot's own page (wtf-handoff LOT_PAGE_BRIEF.md): /a/<auction slug>/lot/<n>. Everything comes from the lot API
-// (API.md): the public GET /lots/by-number (same for everyone), the buyer's own GET /lots/:id/me, the anonymised
-// history and related lots. The page only renders: the server is the only judge of prices and minimums.
+// (API.md): the public GET /lots/by-number (same for everyone), the buyer's own GET /lots/:id/me and own bids
+// (the admin: every bid), and related lots; bidders are never identified to the public (B7). The page only
+// renders: the server is the only judge of prices and minimums.
 const ADMIN_USERNAME = 'whatthefind'
 const POLL_MS = 5000
 
@@ -73,7 +74,7 @@ export default function LotPage() {
         if (cancelled) return
         const s = mod.sampleLotPage(slug, Number(n))
         if (!s) { setMissing(true); return }
-        setSample(s); setData(s.lot); setHistory(s.bids); setRelated(s.related)
+        setSample(s); setData(s.lot); setRelated(s.related)
       })
       return () => { cancelled = true }
     }
@@ -277,7 +278,7 @@ export default function LotPage() {
               {/* Premium is always beside the price (BRAND.md), computed by the server with the invoice's maths. */}
               {lot.status !== 'unsold' && <p className="lp-price-prem"><span className="wtf-price">{money(price.total_with_premium)}</span> with {pct}% buyer's premium</p>}
             </> : <p className="lp-price-label">Closed without a sale</p>}
-            {price.bid_count > 0 && <p className="lp-bidcount">{price.bid_count === 1 ? '1 bid' : `${price.bid_count} bids`}</p>}
+            <p className="lp-bidcount">{price.bid_count === 0 ? 'No bids yet' : price.bid_count === 1 ? '1 bid' : `${price.bid_count} bids`}</p>
           </div>
 
           {token && !isAdmin && me && <StatusLine status={me.status} myMax={me.my_max} open={open} />}
@@ -354,7 +355,7 @@ export default function LotPage() {
               <li>
                 <p className="lp-ship-h">Local pickup · Free</p>
                 <p>
-                  {fulfilment.pickup.city ? `In ${fulfilment.pickup.city}. ` : ''}The exact address is sent to winners.
+                  {fulfilment.pickup.town ? `In ${fulfilment.pickup.town}. ` : ''}The exact address is sent to winners who chose pickup.
                   {fulfilment.pickup.starts_at && fulfilment.pickup.ends_at && ` Pickup window: ${fmtShort(fulfilment.pickup.starts_at)} to ${fmtShort(fulfilment.pickup.ends_at)}.`}
                 </p>
               </li>
@@ -373,30 +374,49 @@ export default function LotPage() {
           {fulfilment.pickup && fulfilment.shipping && <p className="lp-muted lp-small">You choose pickup or shipping before your first bid in this auction.</p>}
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-hist-h">
-          <details className="lp-history" open={historyOpen} onToggle={e => setHistoryOpen(e.currentTarget.open)}>
-            <summary><h2 id="lp-hist-h" className="lp-h2">Bid history ({price.bid_count})</h2></summary>
-            {!history ? <p className="lp-muted">Loading…</p>
-              : history.error ? <p className="lp-muted">Could not load the history. Try again in a moment.</p>
-              : history.bids.length === 0 ? <p className="lp-muted">No bids yet.</p>
-              : (
-                <table className="lp-hist-table">
-                  <caption className="visually-hidden">Bids on lot {lot.number}, newest first. Bidders are anonymous.</caption>
-                  <thead><tr><th scope="col">Bidder</th><th scope="col">Bid</th><th scope="col">Time</th></tr></thead>
-                  <tbody>
-                    {history.bids.map((b, i) => (
-                      <tr key={i} className={b.you ? 'you' : ''}>
-                        <td>{b.bidder}</td>
-                        <td className="tabular">{money(b.amount)}</td>
-                        <td className="tabular">{fmtShort(b.at)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            <p className="lp-muted lp-small">Every bid that set the price, newest first. Bidders stay anonymous and max bids are never shown.</p>
-          </details>
-        </section>
+        {/* No public bid list (B7): the public sees the price and the count. A logged-in buyer sees their OWN bids;
+            the admin sees everyone's, with names and maxes. */}
+        {token && !isSample && (
+          <section className="lp-section" aria-labelledby="lp-hist-h">
+            <details className="lp-history" open={historyOpen} onToggle={e => setHistoryOpen(e.currentTarget.open)}>
+              <summary><h2 id="lp-hist-h" className="lp-h2">{isAdmin ? `Bid history, admin only (${price.bid_count})` : 'Your bids on this lot'}</h2></summary>
+              {!history ? <p className="lp-muted">Loading…</p>
+                : history.error ? <p className="lp-muted">Could not load the bids. Try again in a moment.</p>
+                : history.bids.length === 0 ? <p className="lp-muted">{isAdmin ? 'No bids yet.' : "You haven't bid on this lot."}</p>
+                : isAdmin ? (
+                  <table className="lp-hist-table">
+                    <caption className="visually-hidden">Every bid on lot {lot.number}, newest first (admin only).</caption>
+                    <thead><tr><th scope="col">Time</th><th scope="col">Bidder</th><th scope="col">Price</th><th scope="col">Max</th><th scope="col">Leading</th></tr></thead>
+                    <tbody>
+                      {history.bids.map((b, i) => (
+                        <tr key={i}>
+                          <td className="tabular">{fmtShort(b.at)}</td>
+                          <td>@{b.bidder}</td>
+                          <td className="tabular">{money(b.price)}</td>
+                          <td className="tabular">{b.max != null ? money(b.max) : '–'}</td>
+                          <td>{b.leader ? `@${b.leader}` : '–'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <table className="lp-hist-table">
+                    <caption className="visually-hidden">Your bids on lot {lot.number}, newest first.</caption>
+                    <thead><tr><th scope="col">Your bid</th><th scope="col">Time</th></tr></thead>
+                    <tbody>
+                      {history.bids.map((b, i) => (
+                        <tr key={i}>
+                          <td className="tabular">{money(b.amount)}</td>
+                          <td className="tabular">{fmtShort(b.at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              {!isAdmin && <p className="lp-muted lp-small">Only you can see these. Other bidders are never shown, and neither is anyone's max.</p>}
+            </details>
+          </section>
+        )}
       </div>
 
       <nav className="lp-prevnext" aria-label="Previous and next lot">

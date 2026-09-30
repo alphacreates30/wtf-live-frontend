@@ -240,6 +240,9 @@ input[type="checkbox"], input[type="radio"] {
   h3 { font-size: var(--fs-20); }
 }
 
+/* A short note under (or beside) a form field. Plain case, even inside an uppercase label. */
+.form-hint { font-size: var(--fs-12); color: var(--muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+
 /* For screen readers only. */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

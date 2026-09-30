@@ -3,12 +3,8 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { api } from '../api'
 import { lotPriceLabel } from '../lotPrice'
 
-// Is the viewer this lot's leader (or, once sold, its winner)? Only a logged-in
-// viewer can be: logged out, username and leading_bidder can both be null, and
-// null === null showed "You're leading" on every open lot with no bids.
-function isViewerLeader(item, username, token) {
-  return Boolean(token && username && item.leading_bidder && item.leading_bidder === username)
-}
+// The public lot rows name nobody (B7), so the viewer's own standing per lot comes from
+// GET /auction/:id/my-standing: winning | outbid | no_bid | won | lost | closed. Logged out: none.
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import './StandardAuctionRoom.css'
@@ -28,8 +24,9 @@ function FulfillmentNote({ auction }) {
   const windowLabel = auction.pickup_starts_at && auction.pickup_ends_at
     ? `${fmtPickupDate(auction.pickup_starts_at)} – ${fmtPickupDate(auction.pickup_ends_at)}`
     : null
+  // The town only: the street address goes to winners who chose pickup (B6).
   const pickupDetail = [
-    auction.pickup_address,
+    auction.pickup_town ? `In ${auction.pickup_town}; the exact address is sent to winners` : 'The exact address is sent to winners',
     windowLabel ? `Pickup window: ${windowLabel}` : null,
   ].filter(Boolean).join(' · ')
 
@@ -100,12 +97,17 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
     }
   }, [id])
 
+  const [standing, setStanding] = useState({})
   const loadItems = useCallback(async () => {
     try {
-      const data = await api.getStandardStatus(id)
+      const [data, mine] = await Promise.all([
+        api.getStandardStatus(id),
+        token && !isAdmin ? api.getMyStanding(id).catch(() => null) : null,
+      ])
       setItems(data || [])
+      if (mine) setStanding(mine.lots || {})
     } catch (e) {}
-  }, [id])
+  }, [id, token, isAdmin])
 
   useEffect(() => {
     if (!initialAuction) loadAuction()
@@ -253,7 +255,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
         <div className="sar-grid">
           {sorted.map(item => {
             const closed = item.status !== 'open' || (item.ends_at && new Date(item.ends_at).getTime() <= now)
-            const isLeading = isViewerLeader(item, username, token)
+            const mine = standing[item.id]
             const floor = parseFloat(item.current_bid || item.starting_bid || 0)
             const timeLabel = !closed ? timeLeftLabel(item.ends_at, now) : null
             const urgentCountdown = timeLabel && /^\d+s$/.test(timeLabel)
@@ -338,17 +340,21 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                     )}
                   </div>
 
-                  {isLeading && !closed && (
-                    <p className="sar-card-leading-you">You're leading</p>
+                  {mine === 'winning' && !closed && (
+                    <p className="sar-card-leading-you">You're winning</p>
                   )}
-                  {closed && item.status === 'sold' && item.leading_bidder && (
-                    isLeading ? (
+                  {mine === 'outbid' && !closed && (
+                    <p className="sar-card-outbid-you">You've been outbid</p>
+                  )}
+                  {closed && item.status === 'sold' && (
+                    mine === 'won' ? (
                       <p className="sar-card-winner sar-won-you">
                         <img src="/brand/state-won.svg" alt="" width="32" height="32" />
                         Won by you!
                       </p>
                     ) : (
-                      <p className="sar-card-winner">Won by @{item.leading_bidder}</p>
+                      // The admin (full rows) sees who; everyone else only that it sold.
+                      <p className="sar-card-winner">{isAdmin && item.leading_bidder ? `Won by @${item.leading_bidder}` : 'Sold'}</p>
                     )
                   )}
                   {closed && item.status === 'unsold' && (

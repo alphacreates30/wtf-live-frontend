@@ -131,6 +131,7 @@ export const api = {
     return early || request(`/lots/by-number/${encodeURIComponent(slug)}/${encodeURIComponent(n)}`)
   },
   getLotMe: (id) => request(`/lots/${id}/me`),
+  // Login only: a buyer's own bids on the lot; the admin gets everyone's (API.md).
   getLotBids: (id) => request(`/lots/${id}/bids`),
   getLotRelated: (id) => request(`/lots/${id}/related`),
   signup: (email, website = '') => request('/signup', { method: 'POST', body: JSON.stringify({ email, website }) }),
@@ -159,6 +160,7 @@ export const api = {
   updateFulfillmentChoice: (auctionId, fulfillment_choice) =>
     request(`/auction/${auctionId}/fulfillment-choice`, { method: 'PATCH', body: JSON.stringify({ fulfillment_choice }) }),
 
+  // The admin gets the rows; everyone else just { bid_count } (B7).
   getBids: (id) => request(`/auction/${id}/bids`),
   getChat: (id) => request(`/auction/${id}/chat`),
 
@@ -194,6 +196,8 @@ export const api = {
     placeStandardBid: (auctionId, itemId, max_amount) =>
           request(`/auction/${auctionId}/items/${itemId}/bid`, { method: 'POST', body: JSON.stringify({ max_amount }) }),
     getStandardStatus: (auctionId) => request(`/auction/${auctionId}/items/standard-status`),
+    // The logged-in buyer's own standing on every lot of an auction (the public rows name nobody).
+    getMyStanding: (auctionId) => request(`/auction/${auctionId}/my-standing`),
   
 
 

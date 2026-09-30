@@ -201,6 +201,17 @@ export default function MyOrders() {
                 )}
               </div>
             )}
+            {/* Where to collect: only a winner who chose pickup gets the street address (B6). */}
+            {first.fulfillment_choice === 'pickup' && first.pickup?.address && (
+              <div className="order-block order-line">
+                <span>
+                  Pick up at <strong>{first.pickup.address}</strong>
+                  {first.pickup.starts_at && first.pickup.ends_at && (
+                    <> between {new Date(first.pickup.starts_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} and {new Date(first.pickup.ends_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</>
+                  )}. Lots not collected in the window are forfeited.
+                </span>
+              </div>
+            )}
             {changeError?.auctionId === first.auction_id && (
               <p className="error-msg inline-error">{changeError.message}</p>
             )}

@@ -52,7 +52,7 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
             <>
               <li>
                 <strong>Pickup:{pickupWindow ? ` ${pickupWindow}` : ''}</strong>
-                {auction.pickup_address ? ` at ${auction.pickup_address}.` : '.'}
+                {auction.pickup_town ? ` in ${auction.pickup_town}` : ''}. The exact address is sent to you if you win.
               </li>
               <li className="terms-modal-warning">
                 Lots not collected within the pickup window are <strong>forfeited with no refund</strong>.
@@ -74,7 +74,7 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
               <span>
                 <strong>Local pickup</strong>
                 <br />
-                {pickupWindow ? `${pickupWindow}` : 'Window to be confirmed'}{auction.pickup_address ? ` at ${auction.pickup_address}` : ''}.{' '}
+                {pickupWindow ? `${pickupWindow}` : 'Window to be confirmed'}{auction.pickup_town ? ` in ${auction.pickup_town}` : ''}. The exact address is sent to you if you win.{' '}
                 <span className="terms-modal-warning">Lots not collected in this window are forfeited with no refund.</span>
               </span>
             </label>
