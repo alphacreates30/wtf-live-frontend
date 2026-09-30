@@ -36,7 +36,7 @@ function AuctionCard({ auction }) {
           so it gets an honest placeholder instead of collapsing. */}
       <div className="auction-card-img">
         {auction.image_url
-          ? <img src={auction.image_url} alt={auction.title} />
+          ? <img src={auction.thumb_url || auction.image_url} alt={auction.title} loading="lazy" />
           : (
             <div className="auction-card-img-empty">
               <img src="/logo-mark.svg" alt="" width="44" height="44" />

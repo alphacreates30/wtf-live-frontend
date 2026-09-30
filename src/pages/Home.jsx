@@ -82,8 +82,8 @@ export default function Home() {
           {comingNext.map(a => (
             <Link key={a.id} to={`/auction/${a.id}`} className="lc lc-auction">
               <div className="lc-img">
-                {a.image_url
-                  ? <img src={a.image_url} alt="" loading="lazy" decoding="async" width="400" height="300" />
+                {a.thumb_url || a.image_url
+                  ? <img src={a.thumb_url || a.image_url} alt="" loading="lazy" decoding="async" width="480" height="360" />
                   : <div className="lc-img-empty"><img src="/logo-mark.svg" alt="" width="36" height="36" /><span>Photography to follow</span></div>}
               </div>
               <div className="lc-body">

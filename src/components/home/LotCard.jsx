@@ -5,6 +5,8 @@ import { shortTimeLeft, money, lotHref, HOUR } from './clock'
 // auction's buyer's premium, and server `now`), so an app can rebuild it 1:1.
 // No watch star yet: the watch list is a separate build.
 export default function LotCard({ lot, premiumPct, now }) {
+  // The small WebP when there is one (F1a); otherwise the full photo.
+  const photo = lot.thumb_url || lot.image_url
   const msLeft = Date.parse(lot.ends_at) - now
   const closed = msLeft <= 0
   const finalHour = !closed && msLeft < HOUR
@@ -14,8 +16,8 @@ export default function LotCard({ lot, premiumPct, now }) {
   return (
     <Link to={lotHref(lot)} className="lc">
       <div className="lc-img">
-        {lot.image_url
-          ? <img src={lot.image_url} alt="" loading="lazy" decoding="async" width="400" height="300" />
+        {photo
+          ? <img src={photo} alt="" loading="lazy" decoding="async" width="480" height="360" />
           : (
             <div className="lc-img-empty">
               <img src="/logo-mark.svg" alt="" width="36" height="36" />

@@ -448,7 +448,8 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
               >
                 <div className="sar-card-img-wrap">
                   {item.image_url
-                    ? <img src={item.image_url} alt={item.title} className="sar-card-img" loading="lazy" />
+                    // Grid card: the small WebP when there is one (F1a). The lot modal keeps the full photo.
+                    ? <img src={item.thumb_url || item.image_url} alt={item.title} className="sar-card-img" loading="lazy" />
                     : <div className="sar-card-no-img">
                         <img src="/logo-mark.svg" alt="" width="40" height="40" />
                         <span>Photography to follow</span>

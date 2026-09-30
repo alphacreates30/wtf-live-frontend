@@ -45,7 +45,10 @@ export default function AuctionHero({ featured, now }) {
 
 // Desktop: one tall photo and up to four small ones. Phone: a swipeable 4:3
 // strip with dots. Never advances by itself.
-function Collage({ images, title }) {
+function Collage({ images: raw, title }) {
+  // { url, thumb_url } per photo (F1a); a plain URL string is still accepted.
+  // The collage shows the small WebP, falling back to the full photo.
+  const images = raw.map(i => (typeof i === 'string' ? i : i.thumb_url || i.url))
   const stripRef = useRef(null)
   const [active, setActive] = useState(0)
 
@@ -62,7 +65,7 @@ function Collage({ images, title }) {
             <img
               src={src}
               alt={i === 0 ? `From ${title}` : ''}
-              width="800" height="600"
+              width="480" height="360"
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchpriority={i === 0 ? 'high' : undefined}
               decoding="async"
