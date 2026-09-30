@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import './Listings.css'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { usePreview, PreviewSwitch } from '../preview/PreviewContext'
 
 const ADMIN_USERNAME = 'whatthefind'
 
@@ -37,12 +39,7 @@ function AuctionCard({ auction }) {
       <div className="auction-card-img">
         {auction.image_url
           ? <img src={auction.thumb_url || auction.image_url} alt={auction.title} loading="lazy" />
-          : (
-            <div className="auction-card-img-empty">
-              <img src="/logo-mark.svg" alt="" width="44" height="44" />
-              <span>Photography to follow</span>
-            </div>
-          )}
+          : <PhotoPlaceholder label={auction.placeholder_label || 'Photo coming soon'} seed={auction.id} />}
       </div>
       <div className="auction-card-body">
         <div className="auction-card-top">
@@ -100,6 +97,8 @@ export default function Listings() {
 
   const username = localStorage.getItem('wtf_username')
   const isAdmin = username === ADMIN_USERNAME
+  // Admin-only preview: sample auctions built into the page (nothing sent or saved).
+  const preview = usePreview()
 
   useEffect(() => {
     async function load() {
@@ -107,7 +106,9 @@ export default function Listings() {
       setError('')
       try {
         const status = filter === 'all' ? undefined : filter
-        const data = await api.getAuctions(status)
+        const data = preview.active
+          ? (await import('../preview/sampleData')).sampleAuctions(preview.count).filter(a => !status || a.status === status)
+          : await api.getAuctions(status)
         setAuctions(data)
       } catch (err) {
         setError(err.message)
@@ -116,12 +117,13 @@ export default function Listings() {
       }
     }
     load()
-  }, [filter])
+  }, [filter, preview.active, preview.count])
 
   const filters = ['all', 'live', 'upcoming', 'ended']
 
   return (
-    <div className="page listings-page">
+    <div className="page listings-page" onClickCapture={preview.blockSampleClick}>
+      <PreviewSwitch />
       <div className="listings-header">
         <div>
           <p className="wtf-label listings-eyebrow">Auctions</p>

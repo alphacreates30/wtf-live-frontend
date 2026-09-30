@@ -3,7 +3,7 @@ import './watch.css'
 
 // "Watch" (outline eye) / "Watching" (filled) on a lot. `compact` = icon only,
 // for small cards; the accessible name always says what it does.
-export function WatchButton({ itemId, compact = false, className = '' }) {
+export function WatchButton({ itemId, compact = false, className = '', disabled = false }) {
   const w = useWatch()
   if (!w) return null
   const on = w.isWatching(itemId)
@@ -13,6 +13,7 @@ export function WatchButton({ itemId, compact = false, className = '' }) {
       className={`watch-btn${on ? ' watch-on' : ''}${compact ? ' watch-compact' : ''} ${className}`}
       aria-pressed={on}
       aria-label={on ? 'Watching this lot: tap to stop watching' : 'Watch this lot'}
+      disabled={disabled}
       onClick={e => { e.preventDefault(); e.stopPropagation(); w.toggleWatch(itemId) }}
     >
       <EyeIcon filled={on} />
@@ -22,7 +23,7 @@ export function WatchButton({ itemId, compact = false, className = '' }) {
 }
 
 // "Follow" an open auction; "Remind me" before it opens.
-export function FollowButton({ auctionId, upcoming = false, className = '' }) {
+export function FollowButton({ auctionId, upcoming = false, className = '', disabled = false }) {
   const w = useWatch()
   if (!w) return null
   const on = w.isFollowing(auctionId)
@@ -32,6 +33,7 @@ export function FollowButton({ auctionId, upcoming = false, className = '' }) {
       type="button"
       className={`watch-btn follow-btn${on ? ' watch-on' : ''} ${className}`}
       aria-pressed={on}
+      disabled={disabled}
       onClick={e => { e.preventDefault(); e.stopPropagation(); w.toggleFollow(auctionId) }}
     >
       <BellIcon filled={on} />

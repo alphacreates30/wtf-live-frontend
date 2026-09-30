@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { shortTimeLeft, money, lotHref, HOUR } from './clock'
+import PhotoPlaceholder from '../PhotoPlaceholder'
 
 // One lot, as a card. Plain props (the /home or /search lot shape, the
 // auction's buyer's premium, and server `now`), so an app can rebuild it 1:1.
@@ -19,12 +20,7 @@ export default function LotCard({ lot, premiumPct, now, extra = null }) {
         <div className="lc-img">
           {photo
             ? <img src={photo} alt="" loading="lazy" decoding="async" width="480" height="360" />
-            : (
-              <div className="lc-img-empty">
-                <img src="/logo-mark.svg" alt="" width="32" height="32" />
-                <span>Photography to follow</span>
-              </div>
-            )}
+            : <PhotoPlaceholder label={lot.placeholder_label || 'Photo coming soon'} seed={lot.id} />}
         </div>
         <div className="lc-body">
           {lot.auction_title && <p className="lc-auction">{lot.auction_title}</p>}

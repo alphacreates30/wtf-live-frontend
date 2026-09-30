@@ -5,7 +5,7 @@ import './home.css'
 // "Wake me when it opens." Stores the address only (POST /signup); the server
 // answers the same way for a new or repeat address. `website` is a honeypot:
 // hidden from people, tempting to bots.
-export default function SignupForm({ tone = 'light', compact = false }) {
+export default function SignupForm({ tone = 'light', compact = false, disabled = false }) {
   const [email, setEmail] = useState('')
   const [website, setWebsite] = useState('')
   const [state, setState] = useState({ status: 'idle', message: '' })
@@ -39,8 +39,9 @@ export default function SignupForm({ tone = 'light', compact = false }) {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          disabled={disabled}
         />
-        <button type="submit" className="btn-primary" disabled={state.status === 'sending'}>
+        <button type="submit" className="btn-primary" disabled={disabled || state.status === 'sending'}>
           {state.status === 'sending' ? 'Sending…' : 'Wake me'}
         </button>
       </div>

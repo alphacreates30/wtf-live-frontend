@@ -11,6 +11,7 @@ import SearchResults from './pages/SearchResults'
 import { api } from './api'
 import Footer from './components/Footer'
 import { WatchProvider } from './watch/WatchContext'
+import { PreviewProvider } from './preview/PreviewContext'
 
 // Split out of the main bundle: the homepage shouldn't download the auction
 // rooms (LiveKit), card setup (Stripe.js loads on import) or the admin pages.
@@ -114,6 +115,7 @@ export default function App() {
     <BrowserRouter>
       <WatchProvider>
       <Navbar />
+      <PreviewProvider>
       <EmailGate>
       <Suspense fallback={<div className="page"><p className="buyer-note">Loading…</p></div>}>
       <Routes>
@@ -204,6 +206,7 @@ export default function App() {
       </Suspense>
       </EmailGate>
       <Footer />
+      </PreviewProvider>
       </WatchProvider>
     </BrowserRouter>
   )

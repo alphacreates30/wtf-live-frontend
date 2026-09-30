@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useWatch } from '../watch/WatchContext'
 import { shortTimeLeft, money, fmtDateTime, lotHref, HOUR, DAY } from '../components/home/clock'
 import '../watch/watch.css'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
 
 const STATUS = { winning: "You're winning", outbid: 'Outbid', no_bid: 'No bid yet', won: 'Won', lost: 'Not won', closed: 'Closed' }
 
@@ -72,7 +73,7 @@ function LotRow({ lot, now, w }) {
   return (
     <li className="wl-row">
       <Link to={lotHref(lot)} className="wl-img" tabIndex={-1} aria-hidden="true">
-        {photo ? <img src={photo} alt="" loading="lazy" width="120" height="90" /> : null}
+        {photo ? <img src={photo} alt="" loading="lazy" width="120" height="90" /> : <PhotoPlaceholder seed={lot.id} size="sm" />}
       </Link>
       <div className="wl-main">
         <span className="wl-auction">{lot.auction_title} · Lot {lot.position + 1}</span>
@@ -99,7 +100,7 @@ function AuctionRow({ a, w }) {
   return (
     <li className="wl-row">
       <Link to={`/auction/${a.id}`} className="wl-img" tabIndex={-1} aria-hidden="true">
-        {photo ? <img src={photo} alt="" loading="lazy" width="120" height="90" /> : null}
+        {photo ? <img src={photo} alt="" loading="lazy" width="120" height="90" /> : <PhotoPlaceholder seed={a.id} size="sm" />}
       </Link>
       <div className="wl-main">
         <span className="wl-auction">Auction you follow · {a.lot_count} lots</span>

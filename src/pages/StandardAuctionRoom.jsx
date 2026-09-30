@@ -12,6 +12,7 @@ function isViewerLeader(item, username, token) {
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import './StandardAuctionRoom.css'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
 
 const ADMIN_USERNAME = 'whatthefind'
 const POLL_MS = 4000
@@ -157,7 +158,7 @@ function ItemDetailModal({ item, auctionId, username, isAdmin, now, premiumPct, 
               )}
             </>
           ) : (
-            <div className="sar-modal-no-img">No photo available</div>
+            <div className="sar-modal-no-img"><PhotoPlaceholder seed={item.id} /></div>
           )}
         </div>
 
@@ -457,10 +458,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                   {item.image_url
                     // Grid card: the small WebP when there is one (F1a). The lot modal keeps the full photo.
                     ? <img src={item.thumb_url || item.image_url} alt={item.title} className="sar-card-img" loading="lazy" />
-                    : <div className="sar-card-no-img">
-                        <img src="/logo-mark.svg" alt="" width="40" height="40" />
-                        <span>Photography to follow</span>
-                      </div>
+                    : <div className="sar-card-no-img"><PhotoPlaceholder seed={item.id} /></div>
                   }
                   <span className="sar-card-lot">Lot {item.position + 1}</span>
                   {!closed && !isAdmin && <WatchButton itemId={item.id} compact className="sar-card-watch" />}

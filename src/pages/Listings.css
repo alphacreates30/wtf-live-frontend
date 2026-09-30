@@ -55,21 +55,6 @@
   background: var(--surface-2);
 }
 .auction-card-img > img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.auction-card-img-empty {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-.auction-card-img-empty img { width: 44px; height: 44px; opacity: 0.4; }
 
 .auction-card-body { padding: 16px; }
 

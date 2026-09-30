@@ -76,8 +76,6 @@
 .ac-collage-3 > .ac-photo:first-child { grid-row: span 2; }
 .ac-photo { position: relative; overflow: hidden; background: var(--surface-2); display: block; min-height: 0; }
 .ac-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ac-photo-empty { display: flex; align-items: center; justify-content: center; }
-.ac-photo-empty img { width: 40px; height: 40px; object-fit: contain; }
 
 .ac-body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
 .ac-live { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--muted); }
@@ -156,11 +154,6 @@
 .lc-link:hover .lc-title { text-decoration: underline; text-underline-offset: 3px; }
 .lc-img { position: relative; aspect-ratio: 4 / 3; background: var(--surface-2); overflow: hidden; }
 .lc-img > img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.lc-img-empty {
-  height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2);
-  font-size: var(--fs-12); color: var(--muted); text-align: center; padding: var(--space-2);
-}
 .lc-body { padding: var(--space-3); display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .lc-auction { font-size: var(--fs-12); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lc-lot { font-size: var(--fs-12); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }

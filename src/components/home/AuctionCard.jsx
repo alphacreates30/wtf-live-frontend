@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { endsLabel, closingChip } from './clock'
+import PhotoPlaceholder from '../PhotoPlaceholder'
 
 // One open auction (GET /home `open_auctions[]`): a 3-photo collage (1 large +
 // 2 small), title, one-line story, lot count, end day and time, a time-left
@@ -15,14 +16,17 @@ export default function AuctionCard({ auction, now, wide = false, priority = fal
 
   return (
     <article className={`ac${wide ? ' ac-wide' : ''}`} aria-labelledby={`ac-${auction.id}`}>
-      <Link to={href} className={`ac-collage ac-collage-${Math.max(1, photos.length)}`} tabIndex={-1} aria-hidden="true">
+      {/* The layout follows the number of tiles drawn: photos, or placeholder tiles when there are none. */}
+      <Link to={href} className={`ac-collage ac-collage-${photos.length || Math.min(3, (auction.placeholder_labels || ['']).length)}`} tabIndex={-1} aria-hidden="true">
         {photos.length
           ? photos.map((src, i) => (
             <span key={src} className="ac-photo">
               <img src={src} alt="" width="480" height="360" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={priority && i === 0 ? 'high' : undefined} decoding="async" />
             </span>
           ))
-          : <span className="ac-photo ac-photo-empty"><img src="/logo-mark.svg" alt="" width="40" height="40" /></span>}
+          : (auction.placeholder_labels || ['Photo coming soon']).slice(0, 3).map((label, i) => (
+            <span key={i} className="ac-photo"><PhotoPlaceholder label={label} seed={auction.id + i} size={i ? 'sm' : 'md'} /></span>
+          ))}
       </Link>
       <div className="ac-body">
         <p className="ac-live"><span className="ac-dot" aria-hidden="true" />Open now · {lots}</p>

@@ -171,22 +171,8 @@
 }
 .sar-card:hover .sar-card-img { transform: scale(1.04); }
 
-/* Photography leads: a lot with no photo gets a placeholder, not a hole. */
-.sar-card-no-img {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.sar-card-no-img img { width: 40px; height: 40px; opacity: 0.4; }
+/* Photography leads: a lot with no photo gets the placeholder tile, not a hole. */
+.sar-card-no-img { position: absolute; inset: 0; }
 
 .sar-card-lot,
 .sar-card-status-badge {
@@ -469,18 +455,7 @@
 .sar-modal-thumb:hover { opacity: 0.9; }
 .sar-modal-thumb.active { border-color: var(--ink); opacity: 1; }
 
-.sar-modal-no-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 260px;
-  color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
+.sar-modal-no-img { aspect-ratio: 4 / 3; min-height: 260px; border-radius: var(--radius-control); overflow: hidden; }
 
 /* ---- Modal detail panel ---- */
 .sar-modal-details {

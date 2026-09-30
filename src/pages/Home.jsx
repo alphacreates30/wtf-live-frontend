@@ -9,7 +9,9 @@ import LotCard from '../components/home/LotCard'
 import SignupForm from '../components/home/SignupForm'
 import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import { CONSIGN_MAILTO } from '../components/home/links'
+import { usePreview, PreviewSwitch } from '../preview/PreviewContext'
 import '../components/home/home.css'
+import PhotoPlaceholder from '../components/PhotoPlaceholder'
 
 const HOME_REFRESH_MS = 30_000
 
@@ -32,7 +34,7 @@ const STEPS = [
 // homepage features none over the others: one card each (1 = wide, 2-3 side
 // by side, 4+ a swipe row), soonest ending first. Each auction's full story
 // lives on its own page.
-function OpenNow({ auctions, now }) {
+function OpenNow({ auctions, now, sample }) {
   const layout = auctions.length === 1 ? 'one' : auctions.length <= 3 ? 'few' : 'many'
   return (
     <section className="open-now" aria-labelledby="open-h">
@@ -41,27 +43,38 @@ function OpenNow({ auctions, now }) {
         <Link to="/auctions" className="section-link">All auctions →</Link>
       </div>
       <div className={`open-now-list open-now-${layout}`}>
-        {auctions.map((a, i) => <AuctionCard key={a.id} auction={a} now={now} wide={layout === 'one'} priority={i === 0} extra={<FollowButton auctionId={a.id} />} />)}
+        {auctions.map((a, i) => <AuctionCard key={a.id} auction={a} now={now} wide={layout === 'one'} priority={i === 0} extra={<FollowButton auctionId={a.id} disabled={sample} />} />)}
       </div>
     </section>
   )
 }
 
-function Asleep() {
+function Asleep({ sample }) {
   return (
     <section className="asleep" aria-labelledby="asleep-h">
       <img src="/brand/state-asleep.svg" alt="" width="64" height="64" className="asleep-mark" />
       <h1 id="asleep-h" className="asleep-title">The next collection is being catalogued.</h1>
       <p className="asleep-text">Leave your email and we'll wake you when it opens.</p>
-      <div id="signup" className="asleep-form"><SignupForm /></div>
+      <div id="signup" className="asleep-form"><SignupForm disabled={sample} /></div>
     </section>
   )
 }
 
 export default function Home() {
-  const [home, setHome] = useState(null)
+  const [real, setHome] = useState(null)
   const [error, setError] = useState('')
   const location = useLocation()
+  // Admin-only preview (PREVIEW_MODE_BRIEF.md): sample data built into the page,
+  // loaded only when it's on. Nothing is sent or saved; the real /home is untouched.
+  const preview = usePreview()
+  const [sample, setSample] = useState(null)
+  useEffect(() => {
+    if (!preview.active) { setSample(null); return }
+    let cancelled = false
+    import('../preview/sampleData').then(m => { if (!cancelled) setSample(m.sampleHome(preview.count)) })
+    return () => { cancelled = true }
+  }, [preview.active, preview.count])
+  const home = preview.active ? sample : real
   const now = useServerClock(home?.server_now)
 
   // The page only renders what GET /home returns. Refreshed quietly so rails
@@ -93,12 +106,14 @@ export default function Home() {
   }
 
   const { open_auctions: open = [], closing_schedule: schedule = [], rails, upcoming, premium_pct: prem = {}, timezone } = home
-  const cards = lots => lots.map(l => <LotCard key={l.id} lot={l} premiumPct={prem[l.auction_id]} now={now} extra={<div className="lc-watch"><WatchButton itemId={l.id} /></div>} />)
+  const isSample = !!home.sample
+  const cards = lots => lots.map(l => <LotCard key={l.id} lot={l} premiumPct={prem[l.auction_id]} now={now} extra={<div className="lc-watch"><WatchButton itemId={l.id} disabled={isSample} /></div>} />)
 
   return (
-    <div className="home">
+    <div className="home" onClickCapture={preview.blockSampleClick}>
+      <PreviewSwitch />
       {open.length > 0 && <h1 className="visually-hidden">What The Find: online auctions of collections</h1>}
-      {open.length ? <OpenNow auctions={open} now={now} /> : <Asleep />}
+      {open.length ? <OpenNow auctions={open} now={now} sample={isSample} /> : <Asleep sample={isSample} />}
 
       {open.length > 1 && <ClosingSchedule entries={schedule} timezone={timezone} now={now} />}
 
@@ -118,7 +133,7 @@ export default function Home() {
               <div className="lc-img">
                 {a.thumb_url || a.image_url
                   ? <img src={a.thumb_url || a.image_url} alt="" loading="lazy" decoding="async" width="480" height="360" />
-                  : <div className="lc-img-empty"><img src="/logo-mark.svg" alt="" width="32" height="32" /><span>Photography to follow</span></div>}
+                  : <PhotoPlaceholder label={a.placeholder_label || 'Photo coming soon'} seed={a.id} />}
               </div>
               <div className="lc-body">
                 <h3 className="lc-title lc-title-auction">{a.title}</h3>
@@ -126,7 +141,7 @@ export default function Home() {
                 <p className="lc-opens">Opens {fmtDateTime(a.starts_at)}</p>
               </div>
             </Link>
-            <div className="lc-watch"><FollowButton auctionId={a.id} upcoming /></div>
+            <div className="lc-watch"><FollowButton auctionId={a.id} upcoming disabled={isSample} /></div>
           </div>
         ))}
       </Rail>
