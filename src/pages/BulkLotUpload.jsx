@@ -116,6 +116,9 @@ const newLot = (photoIdxs, condition) => ({
   flaws: [],
   confidence: '',
   estimated_value: '',
+  // Why the host should read this one before creating it (from the server: short description, "appears to be",
+  // low confidence). Cleared by "Looks right" or by regenerating into a description that passes.
+  needsLook: [],
   analyzed: false,
   analyzing: false,
   regenerating: false,
@@ -357,6 +360,10 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     setBusy('')
   }
 
+  // "Create" with lots still flagged "Needs a look": the first click shows a warning, the second creates.
+  const [confirmUnchecked, setConfirmUnchecked] = useState(false)
+  const needsLookCount = lots.filter(l => l.include && l.needsLook?.length).length
+
   async function analyzeOne(i, standalone = true) {
     const lot = lots[i]
     if (!lot) return
@@ -383,6 +390,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
         flaws: a.visible_flaws || [],
         confidence: a.confidence || '',
         estimated_value: a.estimated_value_usd || '',
+        needsLook: Array.isArray(a.needs_look) ? a.needs_look : [],
         analyzed: true, analyzing: false, error: '',
       })
     } catch (err) {
@@ -404,6 +412,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
       updateLot(i, {
         description: r.description || lot.description,
         category: r.category || lot.category,
+        needsLook: Array.isArray(r.needs_look) ? r.needs_look : lot.needsLook,
         regenerating: false,
       })
     } catch (err) {
@@ -418,6 +427,10 @@ export default function BulkLotUpload({ auctionId, onDone }) {
     if (!keep.length) { setError('No lots selected to create.'); return }
     const bad = keep.findIndex(l => !l.title?.trim())
     if (bad !== -1) { setError(`Group ${bad + 1} needs a title before it can be created.`); return }
+    // Lots flagged "Needs a look" and not yet checked: ask once, on the page (no browser dialog).
+    const unchecked = keep.filter(l => l.needsLook?.length).length
+    if (unchecked && !confirmUnchecked) { setConfirmUnchecked(true); return }
+    setConfirmUnchecked(false)
 
     setError(''); setBusy('committing')
     const totalPhotos = keep.reduce((s, l) => s + l.photoIdxs.length, 0)
@@ -600,11 +613,18 @@ export default function BulkLotUpload({ auctionId, onDone }) {
               )}
               {analyzedCount > 0 && (
                 <button className="blu-btn blu-btn-go" onClick={commit}>
-                  Create {includedCount} lot{includedCount !== 1 ? 's' : ''} →
+                  {confirmUnchecked ? `Create anyway (${includedCount}) →` : `Create ${includedCount} lot${includedCount !== 1 ? 's' : ''} →`}
                 </button>
               )}
             </div>
           </div>
+
+          {needsLookCount > 0 && (
+            <p className={`blu-needs-look-summary${confirmUnchecked ? ' confirm' : ''}`} role="status">
+              {needsLookCount} lot{needsLookCount !== 1 ? 's need' : ' needs'} a look before you create {needsLookCount !== 1 ? 'them' : 'it'}.
+              {confirmUnchecked ? ' Click "Create anyway" to create them unchecked, or check each and click "Looks right".' : ' Nothing is published until you publish the auction.'}
+            </p>
+          )}
 
           {analyzedCount > 0 && (
             <p className="blu-unsaved-warning">
@@ -641,6 +661,7 @@ export default function BulkLotUpload({ auctionId, onDone }) {
                       Group {i + 1}
                     </label>
                     {lot.confidence && <span className={`blu-conf ${lot.confidence}`}>{lot.confidence} confidence</span>}
+                    {lot.needsLook?.length > 0 && <span className="blu-needs-look">Needs a look</span>}
                     {lot.error && <span className="blu-lot-error">AI failed — retry below, or fill in by hand</span>}
                     <button className="blu-btn-xs blu-ungroup" onClick={() => ungroupLot(i)}>Ungroup</button>
                   </div>
@@ -684,6 +705,13 @@ export default function BulkLotUpload({ auctionId, onDone }) {
                       {lot.flaws?.length > 0 && (
                         <div className="blu-flaws"><strong>Flaws spotted:</strong> {lot.flaws.join(' · ')}</div>
                       )}
+
+                      {lot.needsLook?.length > 0 && (
+                        <div className="blu-needs-look-box">
+                          <span><strong>Check before creating:</strong> {lot.needsLook.join(' · ')}</span>
+                          <button className="blu-btn-xs" onClick={() => { updateLot(i, { needsLook: [] }); setConfirmUnchecked(false) }}>Looks right</button>
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -717,8 +745,11 @@ export default function BulkLotUpload({ auctionId, onDone }) {
 
           {analyzedCount > 0 && (
             <div className="blu-foot">
+              {confirmUnchecked && needsLookCount > 0 && (
+                <span className="blu-needs-look-summary confirm">{needsLookCount} lot{needsLookCount !== 1 ? 's' : ''} still flagged "Needs a look".</span>
+              )}
               <button className="blu-btn blu-btn-go" onClick={commit}>
-                Create {includedCount} lot{includedCount !== 1 ? 's' : ''} →
+                {confirmUnchecked ? `Create anyway (${includedCount}) →` : `Create ${includedCount} lot${includedCount !== 1 ? 's' : ''} →`}
               </button>
             </div>
           )}
