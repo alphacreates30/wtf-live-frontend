@@ -65,6 +65,10 @@ export default function HostDashboard() {
 
   useEffect(() => { loadAuctions() }, [])
 
+  // The soft-close length comes from the server's setting (GET /config), never a number written here.
+  const [softClose, setSoftClose] = useState(null)
+  useEffect(() => { api.getConfig().then(c => setSoftClose(c.soft_close_minutes ?? null)).catch(() => {}) }, [])
+
   // The pickup window follows the auction's close (close -> close + 7 days) until the admin edits either date.
   const [pickupEdited, setPickupEdited] = useState(false)
   function handleChange(e) {
@@ -230,7 +234,8 @@ export default function HostDashboard() {
             </div>
             <form onSubmit={handleSubmit} className="host-form">
               <p style={{fontSize:'0.8rem',opacity:0.7}}>
-                Upload items and run a timed bidding auction, like Goldin or AuctionNinja, with proxy bidding and a closing time per item.
+                Timed auction: every lot has its own closing time, bidders set a max and we bid for them, and a late bid
+                resets that lot's clock{softClose ? ` to ${softClose} minute${softClose === 1 ? '' : 's'}` : ''}.
               </p>
               <div className="form-group">
                 <label>Title *</label>

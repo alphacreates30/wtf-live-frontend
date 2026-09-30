@@ -122,6 +122,8 @@ export const api = {
     return early || request('/home')
   },
   searchLots: (q) => request(`/search?q=${encodeURIComponent(q)}`),
+  // The auction rules a page states in words (soft close), from the server's own settings.
+  getConfig: () => request('/config'),
   // The lot page (API.md). getLot / getLotByNumber are public and the same for everyone; getLotMe is the
   // logged-in buyer's own status and max; getLotBids is the anonymised history ("You" when logged in).
   getLot: (id) => request(`/lots/${id}`),
