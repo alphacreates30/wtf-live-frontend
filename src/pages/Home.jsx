@@ -12,6 +12,7 @@ import { CONSIGN_MAILTO } from '../components/home/links'
 import { usePreview, PreviewSwitch } from '../preview/PreviewContext'
 import '../components/home/home.css'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
+import { usePointsConfig, pointsSentence } from '../points/points'
 
 const HOME_REFRESH_MS = 30_000
 
@@ -61,6 +62,7 @@ function Asleep({ sample }) {
 }
 
 export default function Home() {
+  const pointsCfg = usePointsConfig()
   const [real, setHome] = useState(null)
   const [error, setError] = useState('')
   const location = useLocation()
@@ -157,6 +159,8 @@ export default function Home() {
             </li>
           ))}
         </ol>
+        {/* G2: one line about points, only while they are switched on. Wording: Cowork drafts, Albert approves. */}
+        {pointsCfg?.enabled && <p className="how-points">{pointsSentence(pointsCfg)}</p>}
       </section>
 
       <section className="consign" aria-labelledby="consign-h">

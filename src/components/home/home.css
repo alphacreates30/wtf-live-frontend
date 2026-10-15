@@ -298,3 +298,4 @@
   .open-now-many { grid-auto-columns: calc((100% - 3 * var(--space-4)) / 3.3); }
   .search-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
+.how-points { margin: var(--space-6) auto 0; max-width: 40rem; text-align: center; color: var(--success); font-weight: var(--fw-semibold); }

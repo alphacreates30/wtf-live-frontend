@@ -148,6 +148,22 @@ export const api = {
   unsubscribeInfo: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`),
   unsubscribe: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`, { method: 'POST' }),
   getWatchCounts: (auctionId) => request(`/admin/watch-counts?auction_id=${auctionId}`),
+  // Points + promotions (G2). Every buyer call answers { enabled: false } / [] while points are switched off.
+  getMyPoints: () => request('/me/points'),
+  setPointsAutoApply: (auto_apply) => request('/me/points/settings', { method: 'PUT', body: JSON.stringify({ auto_apply }) }),
+  getAuctionPromotions: (auctionId) => request(`/auction/${auctionId}/promotions`),
+  getEnteredCode: (auctionId) => request(`/checkout/code?auction_id=${auctionId}`),
+  applyCode: (auction_id, code) => request('/checkout/apply-code', { method: 'POST', body: JSON.stringify({ auction_id, code }) }),
+  removeCode: (auctionId) => request(`/checkout/apply-code?auction_id=${auctionId}`, { method: 'DELETE' }),
+  getPointsSettings: () => request('/admin/points-settings'),
+  savePointsSettings: (data) => request('/admin/points-settings', { method: 'PUT', body: JSON.stringify(data) }),
+  getPointsSummary: () => request('/admin/points-summary'),
+  getPromotions: (auctionId) => request('/admin/promotions' + (auctionId ? `?auction_id=${auctionId}` : '')),
+  createPromotion: (data) => request('/admin/promotions', { method: 'POST', body: JSON.stringify(data) }),
+  updatePromotion: (id, data) => request(`/admin/promotions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deletePromotion: (id) => request(`/admin/promotions/${id}`, { method: 'DELETE' }),
+  getBuyerPoints: (userId) => request(`/admin/points/${userId}`),
+  adjustBuyerPoints: (userId, points, note) => request(`/admin/points/${userId}/adjust`, { method: 'POST', body: JSON.stringify({ points, note }) }),
   updateAuction: (id, data) =>
     request(`/auction/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 

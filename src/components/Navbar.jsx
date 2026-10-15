@@ -242,6 +242,7 @@ function AdminNav({ location, menuOpen, setMenuOpen, closeMenu, closeMenuAndRefo
           <Link to="/host" className={`navbar-link ${hostActive ? 'active' : ''}`}>Auctions</Link>
           <Link to="/host/buyers" className={`navbar-link ${location.pathname === '/host/buyers' ? 'active' : ''}`}>Buyers</Link>
           <Link to="/host/orders" className={`navbar-link ${location.pathname === '/host/orders' ? 'active' : ''}`}>Orders</Link>
+          <Link to="/host/rewards" className={`navbar-link ${location.pathname === '/host/rewards' ? 'active' : ''}`}>Rewards</Link>
           <Link to="/host/settings" className={`navbar-link ${location.pathname === '/host/settings' ? 'active' : ''}`}>Settings</Link>
           <button className="btn-ghost navbar-btn" onClick={logout}>Log out</button>
         </div>
@@ -269,6 +270,7 @@ function AdminNav({ location, menuOpen, setMenuOpen, closeMenu, closeMenuAndRefo
             <Link to="/host" className={`navbar-mobile-link ${hostActive ? 'active' : ''}`} onClick={closeMenu} ref={firstLinkRef}>Auctions</Link>
             <Link to="/host/buyers" className={`navbar-mobile-link ${location.pathname === '/host/buyers' ? 'active' : ''}`} onClick={closeMenu}>Buyers</Link>
             <Link to="/host/orders" className={`navbar-mobile-link ${location.pathname === '/host/orders' ? 'active' : ''}`} onClick={closeMenu}>Orders</Link>
+            <Link to="/host/rewards" className={`navbar-mobile-link ${location.pathname === '/host/rewards' ? 'active' : ''}`} onClick={closeMenu}>Rewards</Link>
             <Link to="/host/settings" className={`navbar-mobile-link ${location.pathname === '/host/settings' ? 'active' : ''}`} onClick={closeMenu}>Settings</Link>
             <button className="navbar-mobile-logout" onClick={() => { closeMenu(); logout(); }}>Log out</button>
           </div>

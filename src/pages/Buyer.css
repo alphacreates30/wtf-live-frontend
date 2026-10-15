@@ -219,3 +219,7 @@
 .status-tag-pending  { color: var(--warning); border-color: var(--warning); background: var(--warning-wash); }
 .status-tag-rejected,
 .status-tag-blocked  { color: var(--danger);   border-color: var(--danger);   background: var(--danger-wash); }
+
+/* G2: an invoice's points reward / promo code line, and the points it earned. Good news: success green. */
+.order-table .order-discount td { color: var(--success); }
+.order-points { margin: var(--space-2) 0 0; font-size: var(--fs-14); color: var(--success); }

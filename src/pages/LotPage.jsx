@@ -8,6 +8,7 @@ import Gallery from '../lot/Gallery'
 import { WatchButton } from '../watch/WatchButtons'
 import { usePreview } from '../preview/PreviewContext'
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
+import { EarnHint, PromoNotes } from '../points/points'
 import '../components/home/home.css'
 import './LotPage.css'
 
@@ -315,6 +316,8 @@ export default function LotPage() {
                 </div>
                 <p className="lp-max-help">We bid for you, only as high as needed.</p>
               </form>
+              {/* G2: points this win would earn, on the price a win would be at now (logged in only; nothing while points are off) */}
+              {token && !isSample && <EarnHint dollars={winning ? shownPrice : (price.next_bids[0] ?? shownPrice)} />}
               <div className="lp-watch"><WatchButton itemId={lot.id} disabled={isSample} /></div>
               {bidError && <p className="error-msg" role="alert">{bidError}</p>}
               {bidNote && <p className={status === 'winning' ? 'success-msg' : 'lp-outbid-msg'} role="status">{bidNote}</p>}
@@ -372,6 +375,7 @@ export default function LotPage() {
             )}
           </ul>
           {fulfilment.pickup && fulfilment.shipping && <p className="lp-muted lp-small">You choose pickup or shipping before your first bid in this auction.</p>}
+          {!isSample && <PromoNotes auctionId={auction.id} compact />}
         </section>
 
         {/* No public bid list (B7): the public sees the price and the count. A logged-in buyer sees their OWN bids;

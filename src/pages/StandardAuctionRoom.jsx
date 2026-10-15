@@ -10,6 +10,7 @@ import { WatchButton, FollowButton } from '../watch/WatchButtons'
 import './StandardAuctionRoom.css'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
 import { lotPath } from '../lot/slug'
+import { PromoNotes } from '../points/points'
 
 const ADMIN_USERNAME = 'whatthefind'
 const POLL_MS = 4000
@@ -247,6 +248,8 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
           </div>
         )}
         <FulfillmentNote auction={auction} />
+        {/* G2: offers running for this auction, and the promo-code box (nothing while points are off) */}
+        <PromoNotes auctionId={auction.id} loggedIn={!!token && !isAdmin} open={auction.status !== 'ended'} />
       </div>
 
       {sorted.length === 0 ? (

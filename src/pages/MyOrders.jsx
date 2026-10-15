@@ -114,7 +114,7 @@ export default function MyOrders() {
         {showLabel && <div className="order-ship-lot">{o.item_title}</div>}
         <div className="order-line">
           <span className="muted">
-            Postage{o.shipping_cost_cents != null ? ` — ${fmt(o.shipping_cost_cents)}` : ' — charged separately once packed'}
+            Postage{o.shipping_promo ? ' — free (offer)' : o.shipping_cost_cents != null ? ` — ${fmt(o.shipping_cost_cents)}` : ' — charged separately once packed'}
           </span>
           <span className={`badge pay-badge ${shipClass}`}>{shipLabel}</span>
         </div>
@@ -144,7 +144,12 @@ export default function MyOrders() {
         const statusKey = first.payment_status || 'unpaid'
         const statusClass = PAYMENT_STATUS_CLASS[statusKey] || PAYMENT_STATUS_CLASS.unpaid
         const label = PAYMENT_STATUS_LABEL[statusKey] || statusKey
-        const totalCents = group.orders.reduce((s, o) => s + (o.total_cents || 0), 0)
+        // G2: an invoice's one discount (points reward or promo code) comes off as its own line(s); its total is the
+        // invoice's, which already has it taken off.
+        const inv = group.invoice ? first.invoice : null
+        const discount = inv?.discount_kind && inv.discount_cents > 0 ? inv : null
+        const totalCents = discount ? inv.total_cents : group.orders.reduce((s, o) => s + (o.total_cents || 0), 0)
+        const earned = group.orders.reduce((s, o) => s + (o.points_earned || 0), 0)
 
         return (
           <div key={group.key} className="card order-card">
@@ -177,12 +182,19 @@ export default function MyOrders() {
                     </tr>
                   </>
                 )}
+                {discount && (
+                  <tr className="order-discount">
+                    <td>{discount.discount_kind === 'points_reward' ? 'Points reward' : 'Promo code'}</td>
+                    <td>−{fmt(discount.discount_cents)}{discount.discount_premium_cents > 0 ? ` and −${fmt(discount.discount_premium_cents)} premium` : ''}</td>
+                  </tr>
+                )}
                 <tr className="order-total">
                   <td>Total</td>
                   <td>{fmt(totalCents)}</td>
                 </tr>
               </tbody>
             </table>
+            {earned > 0 && <p className="order-points">You earned {earned} points.</p>}
 
             {first.fulfillment_choice && (
               <div className="order-block order-line">

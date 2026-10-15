@@ -20,6 +20,7 @@ const LotPage = lazy(() => import('./pages/LotPage'))
 const HostDashboard = lazy(() => import('./pages/HostDashboard'))
 const AuctionWorkspace = lazy(() => import('./pages/AuctionWorkspace'))
 const HostSettings = lazy(() => import('./pages/HostSettings'))
+const HostRewards = lazy(() => import('./pages/HostRewards'))
 const ProfileSetup = lazy(() => import('./pages/ProfileSetup'))
 const AdminBuyers = lazy(() => import('./pages/AdminBuyers'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
@@ -181,6 +182,14 @@ export default function App() {
           element={
             <AdminRoute>
               <HostSettings />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/host/rewards"
+          element={
+            <AdminRoute>
+              <HostRewards />
             </AdminRoute>
           }
         />

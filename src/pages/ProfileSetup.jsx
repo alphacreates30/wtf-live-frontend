@@ -5,6 +5,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { api } from '../api'
 import './Buyer.css'
 import DeleteAccount from '../components/DeleteAccount'
+import { PointsCard } from '../points/points'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
@@ -229,6 +230,8 @@ export default function ProfileSetup() {
   return (
     <Elements stripe={stripePromise}>
       <ProfileForm />
+      {/* G2: renders nothing while points are switched off */}
+      {!isHost && <div className="page profile-page" style={{ paddingTop: 0 }}><PointsCard /></div>}
       {!isHost && <div className="page profile-page" style={{ paddingTop: 0 }}><DeleteAccount /></div>}
     </Elements>
   )
