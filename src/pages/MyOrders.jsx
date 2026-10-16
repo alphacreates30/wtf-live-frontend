@@ -25,13 +25,14 @@ function trackingLink(order) {
 // Classes live in Buyer.css (.pay-paid etc.) and are all token-driven. The colour
 // objects that used to sit here were hardcoded hexes, including a blue that
 // appears nowhere in the palette.
-const PAYMENT_STATUS_CLASS = { paid: 'pay-paid', unpaid: 'pay-unpaid', charging: 'pay-charging', failed: 'pay-failed' }
+const PAYMENT_STATUS_CLASS = { paid: 'pay-paid', unpaid: 'pay-unpaid', charging: 'pay-charging', failed: 'pay-failed', cancelled: 'pay-unpaid' }
 
 const PAYMENT_STATUS_LABEL = {
   paid: 'Paid',
   unpaid: 'Unpaid',
   charging: 'Charging…',
   failed: 'Payment Failed',
+  cancelled: 'Cancelled',   // a live lot whose card was never fixed, offered again after the show
 }
 
 const SHIPPING_STATUS_LABEL = {
@@ -147,8 +148,10 @@ export default function MyOrders() {
         // G2: an invoice's one discount (points reward or promo code) comes off as its own line(s); its total is the
         // invoice's, which already has it taken off.
         const inv = group.invoice ? first.invoice : null
-        const discount = inv?.discount_kind && inv.discount_cents > 0 ? inv : null
-        const totalCents = discount ? inv.total_cents : group.orders.reduce((s, o) => s + (o.total_cents || 0), 0)
+        // A live-show lot is charged on its own, so its discount is on the order (`discount`), not an invoice.
+        const discount = inv?.discount_kind && inv.discount_cents > 0 ? inv
+          : !group.invoice && first.discount ? { discount_kind: first.discount.kind, discount_cents: first.discount.cents, discount_premium_cents: 0 } : null
+        const totalCents = discount && inv ? inv.total_cents : group.orders.reduce((s, o) => s + (o.total_cents || 0), 0)
         const earned = group.orders.reduce((s, o) => s + (o.points_earned || 0), 0)
 
         return (
