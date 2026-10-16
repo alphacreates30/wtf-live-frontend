@@ -392,3 +392,14 @@
   background: var(--ink); color: var(--on-dark);
   font-size: var(--fs-12); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums;
 }
+
+/* Services (F5): a dropdown beside the links on desktop (the account menu's look, opening from the left edge);
+ * a labelled section in the phone menu. */
+.navbar-services-btn { background: transparent; border: none; border-radius: 0; padding: 0; gap: 4px; cursor: pointer; }
+.navbar-services-menu { left: 0; right: auto; min-width: 220px; }
+.navbar-services-all { border-top: 1px solid var(--line); margin-top: 4px; }
+.navbar-mobile-section {
+  padding: 14px 24px 4px; font-family: var(--font-ui); font-size: var(--fs-12); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+}
+.navbar-mobile-sub { padding-left: 36px; }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignupForm from './home/SignupForm'
-import { CONTACT_MAILTO, CONSIGN_MAILTO } from './home/links'
 import './Footer.css'
 
 
@@ -34,12 +33,18 @@ export default function Footer() {
           {/* TODO(Results): past results page, when built. */}
         </nav>
 
+        <nav className="footer-col" aria-labelledby="footer-sell">
+          <h2 id="footer-sell" className="footer-col-title">Sell</h2>
+          <Link to="/services/sell" className="footer-link">Sell to us</Link>
+          <Link to="/services/consign" className="footer-link">Consign</Link>
+          <Link to="/services/estates" className="footer-link">Estate buyouts</Link>
+          <Link to="/services/collection-auctions" className="footer-link">Collection auctions</Link>
+        </nav>
+
         <nav className="footer-col" aria-labelledby="footer-help">
           <h2 id="footer-help" className="footer-col-title">Help</h2>
           <Link to="/terms" className="footer-link">Terms of sale</Link>
-          <a href={CONTACT_MAILTO} className="footer-link">Contact</a>
-          <a href={CONSIGN_MAILTO} className="footer-link">Consign a collection</a>
-          {/* TODO(Consign): link the consign page instead of email when it's built. */}
+          <Link to="/contact" className="footer-link">Contact</Link>
           {/* TODO(FAQ), TODO(Privacy: A4 privacy policy), TODO(About): link each when its page exists. */}
         </nav>
       </div>

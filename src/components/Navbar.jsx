@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import './Navbar.css'
 import { disconnectSocket } from '../socket'
-import { CONSIGN_MAILTO } from './home/links'
+import { api } from '../api'
+import { SERVICES } from '../services/content'
 import { useWatch } from '../watch/WatchContext'
 
-// Buyers and visitors: mark + wordmark · search · Auctions · How it works · Consign ·
+// Buyers and visitors: mark + wordmark · search · Auctions · How it works · Services (a dropdown) ·
 // Log in / account menu. Phones: mark + wordmark · search icon (opens a
 // full-width bar) · menu. The admin's nav is its own (host links), unchanged.
 export default function Navbar() {
@@ -18,11 +19,13 @@ export default function Navbar() {
   const watch = useWatch()
   const [menuOpen, setMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [servicesOpen, setServicesOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const toggleRef = useRef(null)
   const firstLinkRef = useRef(null)
   const accountRef = useRef(null)
+  const servicesRef = useRef(null)
   const searchToggleRef = useRef(null)
   const searchInputRef = useRef(null)
 
@@ -57,6 +60,7 @@ export default function Navbar() {
   useEffect(() => {
     setMenuOpen(false)
     setAccountOpen(false)
+    setServicesOpen(false)
     setSearchOpen(false)
   }, [location.pathname])
 
@@ -84,6 +88,15 @@ export default function Navbar() {
     document.addEventListener('keydown', onKey)
     return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey) }
   }, [accountOpen])
+
+  useEffect(() => {
+    if (!servicesOpen) return
+    function onDown(e) { if (!servicesRef.current?.contains(e.target)) setServicesOpen(false) }
+    function onKey(e) { if (e.key === 'Escape') { setServicesOpen(false); servicesRef.current?.querySelector('button')?.focus() } }
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [servicesOpen])
 
   useEffect(() => {
     if (!searchOpen) return
@@ -127,7 +140,23 @@ export default function Navbar() {
         <div className="navbar-links">
           <Link to="/auctions" className={`navbar-link ${location.pathname === '/auctions' ? 'active' : ''}`}>Auctions</Link>
           <Link to="/#how-it-works" className="navbar-link">How it works</Link>
-          <a href={CONSIGN_MAILTO} className="navbar-link navbar-link-consign">Consign</a>
+          <div className="navbar-account navbar-services" ref={servicesRef}>
+            <button
+              type="button"
+              className={`navbar-link navbar-services-btn ${location.pathname.startsWith('/services') ? 'active' : ''}`}
+              aria-expanded={servicesOpen}
+              aria-controls="navbar-services-menu"
+              onClick={() => setServicesOpen(o => !o)}
+            >
+              Services <span aria-hidden="true">▾</span>
+            </button>
+            {servicesOpen && (
+              <div className="navbar-account-menu navbar-services-menu" id="navbar-services-menu">
+                {SERVICES.map(s => <Link key={s.slug} to={`/services/${s.slug}`} className="navbar-mobile-link">{s.nav}</Link>)}
+                <Link to="/services" className="navbar-mobile-link navbar-services-all">All services</Link>
+              </div>
+            )}
+          </div>
           {token && (
             <Link to="/watching" className={`navbar-link ${location.pathname === '/watching' ? 'active' : ''}`}>
               Watching{watch?.count ? <span className="navbar-count">{watch.count}</span> : null}
@@ -197,7 +226,10 @@ export default function Navbar() {
           <div className="navbar-mobile-menu" id="navbar-mobile-menu">
             <Link to="/auctions" className="navbar-mobile-link" onClick={closeMenu} ref={firstLinkRef}>Auctions</Link>
             <Link to="/#how-it-works" className="navbar-mobile-link" onClick={closeMenu}>How it works</Link>
-            <a href={CONSIGN_MAILTO} className="navbar-mobile-link" onClick={closeMenu}>Consign a collection</a>
+            <div className="navbar-mobile-section">Services</div>
+            {SERVICES.map(s => <Link key={s.slug} to={`/services/${s.slug}`} className="navbar-mobile-link navbar-mobile-sub" onClick={closeMenu}>{s.nav}</Link>)}
+            <Link to="/services" className="navbar-mobile-link navbar-mobile-sub" onClick={closeMenu}>All services</Link>
+            <Link to="/contact" className="navbar-mobile-link" onClick={closeMenu}>Contact</Link>
             {token ? (
               <>
                 <div className="navbar-mobile-user">@{username}</div>
@@ -230,6 +262,10 @@ function SearchIcon() {
 // The admin's nav: host links, unchanged by the homepage refresh.
 function AdminNav({ location, menuOpen, setMenuOpen, closeMenu, closeMenuAndRefocus, toggleRef, firstLinkRef, username, logout }) {
   const hostActive = location.pathname === '/host' || location.pathname.startsWith('/host/auction')
+  // Requests (F5): the count of New beside the link, refreshed on every page change.
+  const [newRequests, setNewRequests] = useState(0)
+  useEffect(() => { api.getServiceRequestSummary().then(r => setNewRequests(r.new_count || 0)).catch(() => {}) }, [location.pathname])
+  const reqCount = newRequests ? <span className="navbar-count" aria-label={`${newRequests} new`}>{newRequests}</span> : null
   return (
     <nav className="navbar navbar--admin">
       <Link to="/" className="navbar-logo" onClick={closeMenu}>
@@ -242,6 +278,7 @@ function AdminNav({ location, menuOpen, setMenuOpen, closeMenu, closeMenuAndRefo
           <Link to="/host" className={`navbar-link ${hostActive ? 'active' : ''}`}>Auctions</Link>
           <Link to="/host/buyers" className={`navbar-link ${location.pathname === '/host/buyers' ? 'active' : ''}`}>Buyers</Link>
           <Link to="/host/orders" className={`navbar-link ${location.pathname === '/host/orders' ? 'active' : ''}`}>Orders</Link>
+          <Link to="/host/requests" className={`navbar-link ${location.pathname === '/host/requests' ? 'active' : ''}`}>Requests{reqCount}</Link>
           <Link to="/host/rewards" className={`navbar-link ${location.pathname === '/host/rewards' ? 'active' : ''}`}>Rewards</Link>
           <Link to="/host/settings" className={`navbar-link ${location.pathname === '/host/settings' ? 'active' : ''}`}>Settings</Link>
           <button className="btn-ghost navbar-btn" onClick={logout}>Log out</button>
@@ -270,6 +307,7 @@ function AdminNav({ location, menuOpen, setMenuOpen, closeMenu, closeMenuAndRefo
             <Link to="/host" className={`navbar-mobile-link ${hostActive ? 'active' : ''}`} onClick={closeMenu} ref={firstLinkRef}>Auctions</Link>
             <Link to="/host/buyers" className={`navbar-mobile-link ${location.pathname === '/host/buyers' ? 'active' : ''}`} onClick={closeMenu}>Buyers</Link>
             <Link to="/host/orders" className={`navbar-mobile-link ${location.pathname === '/host/orders' ? 'active' : ''}`} onClick={closeMenu}>Orders</Link>
+            <Link to="/host/requests" className={`navbar-mobile-link ${location.pathname === '/host/requests' ? 'active' : ''}`} onClick={closeMenu}>Requests{newRequests ? ` (${newRequests} new)` : ''}</Link>
             <Link to="/host/rewards" className={`navbar-mobile-link ${location.pathname === '/host/rewards' ? 'active' : ''}`} onClick={closeMenu}>Rewards</Link>
             <Link to="/host/settings" className={`navbar-mobile-link ${location.pathname === '/host/settings' ? 'active' : ''}`} onClick={closeMenu}>Settings</Link>
             <button className="navbar-mobile-logout" onClick={() => { closeMenu(); logout(); }}>Log out</button>

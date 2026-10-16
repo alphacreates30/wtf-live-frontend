@@ -31,6 +31,9 @@ const AccountDeleted = lazy(() => import('./pages/AccountDeleted'))
 const Watching = lazy(() => import('./pages/Watching'))
 const NotificationPrefs = lazy(() => import('./pages/NotificationPrefs'))
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'))
+const Services = lazy(() => import('./pages/Services'))
+const Contact = lazy(() => import('./pages/Contact'))
+const AdminRequests = lazy(() => import('./pages/AdminRequests'))
 import './pages/Buyer.css'
 
 const ADMIN_USERNAME = 'whatthefind'
@@ -141,6 +144,10 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms" element={<Terms />} />
+        {/* Services (F5): the overview, one page per service, and Contact. Public, no login. */}
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:slug" element={<Services />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/account-deleted" element={<AccountDeleted />} />
         <Route path="/auction/:id" element={
           <ProfileGate>
@@ -206,6 +213,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminOrders />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/host/requests"
+          element={
+            <AdminRoute>
+              <AdminRequests />
             </AdminRoute>
           }
         />

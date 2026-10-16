@@ -69,6 +69,8 @@ export function apiError(data, res, fallback) {
   const err = new Error(detail && !base.includes(detail) ? `${base} — ${detail}` : base)
   err.status = res.status
   err.detail = detail
+  if (data?.code) err.code = data.code
+  if (data?.field) err.field = data.field   // which form field the server refused (the service request form)
   if (Array.isArray(data?.reasons)) err.reasons = data.reasons   // e.g. why an account can't be deleted yet
   return err
 }
@@ -239,6 +241,16 @@ export const api = {
     return request(`/admin/orders${s ? `?${s}` : ''}`)
   },
   getAdminAuctionsSummary: () => request('/admin/auctions/summary'),
+  // Admin -> Requests (F5). { service, status, id } -> { available, requests, new_count }
+  getServiceRequests: (params = {}) => {
+    const qs = new URLSearchParams()
+    for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v)
+    const s = qs.toString()
+    return request(`/admin/service-requests${s ? `?${s}` : ''}`)
+  },
+  getServiceRequestSummary: () => request('/admin/service-requests/summary'),
+  updateServiceRequest: (id, data) => request(`/admin/service-requests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteServiceRequest: (id) => request(`/admin/service-requests/${id}`, { method: 'DELETE' }),
   chargeOrder: (order_id) =>
     request('/charge-winner', { method: 'POST', body: JSON.stringify({ order_id }) }),
   // Standard-auction orders are billed on one invoice per buyer per auction -
@@ -271,6 +283,20 @@ export const api = {
 
   deleteAccount: (password, confirm) =>
     request('/account/delete', { method: 'POST', body: JSON.stringify({ password, confirm }) }),
+
+  // The Services/Contact form (F5): multipart, so the browser sets the Content-Type (with its boundary). Public.
+  sendServiceRequest: async (formData) => {
+    let res
+    try {
+      res = await fetch(`${BASE}/service-requests`, { method: 'POST', body: formData, signal: AbortSignal.timeout(60000) })
+    } catch (err) {
+      if (err.name === 'TimeoutError' || err.name === 'AbortError') throw new Error('Sending is taking too long. Check your connection and try again.')
+      throw new Error('Could not reach the server. Check your connection and try again.')
+    }
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw apiError(data, res, 'Your request could not be sent')
+    return data
+  },
 
   uploadImage: async (blob, mimeType) => {
     const token = localStorage.getItem('wtf_token')

@@ -347,7 +347,7 @@ export default function LotPage() {
             </p>
           )}
           <p className="lp-questions">
-            Questions about this lot? <a className="lp-link" href={`mailto:${data.contact_email}?subject=${encodeURIComponent(`Lot ${lot.number}: ${lot.title}`)}`}>Email us</a>
+            Questions about this lot? <Link className="lp-link" to={`/contact?about=${encodeURIComponent(`Lot ${lot.number}: ${lot.title}`)}`}>Send us a message</Link>
           </p>
         </section>
 

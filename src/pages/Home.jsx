@@ -8,7 +8,6 @@ import Rail from '../components/home/Rail'
 import LotCard from '../components/home/LotCard'
 import SignupForm from '../components/home/SignupForm'
 import { WatchButton, FollowButton } from '../watch/WatchButtons'
-import { CONSIGN_MAILTO } from '../components/home/links'
 import { usePreview, PreviewSwitch } from '../preview/PreviewContext'
 import '../components/home/home.css'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
@@ -169,7 +168,7 @@ export default function Home() {
           <h2 id="consign-h" className="consign-title">Got a collection with a story?</h2>
           <p className="consign-text">We photograph, catalogue and sell it, one lot at a time, to collectors who care.</p>
         </div>
-        <a href={CONSIGN_MAILTO} className="consign-cta">Tell us about it →</a>
+        <Link to="/services" className="consign-cta">Tell us about it →</Link>
       </section>
     </div>
   )

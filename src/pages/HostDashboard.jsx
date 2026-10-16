@@ -6,6 +6,21 @@ import { resizeImageToBlob } from '../imageResize'
 import AiSpendCard from './AiSpendCard'
 import './HostDashboard.css'
 
+// Service requests (F5): how many are New, and the way in. Hidden until migration zc is applied.
+function RequestsCard() {
+  const [s, setS] = useState(null)
+  useEffect(() => { api.getServiceRequestSummary().then(setS).catch(() => {}) }, [])
+  if (!s?.available) return null
+  return (
+    <div className="card host-ai-spend">
+      <div className="host-ai-head" style={{ marginBottom: 0 }}>
+        <h2 className="host-section-title" style={{ marginBottom: 0 }}>Requests: {s.new_count} new</h2>
+        <Link to="/host/requests" className="host-ai-refresh">Open</Link>
+      </div>
+    </div>
+  )
+}
+
 const EMPTY_FORM = {
   title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
   fulfillment_mode: '', pickup_address: '', pickup_town: '', pickup_starts_at: '', pickup_ends_at: '',
@@ -160,6 +175,7 @@ export default function HostDashboard() {
       <p className="host-sub">Logged in as <strong>@{username}</strong></p>
 
       <AiSpendCard />
+      <RequestsCard />
 
       <div className="host-header-row">
         <h2 className="host-section-title" style={{ marginBottom: 0 }}>My Auctions</h2>

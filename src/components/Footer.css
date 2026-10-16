@@ -63,6 +63,6 @@
 .site-footer a:focus-visible, .site-footer button:focus-visible { outline-color: var(--on-panel); }
 
 @media (min-width: 900px) {
-  .footer-inner { grid-template-columns: 1.6fr 1fr 1fr; padding: var(--space-10) var(--space-8) var(--space-12); }
+  .footer-inner { grid-template-columns: 1.6fr 1fr 1fr 1fr; padding: var(--space-10) var(--space-8) var(--space-12); }
   .footer-brand-col { grid-column: auto; }
 }
