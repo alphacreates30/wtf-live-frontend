@@ -277,7 +277,7 @@ export default function LotPage() {
               <p className="lp-price-label">{priceLine}</p>
               <p className="lp-price-amount wtf-price">{money(lot.status === 'open' || lot.status === 'upcoming' ? shownPrice : price.current_bid)}</p>
               {/* Premium is always beside the price (BRAND.md), computed by the server with the invoice's maths. */}
-              {lot.status !== 'unsold' && <p className="lp-price-prem"><span className="wtf-price">{money(price.total_with_premium)}</span> with {pct}% buyer's premium</p>}
+              {lot.status !== 'unsold' && pct > 0 && <p className="lp-price-prem"><span className="wtf-price">{money(price.total_with_premium)}</span> with {pct}% buyer's premium</p>}
             </> : <p className="lp-price-label">Closed without a sale</p>}
             <p className="lp-bidcount">{price.bid_count === 0 ? 'No bids yet' : price.bid_count === 1 ? '1 bid' : `${price.bid_count} bids`}</p>
           </div>
@@ -505,7 +505,7 @@ function ConfirmSheet({ amount, kind, pct, total, lot, winning, onCancel, onConf
       <div className="lp-sheet card" role="dialog" aria-modal="true" aria-labelledby="lp-sheet-h" onClick={e => e.stopPropagation()}>
         <h2 id="lp-sheet-h" className="lp-sheet-title">{kind === 'tap' ? `Bid ${money(amount)}?` : winning ? `Raise your max to ${money(amount)}?` : `Set a max bid of ${money(amount)}?`}</h2>
         <p className="lp-sheet-lot">Lot {lot.number}: {lot.title}</p>
-        <p className="lp-sheet-total">If you win at {money(amount)}, you pay <strong className="wtf-price">{money(total)}</strong> with the {pct}% buyer's premium{kind === 'max' ? ', and less if nobody bids you up that far.' : '.'}</p>
+        <p className="lp-sheet-total">If you win at {money(amount)}, you pay <strong className="wtf-price">{money(total)}</strong>{pct > 0 ? ` with the ${pct}% buyer's premium` : ''}{kind === 'max' ? ', and less if nobody bids you up that far.' : '.'}</p>
         {kind === 'max' && <p className="lp-muted lp-small">We bid for you, only as high as needed.</p>}
         <p className="lp-muted lp-small">Bids are binding and can't be taken back.</p>
         <div className="lp-sheet-actions">

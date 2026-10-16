@@ -87,7 +87,7 @@ export default function MyBids() {
                   <div className="totals-lines">
                     <div><span>{wins.length} item{wins.length !== 1 ? 's' : ''} won</span></div>
                     <div><span>Hammer total</span><span>{fmt(totalWon)}</span></div>
-                    <div><span>Buyer's premium ({premiumPct}%)</span><span>{fmt(premium)}</span></div>
+                    {premiumPct > 0 && <div><span>Buyer's premium ({premiumPct}%)</span><span>{fmt(premium)}</span></div>}
                     <div className="totals-final"><span>Total</span><span>{fmt(totalWon + premium)}</span></div>
                   </div>
                 </div>

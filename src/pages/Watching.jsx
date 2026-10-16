@@ -80,7 +80,7 @@ function LotRow({ lot, now, w }) {
         <Link to={lotHref(lot)} className="wl-title">{lot.title}</Link>
         <div className="wl-meta">
           {lot.bid_count > 0
-            ? <span><span className="wl-price">{money(lot.current_bid)}</span>{lot.buyers_premium_pct != null && ` +${lot.buyers_premium_pct}% premium`}</span>
+            ? <span><span className="wl-price">{money(lot.current_bid)}</span>{lot.buyers_premium_pct > 0 && ` +${lot.buyers_premium_pct}% premium`}</span>
             : <span>No bids yet</span>}
           {open && <span className={msLeft < HOUR ? 'wl-urgent' : ''}>{shortTimeLeft(msLeft)} left</span>}
           {lot.auction_phase === 'upcoming' && <span>Auction not open yet</span>}

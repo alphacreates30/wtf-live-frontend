@@ -124,7 +124,9 @@ export default function AuctionDetails({ auction, onSaved }) {
       )}
       <div className="form-group">
         <label>Buyer's Premium (%)</label>
-        <input name="buyers_premium_pct" type="number" min="0" max="50" step="0.1" value={form.buyers_premium_pct} onChange={handleChange} required />
+        {auction.mode === 'live'
+          ? <p className="form-hint">Live shows have no buyer's premium.</p>
+          : <input name="buyers_premium_pct" type="number" min="0" max="50" step="0.1" value={form.buyers_premium_pct} onChange={handleChange} required />}
       </div>
       {error && <p className="error-msg">{error}</p>}
       {success && <p className="success-msg">{success}</p>}

@@ -43,8 +43,12 @@ export default function TermsAcknowledgementModal({ auction, onCancel, onAccept 
         <div className="terms-modal-body">
         <h2 className="terms-modal-title" id="terms-modal-title">Before you bid — {auction.title}</h2>
         <ul className="terms-modal-list">
-          <li>Lots open at <strong>$0.00</strong>. Some carry an undisclosed reserve.</li>
-          <li>A <strong>{premiumPct}% buyer's premium</strong> is added to your winning bid.</li>
+          {auction.mode === 'live'
+            ? <li>Each lot sells to the highest bidder when its clock runs out. There is no reserve.</li>
+            : <li>Lots open at <strong>$0.00</strong>. Some carry an undisclosed reserve.</li>}
+          {premiumPct > 0
+            ? <li>A <strong>{premiumPct}% buyer's premium</strong> is added to your winning bid.</li>
+            : <li>No buyer's premium: you pay your winning bid, plus postage.</li>}
           <li><strong>Your card is charged automatically</strong> when a lot closes and you've won it.</li>
           <li><strong>Bids are binding and cannot be retracted.</strong></li>
           <li>Lots are sold <strong>as-is</strong>. All sales final, except a lot materially not as described — tell us within 3 days and we'll refund it.</li>

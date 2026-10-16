@@ -31,7 +31,7 @@ export default function LotCard({ lot, premiumPct, now, extra = null }) {
               <>
                 <span className="lc-amount">{money(lot.current_bid)}</span>
                 {/* Premium is always beside the bid (BRAND.md), never a bare price. */}
-                {premiumPct != null && <span className="lc-prem">+{premiumPct}% premium</span>}
+                {premiumPct > 0 && <span className="lc-prem">+{premiumPct}% premium</span>}
               </>
             ) : <span className="lc-none">No bids yet</span>}
           </p>

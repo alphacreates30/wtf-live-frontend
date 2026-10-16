@@ -223,3 +223,10 @@
 /* G2: an invoice's points reward / promo code line, and the points it earned. Good news: success green. */
 .order-table .order-discount td { color: var(--success); }
 .order-points { margin: var(--space-2) 0 0; font-size: var(--fs-14); color: var(--success); }
+
+/* Card on file (approved screen): verified or not, and replace it. Bidding needs a verified card. */
+.card-on-file { text-align: left; margin-top: 2rem; }
+.card-on-file h3 { margin: 0 0 0.5rem; }
+.card-on-file .profile-card { margin: 0.75rem 0; }
+.card-on-file-actions { display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; }
+.card-on-file .error-msg { color: var(--error); }

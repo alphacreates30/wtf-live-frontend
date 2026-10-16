@@ -323,7 +323,7 @@ export default function StandardAuctionRoom({ initialAuction = null }) {
                       <div className="sar-card-stat">
                         <span className="sar-card-stat-label">{lotPriceLabel(item)}</span>
                         <span className="sar-card-stat-val">${floor.toFixed(2)}</span>
-                        {item.status !== 'unsold' && <span className="sar-prem">+{premiumPct}% prem.</span>}
+                        {item.status !== 'unsold' && premiumPct > 0 && <span className="sar-prem">+{premiumPct}% prem.</span>}
                       </div>
                     )}
                     <div className="sar-card-stat">

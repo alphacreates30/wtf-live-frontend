@@ -168,7 +168,7 @@ export default function MyOrders() {
                 {group.invoice ? group.orders.map(o => (
                   <tr key={o.id}>
                     <td>{o.item_title}</td>
-                    <td>{fmt(o.hammer_cents)} + {fmt(o.premium_cents)}</td>
+                    <td>{fmt(o.hammer_cents)}{o.premium_cents > 0 ? <> + {fmt(o.premium_cents)}</> : null}</td>
                   </tr>
                 )) : (
                   <>
@@ -176,10 +176,12 @@ export default function MyOrders() {
                       <td>Hammer price</td>
                       <td>{fmt(first.hammer_cents)}</td>
                     </tr>
-                    <tr>
-                      <td>Buyer's premium</td>
-                      <td>{fmt(first.premium_cents)}</td>
-                    </tr>
+                    {first.premium_cents > 0 && (
+                      <tr>
+                        <td>Buyer's premium</td>
+                        <td>{fmt(first.premium_cents)}</td>
+                      </tr>
+                    )}
                   </>
                 )}
                 {discount && (

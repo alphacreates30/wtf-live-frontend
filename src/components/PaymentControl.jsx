@@ -102,7 +102,7 @@ export default function PaymentControl({
             {lots.map(l => (
               <li key={l.id}>
                 <span className="pc-lot-title">{l.title}</span>
-                <span className="pc-lot-amt">{fmt(l.hammer_cents)} + {fmt(l.premium_cents)}</span>
+                <span className="pc-lot-amt">{fmt(l.hammer_cents)}{l.premium_cents > 0 ? <> + {fmt(l.premium_cents)}</> : null}</span>
               </li>
             ))}
           </ul>
@@ -110,7 +110,7 @@ export default function PaymentControl({
           {/* Hammer and premium beside each other, THEN the total - never a bare total. */}
           <dl className="pc-totals">
             <div><dt>Hammer</dt><dd>{fmt(hammer)}</dd></div>
-            <div><dt>Buyer's premium</dt><dd>{fmt(premium)}</dd></div>
+            {premium > 0 && <div><dt>Buyer's premium</dt><dd>{fmt(premium)}</dd></div>}
             <div className="pc-total"><dt>Total</dt><dd>{fmt(total)}</dd></div>
           </dl>
         </>
@@ -158,7 +158,7 @@ export default function PaymentControl({
             <h2 id={`pc-title-${id}`} className="pc-dialog-title">{isRetry ? 'Retry' : 'Charge'} {fmt(total)} to {name}?</h2>
             <p className="pc-dialog-body">
               This charges the card {name} has on file, for real.
-              {!compact && lots.length > 0 && <> Hammer <strong>{fmt(hammer)}</strong> + buyer's premium <strong>{fmt(premium)}</strong> = <strong>{fmt(total)}</strong>{auctionTitle ? <> for <em>{auctionTitle}</em></> : null}.</>}
+              {!compact && lots.length > 0 && <> Hammer <strong>{fmt(hammer)}</strong>{premium > 0 ? <> + buyer's premium <strong>{fmt(premium)}</strong></> : null} = <strong>{fmt(total)}</strong>{auctionTitle ? <> for <em>{auctionTitle}</em></> : null}.</>}
             </p>
             {isRetry && eff.error && <p className="error-msg pc-reason"><strong>Last attempt failed.</strong> {eff.error}</p>}
             <div className="pc-dialog-actions">
