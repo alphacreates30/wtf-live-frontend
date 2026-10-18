@@ -193,7 +193,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
       </header>
 
       <main className="vr-stage">
-        <LiveVideo auctionId={auction.id} rehearsal={rehearsal} className="vr-video" />
+        <LiveVideo auctionId={auction.id} rehearsal={rehearsal} onAir={!!st.on_air && !st.ended} className="vr-video" />
         {!connected && <div className="vr-banner vr-banner-warn" role="alert">Connection lost. Reconnecting…</div>}
         {banner && (
           <div className={`vr-banner vr-banner-${banner.kind}`} role={banner.kind === 'declined' || banner.kind === 'outbid' ? 'alert' : 'status'}>

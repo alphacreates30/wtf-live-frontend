@@ -37,11 +37,8 @@
 
 /* Middle: the camera, with the lot card over it */
 .lh-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-.lv { position: absolute; inset: 0; background: var(--media-ground); }
-.lv-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
-.lv-mirror { transform: scaleX(-1); }
-.lh-nocam { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-6); text-align: center; color: var(--on-panel-muted); }
-.lh-nocam .wtf-label { color: var(--on-panel-muted); }
+/* The video itself: LiveVideo.css. The controller's tag over it: */
+.lh-ctl { position: absolute; top: var(--space-2); left: var(--space-2); z-index: 1; padding: 2px 8px; border-radius: var(--radius-control); background: var(--scrim); color: var(--on-photo); }
 
 .lh-card {
   position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);

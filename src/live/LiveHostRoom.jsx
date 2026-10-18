@@ -136,9 +136,10 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
 
       {/* Middle: the camera (phone) with the lot card over it. */}
       <main className="lh-stage">
-        {controller
-          ? <div className="lh-nocam"><span className="wtf-label">Controller</span><p>No camera on this device. The phone films; this one runs the show.</p></div>
-          : <LiveVideo ref={cam} auctionId={auction.id} rehearsal={rehearsal} host className="lh-video" onStatus={setVideo} />}
+        {/* The controller (a second device) shows what viewers see, without the sound; the phone films. */}
+        <LiveVideo ref={controller ? undefined : cam} auctionId={auction.id} rehearsal={rehearsal} role={controller ? 'controller' : 'host'}
+          onAir={onAir} className="lh-video" onStatus={setVideo} />
+        {controller && <span className="lh-ctl wtf-label">Controller: what viewers see. The phone films.</span>}
 
         {!onAir && !ended && (
           <LiveChecklist auction={auction} st={st} controller={controller} onGoLive={goLive} busy={busy === 'go_live'} />
@@ -192,7 +193,7 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
           {!controller && video.phase === 'connected' && !video.publishing && (
             <button type="button" className="lh-link" onClick={() => cam.current?.start()}>Start the camera</button>
           )}
-          {video.message && <p className="lh-note">{video.message}</p>}
+          {video.message && !controller && <p className="lh-note">{video.message}</p>}
         </footer>
       )}
 

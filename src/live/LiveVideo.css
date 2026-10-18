@@ -1,0 +1,31 @@
+/* The show's video (LiveVideo), used by the host screen, the controller and the viewer room. Tokens only; no red
+ * here (nothing on the video asks the viewer to act now). The overlay layer sits in the middle of the picture, below
+ * the room's banners and above its lot card. */
+.lv { position: absolute; inset: 0; background: var(--media-ground); }
+.lv-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lv-mirror { transform: scaleX(-1); }
+
+.lv-over {
+  position: absolute; left: var(--space-3); right: var(--space-3); top: 30%;
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+  pointer-events: none; text-align: center;
+}
+.lv-over > * { pointer-events: auto; }
+
+.lv-slate {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  max-width: 320px; padding: var(--space-4) var(--space-3); border-radius: var(--radius-card);
+  background: var(--scrim-photo); color: var(--on-photo);
+}
+.lv-slate p { margin: 0; font-family: var(--font-heading); font-size: var(--fs-20); line-height: var(--lh-heading); }
+
+.lv-note {
+  margin: 0; display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; justify-content: center;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-control);
+  background: var(--scrim); color: var(--on-photo); font-size: var(--fs-14);
+}
+.lv-btn, .lv-sound {
+  background: var(--surface); color: var(--ink); border-radius: var(--radius-pill);
+  padding: 6px 14px; min-height: 36px; font-weight: var(--fw-semibold);
+}
+.lv-sound { min-height: var(--tap); padding: 8px 18px; font-size: var(--fs-16); }

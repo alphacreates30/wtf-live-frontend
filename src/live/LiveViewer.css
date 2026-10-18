@@ -24,8 +24,6 @@
 .vr-follow { flex: none; }
 
 .vr-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-.vr-stage .lv { position: absolute; inset: 0; background: var(--media-ground); }
-.vr-stage .lv-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .vr-banner {
   position: absolute; left: var(--space-3); right: var(--space-3); top: var(--space-3); z-index: 2;

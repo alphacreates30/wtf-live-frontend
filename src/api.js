@@ -124,7 +124,13 @@ export const api = {
   getLiveUnpaid: (id) => request(`/admin/live/${id}/unpaid`),
   rotateRehearsalKey: (id) => request(`/admin/live/${id}/rehearsal-key`, { method: 'POST' }),
   // The LiveKit token for a live show's video (the server says which LiveKit to connect to).
-  getLiveToken: (id, rehearsal) => request(`/auction/${id}/token${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`),
+  // The show's video token. role 'controller': the host's second device (watches, never publishes).
+  getLiveToken: (id, rehearsal, role) => {
+    const q = new URLSearchParams()
+    if (rehearsal) q.set('rehearsal', rehearsal)
+    if (role) q.set('role', role)
+    return request(`/auction/${id}/token${q.size ? `?${q}` : ''}`)
+  },
   // Homepage (API.md): public, the same calls a future app makes.
   // The homepage's first /home is started by main.jsx before React renders
   // (prefetchHome), so the first photos start loading sooner; use it once.
