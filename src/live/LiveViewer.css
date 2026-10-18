@@ -1,0 +1,121 @@
+/* A live show's viewer room (LiveViewerRoom). Phone first; tokens only. Red ("act now") only for the Bid button, a
+ * clock in its last 5 seconds, the live dot and the outbid / declined banners. Full height over the site header. */
+.vr {
+  position: fixed; inset: 0; z-index: 200;   /* above the site header (z-index 100) */
+  display: flex; flex-direction: column;
+  background: var(--media-ground); color: var(--on-photo); font-family: var(--font-ui);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.vr-loading { align-items: center; justify-content: center; }
+.vr-muted { color: var(--muted); }
+.vr-small { font-size: var(--fs-12); }
+
+.vr-top {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: calc(var(--space-2) + env(safe-area-inset-top)) var(--space-3) var(--space-2);
+  background: var(--panel); color: var(--on-panel);
+}
+.vr-back { color: var(--on-panel); font-size: var(--fs-24); line-height: 1; text-decoration: none; min-width: 28px; min-height: var(--tap); display: flex; align-items: center; }
+.vr-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.vr-name { font-family: var(--font-heading); font-size: var(--fs-16); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vr-meta { display: flex; gap: var(--space-2); align-items: center; font-size: var(--fs-12); color: var(--on-panel-muted); }
+.vr-live, .vr-state { display: inline-flex; align-items: center; gap: 5px; font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: 0.04em; color: var(--on-panel); }
+.vr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.vr-follow { flex: none; }
+
+.vr-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.vr-stage .lv { position: absolute; inset: 0; background: var(--media-ground); }
+.vr-stage .lv-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.vr-banner {
+  position: absolute; left: var(--space-3); right: var(--space-3); top: var(--space-3); z-index: 2;
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); font-size: var(--fs-14);
+  background: var(--surface); color: var(--ink); border-left: 3px solid var(--ink);
+}
+.vr-banner-winning, .vr-banner-ok { background: var(--success-wash); color: var(--success); border-left-color: var(--success); }
+.vr-banner-outbid { background: var(--accent-wash); color: var(--accent); border-left-color: var(--accent); }
+.vr-banner-declined { background: var(--danger-wash); color: var(--danger); border-left-color: var(--danger); }
+.vr-banner-warn { background: var(--warning-wash); color: var(--warning); border-left-color: var(--warning); top: auto; bottom: var(--space-3); }
+.vr-banner-text { flex: 1; }
+.vr-banner-btn { background: var(--danger); color: var(--on-dark); padding: 6px 12px; min-height: 36px; flex: none; }
+.vr-banner-x { background: none; color: inherit; font-size: var(--fs-20); min-width: 32px; min-height: 32px; flex: none; }
+
+.vr-panel { position: absolute; left: var(--space-3); right: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--ink); }
+.vr-panel-title { font-size: var(--fs-24); margin: 4px 0 var(--space-2); }
+.vr-ship { font-size: var(--fs-14); margin: var(--space-2) 0 0; }
+.vr-bottom .vr-ship { color: var(--on-panel-muted); margin: 0 0 var(--space-2); }
+
+.vr-chat { position: absolute; left: var(--space-3); right: 30%; bottom: 120px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-14); pointer-events: none; }
+.vr-chat li { background: var(--scrim); padding: 3px 8px; border-radius: var(--radius-control); width: fit-content; max-width: 100%; overflow-wrap: anywhere; }
+
+.vr-card {
+  position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
+  display: flex; gap: var(--space-3); align-items: center;
+  padding: var(--space-3); border-radius: var(--radius-card); background: var(--scrim-photo);
+}
+.vr-card-img { width: 56px; height: 56px; border-radius: var(--radius-control); object-fit: cover; flex: none; background: var(--placeholder-2); display: inline-block; }
+.vr-card-body { flex: 1; min-width: 0; }
+.vr-card-num { color: var(--on-panel-muted); }
+.vr-card-title { font-family: var(--font-heading); font-size: var(--fs-16); line-height: var(--lh-heading); margin: 2px 0; color: var(--on-photo); overflow-wrap: anywhere; }
+.vr-card-price { margin: 0; }
+.vr-card-price .wtf-price { color: var(--on-photo); font-size: var(--fs-20); }
+.vr-card .vr-muted { color: var(--on-panel-muted); }
+.vr-clock { flex: none; text-align: right; min-width: 56px; padding: 2px 6px; border-radius: var(--radius-control); }
+.vr-clock-num { font-size: var(--fs-32); font-weight: var(--fw-semibold); line-height: 1; }
+.vr-clock-unit { font-size: var(--fs-14); margin-left: 2px; }
+.vr-clock.urgent { background: var(--accent); }
+.vr-last { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3); margin: 0; padding: var(--space-3); border-radius: var(--radius-card); background: var(--scrim-photo); }
+
+.vr-bottom { background: var(--panel); color: var(--on-panel); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); max-height: 46dvh; overflow-y: auto; }
+.vr-bidrow { display: flex; gap: var(--space-2); }
+.vr-bid { flex: 2; min-height: 56px; font-size: var(--fs-20); }
+.vr-max { flex: 1; min-height: 56px; background: transparent; color: var(--on-panel); border-color: var(--on-panel-muted); }
+.vr-max:hover:not(:disabled) { color: var(--on-panel); border-color: var(--on-panel); }
+.vr-winning { flex: 2; display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: var(--radius-control); background: var(--success); color: var(--on-dark); font-weight: var(--fw-semibold); font-size: var(--fs-16); }
+.vr-next .wtf-label { color: var(--on-panel-muted); margin: 0 0 var(--space-2); }
+.vr-next-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.vr-next-item { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-14); }
+.vr-next-img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex: none; background: var(--placeholder-2); display: inline-block; }
+.vr-next-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.vr-tools { display: flex; gap: var(--space-2); }
+.vr-chip { min-height: 36px; padding: 6px 12px; border-radius: var(--radius-pill); background: transparent; color: var(--on-panel); border: 1px solid var(--on-panel-muted); font-size: var(--fs-14); flex: none; }
+
+.vr-sheet-backdrop { position: fixed; inset: 0; z-index: 210; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; }
+.vr-sheet { width: 100%; max-width: 520px; max-height: 85dvh; overflow-y: auto; color: var(--ink); border-radius: var(--radius-card) var(--radius-card) 0 0; padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom)); }
+.vr-sheet .card { border: none; padding: 0; }
+.vr-sheet-head { display: flex; align-items: center; }
+.vr-sheet-title { font-size: var(--fs-20); margin: 0 0 var(--space-2); flex: 1; }
+.vr-sheet-actions { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+.vr-label { display: block; font-size: var(--fs-14); font-weight: var(--fw-semibold); margin: var(--space-2) 0 4px; }
+.vr-x { background: none; color: var(--ink); font-size: var(--fs-24); min-width: var(--tap); min-height: var(--tap); }
+.vr-chat-list { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-14); min-height: 120px; max-height: 50dvh; overflow-y: auto; }
+.vr-chat-form { display: flex; gap: var(--space-2); }
+
+/* You won */
+.vr-won { position: fixed; inset: 0; z-index: 230; background: var(--scrim); display: flex; align-items: center; justify-content: center; padding: var(--space-4); overflow: hidden; }
+.vr-won-card { position: relative; z-index: 1; color: var(--ink); text-align: center; max-width: 360px; width: 100%; }
+.vr-won-title { font-size: var(--fs-24); margin: var(--space-2) 0 4px; }
+.vr-won-amount { font-size: var(--fs-32); margin: 0 0 var(--space-2); }
+.vr-won-mark { animation: vr-pop 0.5s ease-out both; }
+@keyframes vr-pop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.vr-confetti { position: absolute; inset: 0; pointer-events: none; }
+.vr-confetti span {
+  position: absolute; top: -12px; left: calc(var(--i) * 3.6%); width: 8px; height: 14px; border-radius: 2px;
+  background: var(--on-photo); animation: vr-fall 2.6s ease-in calc(var(--i) * 45ms) forwards;
+}
+.vr-confetti span:nth-child(3n) { background: var(--brand-red); }
+.vr-confetti span:nth-child(3n + 1) { background: var(--success); }
+@keyframes vr-fall { to { transform: translateY(110vh) rotate(540deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .vr-confetti { display: none; }
+  .vr-won-mark { animation: none; }
+}
+
+/* A computer: the room stays phone-shaped in the middle, the video fills the sides */
+@media (min-width: 900px) {
+  .vr-card, .vr-last, .vr-banner { max-width: 560px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); }
+  .vr-panel { max-width: 560px; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 32px); }
+  .vr-bottom { align-items: center; }
+  .vr-bottom > * { width: 100%; max-width: 560px; }
+}

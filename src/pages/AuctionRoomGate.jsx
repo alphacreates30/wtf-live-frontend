@@ -1,12 +1,12 @@
 import { useState, useEffect, lazy } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
-import AuctionRoom from './AuctionRoom'
 import StandardAuctionRoom from './StandardAuctionRoom'
 import './Buyer.css'
 
-// The live host screen is only for the host's account: kept out of the viewers' download.
+// Each live room is its own download: the host's screen only for the host's account, the viewer room for everyone else.
 const LiveHostRoom = lazy(() => import('../live/LiveHostRoom'))
+const LiveViewerRoom = lazy(() => import('../live/LiveViewerRoom'))
 const ADMIN_USERNAME = 'whatthefind'
 
 // Decides which room an auction opens in: a timed auction's room, or for a live show the host's screen (the host's
@@ -35,5 +35,5 @@ export default function AuctionRoomGate() {
   const username = localStorage.getItem('wtf_username')
   const isHost = !!username && (username === ADMIN_USERNAME || username === auction.host_username)
   if (isHost) return <LiveHostRoom auction={auction} rehearsal={rehearsal} controller={controller} />
-  return <AuctionRoom />
+  return <LiveViewerRoom auction={auction} rehearsal={rehearsal} />
 }
