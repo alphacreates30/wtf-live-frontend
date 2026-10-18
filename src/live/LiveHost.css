@@ -1,0 +1,185 @@
+/* The host's live-show screen (LiveHostRoom). Portrait phone first; tokens only. Red ("act now") only for the live
+ * dot, a clock in its last 5 seconds, and alerts the host must act on. Full screen: it covers the site header. */
+.lh {
+  position: fixed; inset: 0; z-index: 200;   /* above the site header (z-index 100) */
+  display: flex; flex-direction: column;
+  background: var(--media-ground); color: var(--on-photo);
+  font-family: var(--font-ui);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.lh-loading { align-items: center; justify-content: center; }
+.lh-muted { color: var(--muted); }
+
+/* Top strip */
+.lh-strip {
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  padding: calc(var(--space-2) + env(safe-area-inset-top)) var(--space-3) var(--space-2);
+  background: var(--panel); color: var(--on-panel); font-size: var(--fs-14);
+}
+.lh-exit { color: var(--on-panel); font-size: var(--fs-24); line-height: 1; text-decoration: none; min-width: 28px; }
+.lh-live, .lh-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--fs-12); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 3px 10px; border-radius: var(--radius-pill); background: var(--ink); color: var(--on-dark);
+}
+.lh-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--on-dark); }
+.lh-state { background: transparent; border: 1px solid var(--on-panel-muted); color: var(--on-panel-muted); }
+.lh-stat { color: var(--on-panel-muted); white-space: nowrap; }
+
+.lh-banner, .lh-alert {
+  margin: var(--space-2) var(--space-3) 0; padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control); font-size: var(--fs-14);
+}
+.lh-banner { background: var(--warning-wash); color: var(--warning); border-left: 3px solid var(--warning); }
+.lh-alert { background: var(--danger-wash); color: var(--danger); border-left: 3px solid var(--danger); }
+.lh-alert p { margin: 0 0 var(--space-2); }
+.lh-alert-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+/* Middle: the camera, with the lot card over it */
+.lh-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.lv { position: absolute; inset: 0; background: var(--media-ground); }
+.lv-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lv-mirror { transform: scaleX(-1); }
+.lh-nocam { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-6); text-align: center; color: var(--on-panel-muted); }
+.lh-nocam .wtf-label { color: var(--on-panel-muted); }
+
+.lh-card {
+  position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
+  display: flex; gap: var(--space-3); align-items: flex-start;
+  padding: var(--space-3); border-radius: var(--radius-card);
+  background: var(--scrim-photo); color: var(--on-photo);
+}
+.lh-card-img { width: 64px; height: 64px; border-radius: var(--radius-control); object-fit: cover; flex: none; background: var(--placeholder-2); }
+.lh-card-noimg { display: inline-block; }
+.lh-card-body { flex: 1; min-width: 0; }
+.lh-card-num { color: var(--on-panel-muted); }
+.lh-card-title { font-family: var(--font-heading); font-size: var(--fs-20); line-height: var(--lh-heading); margin: 2px 0 4px; color: var(--on-photo); overflow-wrap: anywhere; }
+.lh-card-price { margin: 0; font-size: var(--fs-16); }
+.lh-card-price .wtf-price { color: var(--on-photo); font-size: var(--fs-20); }
+.lh-card .lh-muted { color: var(--on-panel-muted); }
+.lh-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-2); }
+.lh-autostart { margin: var(--space-2) 0 0; font-size: var(--fs-14); color: var(--on-panel); }
+.lh-clock { flex: none; text-align: right; min-width: 64px; }
+.lh-clock-num { font-size: var(--fs-40); font-weight: var(--fw-semibold); line-height: 1; }
+.lh-clock-unit { font-size: var(--fs-16); margin-left: 2px; }
+.lh-clock.urgent .lh-clock-num, .lh-clock.urgent .lh-clock-unit { color: var(--on-photo); }
+.lh-clock.urgent { background: var(--accent); border-radius: var(--radius-control); padding: 4px 8px; }
+.lh-clock-sd { display: block; font-size: var(--fs-12); color: var(--on-panel-muted); margin-top: 4px; }
+
+.lh-last {
+  position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
+  padding: var(--space-3); border-radius: var(--radius-card); background: var(--scrim-photo); font-size: var(--fs-16);
+}
+.lh-last .wtf-price { color: var(--on-photo); }
+.lh-last-actions { display: inline-flex; gap: 6px; margin-left: var(--space-2); flex-wrap: wrap; }
+.lh-done-note { position: absolute; top: var(--space-4); left: 0; right: 0; text-align: center; color: var(--on-panel-muted); }
+
+/* Chips: presets, small choices. Light on the dark ground. */
+.lh-chip {
+  min-height: 36px; padding: 6px 12px; border-radius: var(--radius-pill);
+  background: transparent; color: var(--on-photo); border: 1px solid var(--on-panel-muted); font-size: var(--fs-14);
+}
+.lh-chip-on { background: var(--on-photo); color: var(--ink); border-color: var(--on-photo); }
+.lh-alert .lh-chip { color: var(--danger); border-color: var(--danger); }
+.lh-alert .lh-chip-on { background: var(--danger); color: var(--on-dark); }
+
+/* Bottom: the one big button, then the small ones */
+.lh-controls { padding: var(--space-3); background: var(--panel); display: flex; flex-direction: column; gap: var(--space-2); }
+.lh-primary {
+  width: 100%; min-height: 64px; padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card); background: var(--on-photo); color: var(--ink);
+  font-size: var(--fs-20); font-weight: var(--fw-semibold); line-height: 1.2; overflow-wrap: anywhere;
+}
+.lh-primary:hover:not(:disabled) { background: var(--surface-2); }
+.lh-primary-sold { background: var(--success); color: var(--on-dark); }
+.lh-primary-sold:hover:not(:disabled) { background: var(--success); opacity: 0.92; }
+.lh-small { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.lh-btn {
+  position: relative; flex: 1 0 64px; min-height: var(--tap); padding: 8px 10px;
+  border-radius: var(--radius-control); background: transparent; color: var(--on-panel); border: 1px solid var(--on-panel-muted);
+}
+.lh-btn-on { background: var(--on-panel); color: var(--panel); }
+.lh-badge { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-dark); font-size: var(--fs-12); line-height: 20px; }
+.lh-link { background: none; color: var(--on-panel); text-decoration: underline; padding: 4px 0; min-height: 0; align-self: center; font-weight: var(--fw-medium); }
+.lh-note { margin: 0; font-size: var(--fs-14); color: var(--on-panel-muted); text-align: center; }
+
+/* Ended */
+.lh-ended { position: absolute; left: var(--space-3); right: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--ink); text-align: center; }
+.lh-ended-title { font-size: var(--fs-24); margin-bottom: var(--space-2); }
+.lh-ended-actions { display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap; margin-top: var(--space-4); }
+
+/* Sheets (lineup, chat) and dialogs: light, over a scrim */
+.lh-sheet-backdrop { position: fixed; inset: 0; z-index: 210; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; }
+.lh-sheet {
+  width: 100%; max-width: 640px; max-height: 80dvh; overflow-y: auto; color: var(--ink);
+  border-radius: var(--radius-card) var(--radius-card) 0 0; padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+}
+.lh-sheet-tall { max-height: 88dvh; }
+.lh-sheet .lh-chip { color: var(--ink); border-color: var(--line-strong); }
+.lh-sheet .lh-chip-on { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
+.lh-grab { width: 48px; height: 5px; border-radius: var(--radius-pill); background: var(--line-strong); margin: 0 auto var(--space-3); }
+.lh-sheet-head { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.lh-sheet-title { font-size: var(--fs-20); margin: 0; flex: 1; }
+.lh-close { background: none; color: var(--ink); font-size: var(--fs-24); min-height: var(--tap); min-width: var(--tap); }
+.lh-tabs { display: flex; gap: 6px; }
+.lh-options { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); background: var(--surface-2); border-radius: var(--radius-control); margin-bottom: var(--space-3); font-size: var(--fs-14); }
+.lh-toggle { display: flex; gap: var(--space-2); align-items: flex-start; }
+.lh-toggle input { margin-top: 4px; }
+.lh-hint { display: block; color: var(--muted); font-size: var(--fs-12); }
+.lh-select { display: flex; gap: var(--space-2); align-items: center; }
+.lh-select select { width: auto; min-height: 36px; padding: 4px 10px; }
+.lh-group { margin: var(--space-3) 0 var(--space-2); }
+.lh-lineup { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lh-row { display: flex; align-items: center; gap: var(--space-2); padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); font-size: var(--fs-14); touch-action: pan-y; }
+.lh-row-drag { border-color: var(--ink); box-shadow: 0 4px 12px var(--scrim); position: relative; z-index: 1; }
+.lh-row-shown { border-color: var(--ink); }
+.lh-handle { min-width: 36px; min-height: var(--tap); background: none; color: var(--muted); touch-action: none; cursor: grab; letter-spacing: -2px; }
+.lh-row-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex: none; background: var(--placeholder-2); }
+.lh-row-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.lh-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.lh-end { width: 100%; margin-top: var(--space-4); }
+.lh-chat { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-14); min-height: 120px; }
+.lh-chat-form { display: flex; gap: var(--space-2); }
+.lh-dialog { color: var(--ink); max-width: 420px; margin: auto var(--space-4); }
+.lh-dialog-title { font-size: var(--fs-20); margin: 0 0 var(--space-2); }
+.lh-dialog-actions { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+.lh-toast {
+  position: fixed; left: 50%; top: calc(56px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 220;
+  max-width: calc(100% - 32px); padding: var(--space-2) var(--space-4); border-radius: var(--radius-control);
+  background: var(--ink); color: var(--on-dark); font-size: var(--fs-14);
+}
+.lh-toast-error { background: var(--danger); }
+
+/* The pre-show checklist sits over the camera, scrolling on its own */
+.lc { position: absolute; inset: var(--space-3); overflow-y: auto; color: var(--ink); }
+.lc-title { font-size: var(--fs-24); margin: 0 0 4px; }
+.lc-sub { color: var(--muted); margin: 0 0 var(--space-3); font-size: var(--fs-14); }
+.lc-section { border-top: 1px solid var(--line); padding: var(--space-3) 0; }
+.lc-h2 { font-family: var(--font-ui); font-size: var(--fs-16); font-weight: var(--fw-semibold); margin: 0 0 var(--space-2); }
+.lc-muted { color: var(--muted); font-size: var(--fs-14); }
+.lc-note { color: var(--muted); font-size: var(--fs-14); }
+.lc-warn { color: var(--warning); }
+.lc-ok { color: var(--success); }
+.lc-device { position: relative; aspect-ratio: 4 / 3; max-height: 260px; background: var(--media-ground); border-radius: var(--radius-control); overflow: hidden; }
+.lc-preview { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lc-start { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.lc-checks { list-style: none; padding: 0; margin: var(--space-2) 0 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-14); }
+.lc-meter { display: inline-block; vertical-align: middle; width: 80px; height: 6px; margin-left: var(--space-2); background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; }
+.lc-meter span { display: block; height: 100%; background: var(--success); }
+.lc-lineup { margin: var(--space-2) 0; padding-left: 0; list-style: none; font-size: var(--fs-14); display: flex; flex-direction: column; gap: 4px; }
+.lc-buyers { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
+.lc-buyers th, .lc-buyers td { text-align: left; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
+.lc-link { background: none; color: var(--ink); text-decoration: underline; padding: 4px 0; min-height: 0; font-weight: var(--fw-medium); display: inline-block; }
+.lc-linkbox { overflow-wrap: anywhere; font-size: var(--fs-14); }
+.lc-go { margin-top: var(--space-3); background: var(--ink); color: var(--on-dark); }
+.lc-go:hover:not(:disabled) { background: var(--ink-hover); }
+
+/* A computer (the controller, or the phone screen on a desktop): the stage gets wider, the controls sit in a column */
+@media (max-width: 400px) {
+  .lh-strip { gap: var(--space-2); font-size: var(--fs-12); }
+}
+@media (min-width: 900px) {
+  .lh-card, .lh-last { max-width: 560px; }
+  .lh-controls { flex-direction: column; align-items: stretch; max-width: 720px; width: 100%; margin: 0 auto; background: transparent; }
+  .lc { inset: var(--space-4) auto var(--space-4) 50%; transform: translateX(-50%); width: min(640px, calc(100% - 32px)); }
+}

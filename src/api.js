@@ -114,7 +114,17 @@ export const api = {
   getAuctions: (status) =>
     request(`/auctions${status ? `?status=${status}` : ''}`),
 
-  getAuction: (id) => request(`/auction/${id}`),
+  // rehearsal: a live show's private rehearsal key (a draft show, invited accounts only).
+  getAuction: (id, rehearsal) => request(`/auction/${id}${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`),
+  // Live shows (API.md "Live shows"). show-state and lineup are public for a published show.
+  getShowState: (id, rehearsal) => request(`/auction/${id}/show-state${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`),
+  getLineup: (id, rehearsal) => request(`/auction/${id}/lineup${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`),
+  getLiveChecklist: (id) => request(`/admin/live/${id}/checklist`),
+  getLivePacking: (id) => request(`/admin/live/${id}/packing`),
+  getLiveUnpaid: (id) => request(`/admin/live/${id}/unpaid`),
+  rotateRehearsalKey: (id) => request(`/admin/live/${id}/rehearsal-key`, { method: 'POST' }),
+  // The LiveKit token for a live show's video (the server says which LiveKit to connect to).
+  getLiveToken: (id, rehearsal) => request(`/auction/${id}/token${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`),
   // Homepage (API.md): public, the same calls a future app makes.
   // The homepage's first /home is started by main.jsx before React renders
   // (prefetchHome), so the first photos start loading sooner; use it once.
@@ -175,8 +185,8 @@ export const api = {
     request(`/auction/${id}/publish`, { method: 'POST' }),
 
   getTermsAcceptance: (auctionId) => request(`/auction/${auctionId}/terms-acceptance`),
-  acceptTerms: (auctionId, fulfillment_choice) =>
-    request(`/auction/${auctionId}/terms-acceptance`, { method: 'POST', body: JSON.stringify(fulfillment_choice ? { fulfillment_choice } : {}) }),
+  acceptTerms: (auctionId, fulfillment_choice, rehearsal) =>
+    request(`/auction/${auctionId}/terms-acceptance${rehearsal ? `?rehearsal=${encodeURIComponent(rehearsal)}` : ''}`, { method: 'POST', body: JSON.stringify(fulfillment_choice ? { fulfillment_choice } : {}) }),
   updateFulfillmentChoice: (auctionId, fulfillment_choice) =>
     request(`/auction/${auctionId}/fulfillment-choice`, { method: 'PATCH', body: JSON.stringify({ fulfillment_choice }) }),
 

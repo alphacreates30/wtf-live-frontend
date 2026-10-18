@@ -6,12 +6,20 @@ import AuctionSchedule from './AuctionSchedule'
 import AuctionResults from './AuctionResults'
 import AdminOrders from './AdminOrders'
 import AuctionDetails from './AuctionDetails'
+import LivePacking from './LivePacking'
 import './AuctionWorkspace.css'
 
 const TABS = [
   { path: 'lots', label: 'Lots' },
   { path: 'schedule', label: 'Schedule' },
   { path: 'results', label: 'Results' },
+  { path: 'orders', label: 'Orders' },
+  { path: 'details', label: 'Details' },
+]
+// A live show: its winners and packing list instead of the timed auction's results (phase 2a).
+const LIVE_TABS = [
+  { path: 'lots', label: 'Lots' },
+  { path: 'packing', label: 'Winners and packing' },
   { path: 'orders', label: 'Orders' },
   { path: 'details', label: 'Details' },
 ]
@@ -55,7 +63,7 @@ export default function AuctionWorkspace() {
       </div>
 
       <div className="aw-tabs">
-        {TABS.map(t => (
+        {(auction.mode === 'live' ? LIVE_TABS : TABS).map(t => (
           <NavLink
             key={t.path}
             to={t.path}
@@ -72,6 +80,7 @@ export default function AuctionWorkspace() {
           <Route path="schedule" element={<AuctionSchedule auctionId={auction.id} auctionStatus={auction.status} auctionMode={auction.mode} />} />
           <Route path="results" element={<AuctionResults auctionId={auction.id} />} />
           <Route path="orders" element={<AdminOrders auctionId={auction.id} />} />
+          <Route path="packing" element={<LivePacking auctionId={auction.id} />} />
           <Route path="details" element={<AuctionDetails auction={auction} onSaved={setAuction} />} />
           <Route path="*" element={<Navigate to="lots" replace />} />
         </Routes>

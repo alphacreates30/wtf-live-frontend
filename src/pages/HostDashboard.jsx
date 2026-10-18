@@ -21,10 +21,14 @@ function RequestsCard() {
   )
 }
 
+// kind: 'standard' (a timed auction) or 'live' (a live show: a start time and a default clock per lot, no end time
+// and no buyer's premium; offered only while live shows are switched on).
 const EMPTY_FORM = {
-  title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
+  kind: 'standard', title: '', description: '', image_url: '', category: '', starting_bid: '', starts_at: '', ends_at: '',
   fulfillment_mode: '', pickup_address: '', pickup_town: '', pickup_starts_at: '', pickup_ends_at: '',
+  clock_seconds: '30', auto_pace: false,
 }
+const LIVE_CLOCKS = [60, 30, 15, 5]
 
 // datetime-local wants LOCAL wall-clock time. (This used toISOString(), which is UTC: the default end showed
 // 4-5 hours off in Miami and was saved that way.)
@@ -82,18 +86,23 @@ export default function HostDashboard() {
 
   // The soft-close length comes from the server's setting (GET /config), never a number written here.
   const [softClose, setSoftClose] = useState(null)
-  useEffect(() => { api.getConfig().then(c => setSoftClose(c.soft_close_minutes ?? null)).catch(() => {}) }, [])
+  const [liveEnabled, setLiveEnabled] = useState(false)
+  useEffect(() => { api.getConfig().then(c => { setSoftClose(c.soft_close_minutes ?? null); setLiveEnabled(!!c.live_enabled) }).catch(() => {}) }, [])
+  const isLive = form.kind === 'live'
 
   // The pickup window follows the auction's close (close -> close + 7 days) until the admin edits either date.
   const [pickupEdited, setPickupEdited] = useState(false)
   function handleChange(e) {
-    const { name, value } = e.target
+    const { name, type, checked } = e.target
+    const value = type === 'checkbox' ? checked : e.target.value
     if (name === 'pickup_starts_at' || name === 'pickup_ends_at') setPickupEdited(true)
     setForm(prev => {
       const next = { ...prev, [name]: value }
       const offersPickup = next.fulfillment_mode === 'pickup' || next.fulfillment_mode === 'both'
-      if ((name === 'fulfillment_mode' || name === 'ends_at') && offersPickup && !pickupEdited) {
-        Object.assign(next, defaultPickupWindow(next.ends_at) || {})
+      // A live show's pickup window follows its start (it has no end time); a timed auction's, its close.
+      const anchor = next.kind === 'live' ? next.starts_at : next.ends_at
+      if ((name === 'fulfillment_mode' || name === 'ends_at' || name === 'starts_at' || name === 'kind') && offersPickup && !pickupEdited && anchor) {
+        Object.assign(next, defaultPickupWindow(anchor) || {})
       }
       return next
     })
@@ -111,6 +120,10 @@ export default function HostDashboard() {
       setError('Choose a fulfilment method')
       return
     }
+    if (isLive && !form.starts_at) {
+      setError('Set when the show starts')
+      return
+    }
     const needsPickup = form.fulfillment_mode === 'pickup' || form.fulfillment_mode === 'both'
     if (needsPickup && (!form.pickup_address || !form.pickup_town || !form.pickup_starts_at || !form.pickup_ends_at)) {
       setError('Pickup address, start, and end are required for this fulfilment method')
@@ -123,11 +136,12 @@ export default function HostDashboard() {
         description: form.description || undefined,
         image_url: form.image_url || undefined,
         category: form.category || undefined,
-        starting_bid: parseInt(form.starting_bid),
+        starting_bid: isLive ? 0 : parseInt(form.starting_bid),
         starts_at: form.starts_at ? new Date(form.starts_at).toISOString() : undefined,
-        ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
-        mode: 'standard',
+        ends_at: !isLive && form.ends_at ? new Date(form.ends_at).toISOString() : undefined,
+        mode: isLive ? 'live' : 'standard',
         fulfillment_mode: form.fulfillment_mode,
+        ...(isLive ? { clock_seconds: Number(form.clock_seconds), auto_pace: !!form.auto_pace } : {}),
       })
       // Pickup details are saved via PATCH, not the create call - POST
       // /auction only takes fulfillment_mode itself.
@@ -188,6 +202,7 @@ export default function HostDashboard() {
           const stats = lotStats[a.id]
           const hasLots = !!(stats && stats.count > 0)
           const showResults = a.mode === 'standard' && a.status === 'ended' && hasLots
+          const livePacking = a.mode === 'live' && hasLots && (a.status === 'ended' || a.status === 'live')
           return (
             <div key={a.id} className="card host-auction-item">
               <div className="host-auction-top">
@@ -209,7 +224,6 @@ export default function HostDashboard() {
                 {/* Only a running live-mode auction has one auction-level price. A standard
                     auction's current_bid is stale (every lot has its own), and an ended
                     auction shows its sold count and gross below. */}
-                {hasLots && a.mode !== 'standard' && a.status !== 'ended' && <span>Current bid: <strong>${a.current_bid.toLocaleString()}</strong></span>}
                 {a.leading_bidder && <span>Leader: <strong>@{a.leading_bidder}</strong></span>}
                 {a.status === 'ended' && hasLots && (
                   <span>{stats.soldCount} of {stats.count} sold · Gross: <strong>{fmtMoney(stats.gross)}</strong></span>
@@ -227,12 +241,12 @@ export default function HostDashboard() {
                     Publish
                   </button>
                 )}
-                <Link to={`/host/auction/${a.id}/${showResults ? 'results' : 'lots'}`}>
-                  <button className="btn-primary host-go-btn">{showResults ? 'View Results' : 'Manage Lots'}</button>
+                <Link to={`/host/auction/${a.id}/${showResults ? 'results' : livePacking ? 'packing' : 'lots'}`}>
+                  <button className="btn-primary host-go-btn">{showResults ? 'View Results' : livePacking ? 'Winners and packing' : 'Manage Lots'}</button>
                 </Link>
                 <Link to={`/auction/${a.id}`}>
                   <button className="btn-ghost host-go-btn">
-                    {a.mode === 'standard' ? 'View' : (a.status === 'live' ? 'Open Room' : 'View')}
+                    {a.mode === 'standard' ? 'View' : a.status === 'ended' ? 'View' : a.status === 'draft' ? 'Rehearse' : 'Open host screen'}
                   </button>
                 </Link>
               </div>
@@ -245,14 +259,34 @@ export default function HostDashboard() {
         <div className="host-modal-overlay" onClick={closeCreate}>
           <div className="card host-modal" onClick={e => e.stopPropagation()}>
             <div className="host-modal-head">
-              <h2 className="host-section-title" style={{ marginBottom: 0 }}>Create Auction</h2>
+              <h2 className="host-section-title" style={{ marginBottom: 0 }}>{isLive ? 'Create Live Show' : 'Create Auction'}</h2>
               <button type="button" className="host-modal-close" onClick={closeCreate}>×</button>
             </div>
             <form onSubmit={handleSubmit} className="host-form">
+              {liveEnabled && (
+                <div className="form-group" role="radiogroup" aria-label="Type">
+                  <label>Type</label>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', fontWeight: 'normal' }}>
+                      <input type="radio" name="kind" value="standard" checked={!isLive} onChange={handleChange} /> Timed auction
+                    </label>
+                    <label style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', fontWeight: 'normal' }}>
+                      <input type="radio" name="kind" value="live" checked={isLive} onChange={handleChange} /> Live show
+                    </label>
+                  </div>
+                </div>
+              )}
+              {isLive ? (
+                <p style={{fontSize:'0.8rem',opacity:0.7}}>
+                  Live show: you sell the lots one by one on camera, each on a short clock. No buyer's premium. Publishing
+                  schedules it; it goes on air when you tap Go live.
+                </p>
+              ) : (
               <p style={{fontSize:'0.8rem',opacity:0.7}}>
                 Timed auction: every lot has its own closing time, bidders set a max and we bid for them, and a late bid
                 resets that lot's clock{softClose ? ` to ${softClose} minute${softClose === 1 ? '' : 's'}` : ''}.
               </p>
+              )}
               <div className="form-group">
                 <label>Title *</label>
                 <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. 1:6 Custom Figure" required />
@@ -266,10 +300,12 @@ export default function HostDashboard() {
                   <label>Category</label>
                   <input name="category" value={form.category} onChange={handleChange} placeholder="Vintage Toys" />
                 </div>
+                {!isLive && (
                 <div className="form-group">
                   <label>Starting Bid ($) *</label>
                   <input name="starting_bid" type="number" min="0" value={form.starting_bid} onChange={handleChange} placeholder="50" required />
                 </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Auction Image</label>
@@ -300,6 +336,26 @@ export default function HostDashboard() {
                 />
                 {imgUploading && <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.25rem 0 0' }}>Uploading…</p>}
               </div>
+              {isLive ? (
+                <>
+                  <div className="form-group">
+                    <label>Show starts at *</label>
+                    <input name="starts_at" type="datetime-local" value={form.starts_at} onChange={handleChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Clock per lot</label>
+                    <select name="clock_seconds" value={form.clock_seconds} onChange={handleChange}>
+                      {LIVE_CLOCKS.map(sec => <option key={sec} value={sec}>{sec} seconds</option>)}
+                    </select>
+                    <p className="form-hint">The default. You can pick another for any lot during the show. A bid in the last 5 seconds adds 5 seconds.</p>
+                  </div>
+                  <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontWeight: 'normal', marginBottom: '1rem' }}>
+                    <input type="checkbox" name="auto_pace" checked={!!form.auto_pace} onChange={handleChange} />
+                    Auto-pace: after a sale, show the next lot and start its clock after 15 seconds (you can tap Hold)
+                  </label>
+                </>
+              ) : (
+              <>
               <div className="form-row">
                 <div className="form-group">
                   <label>Starts at (leave blank = now)</label>
@@ -311,6 +367,8 @@ export default function HostDashboard() {
                 </div>
               </div>
               <p style={{fontSize:'0.8rem',opacity:0.7}}>This is the overall bidding window (e.g. 7 days). Each item also gets its own closing time once you add it in Manage Lots — keep item closing times within this window.</p>
+              </>
+              )}
 
               <div className="form-group">
                 <label>Fulfilment *</label>
@@ -349,7 +407,7 @@ export default function HostDashboard() {
 
               {error && <p className="error-msg">{error}</p>}
               <button type="submit" className="btn-primary host-submit" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Auction'}
+                {loading ? 'Creating...' : isLive ? 'Create Live Show' : 'Create Auction'}
               </button>
             </form>
           </div>
