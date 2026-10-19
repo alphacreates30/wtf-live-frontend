@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
@@ -8,9 +8,9 @@ import EmailGate from './components/EmailGate'
 import Listings from './pages/Listings'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
-import { api } from './api'
 import Footer from './components/Footer'
 import { WatchProvider } from './watch/WatchContext'
+import ProfileGate from './components/ProfileGate'
 import { PreviewProvider } from './preview/PreviewContext'
 
 // Split out of the main bundle: the homepage shouldn't download the auction
@@ -51,69 +51,6 @@ function AdminRoute({ children }) {
   return children
 }
 
-function ProfileGate({ children }) {
-  const token = localStorage.getItem('wtf_token')
-  const username = localStorage.getItem('wtf_username')
-  const [profileStatus, setProfileStatus] = useState('loading')
-
-  useEffect(() => {
-    if (!token || username === ADMIN_USERNAME) {
-      setProfileStatus('ok')
-      return
-    }
-    api.getMyProfile()
-      .then(profile => {
-        setProfileStatus(profile?.status || 'no_profile')
-      })
-      .catch(() => setProfileStatus('no_profile'))
-  }, [token, username])
-
-  if (!token) return children
-
-  if (profileStatus === 'loading') {
-    return <div className="page"><p className="buyer-note">Checking profile...</p></div>
-  }
-
-  if (profileStatus === 'no_profile') {
-    return <Navigate to="/profile-setup" replace />
-  }
-
-  if (profileStatus === 'pending') {
-    return (
-      <div className="page status-screen">
-        <span className="status-tag status-tag-pending">Pending</span>
-        <h2>Pending Approval</h2>
-        <p>
-          Your profile is under review. You'll be able to access auctions once approved by the WhatTheFind team.
-        </p>
-      </div>
-    )
-  }
-
-  if (profileStatus === 'rejected') {
-    return (
-      <div className="page status-screen">
-        <span className="status-tag status-tag-rejected">Not approved</span>
-        <h2>Application Not Approved</h2>
-        <p>
-          Your buyer application was not approved. Please contact WhatTheFind for more information.
-        </p>
-      </div>
-    )
-  }
-
-  if (profileStatus === 'blocked') {
-    return (
-      <div className="page status-screen">
-        <span className="status-tag status-tag-blocked">Suspended</span>
-        <h2>Account Suspended</h2>
-        <p>Your account has been suspended. Please contact WhatTheFind.</p>
-      </div>
-    )
-  }
-
-  return children
-}
 
 export default function App() {
   return (
@@ -149,11 +86,9 @@ export default function App() {
         <Route path="/services/:slug" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/account-deleted" element={<AccountDeleted />} />
-        <Route path="/auction/:id" element={
-          <ProfileGate>
-            <AuctionRoomGate />
-          </ProfileGate>
-        } />
+        {/* No ProfileGate here: AuctionRoomGate applies it to timed auctions; a live show lets an account that isn't
+            approved yet watch (the server says watch_only; phase 5 §0). */}
+        <Route path="/auction/:id" element={<AuctionRoomGate />} />
         {/* A lot's own page: /a/<auction slug>/lot/<lot number>. /auction/:id?lot=<id> redirects here. */}
         <Route path="/a/:slug/lot/:n" element={
           <ProfileGate>
