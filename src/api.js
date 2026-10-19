@@ -162,6 +162,11 @@ export const api = {
   unfollowAuction: (auctionId) => request(`/follow/${auctionId}`, { method: 'DELETE' }),
   getWatching: () => request('/me/watching'),
   getNotificationPrefs: () => request('/me/notification-prefs'),
+  // Live show alerts and phone alerts (phase 6).
+  getLiveAlerts: () => request('/me/live-alerts'),
+  setLiveAlerts: (on) => request('/me/live-alerts', { method: 'PUT', body: JSON.stringify({ live_alerts: !!on }) }),
+  subscribePush: (sub) => request('/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint: sub.endpoint, keys: sub.keys }) }),
+  unsubscribePush: (endpoint) => request('/push/subscribe', { method: 'DELETE', body: JSON.stringify({ endpoint }) }),
   setNotificationPrefs: (prefs) => request('/me/notification-prefs', { method: 'PUT', body: JSON.stringify(prefs) }),
   unsubscribeInfo: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`),
   unsubscribe: (token) => request(`/unsubscribe?token=${encodeURIComponent(token)}`, { method: 'POST' }),

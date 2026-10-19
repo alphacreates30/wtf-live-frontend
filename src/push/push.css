@@ -1,0 +1,15 @@
+/* Phone alerts (live phase 6) */
+.pa { display: flex; flex-direction: column; gap: 6px; margin-top: var(--space-3); }
+.pa-title { margin: 0; font-weight: var(--fw-semibold); font-size: var(--fs-14); }
+.pa-text { margin: 0; font-size: var(--fs-14); color: var(--muted); }
+.pa-btn { align-self: flex-start; min-height: var(--tap); }
+.pa-link { background: none; border: none; padding: 0; color: inherit; text-decoration: underline; font: inherit; cursor: pointer; }
+.pa-compact { margin-top: var(--space-2); }
+.pa-compact .pa-text, .pa-compact .pa-title { color: inherit; opacity: 0.85; }
+.pa-compact .pa-btn { color: inherit; border-color: currentColor; }
+.live-alerts { text-align: left; margin-top: var(--space-4); }
+.live-alerts-title { font-size: var(--fs-20); margin: 0 0 var(--space-2); }
+.live-alerts-row { display: flex; gap: var(--space-2); align-items: flex-start; cursor: pointer; }
+.live-alerts-row input { margin-top: 3px; width: 18px; height: 18px; min-height: 0; flex: none; accent-color: var(--ink); }
+.live-alerts-row span { display: flex; flex-direction: column; }
+.live-alerts-hint { margin-top: 2px; }

@@ -20,6 +20,9 @@ const OPEN = [
   { key: 'records', title: 'Sample: Vinyl records', blurb: 'A jazz and soul collection, sleeves in good order.', label: 'Record', day: 6,
     lots: [['12-inch jazz LP, first pressing', 11, 55], ['Soul 7-inch singles, lot of 10', 3, 20], ['Live album, gatefold sleeve', 0, 0], ['Big-band 10-inch record', 2, 9], ['Blues LP, sealed', 5, 38], ['Record crate, wooden', 0, 0]] },
 ]
+// A live show (phase 6): on air in the banner for 1, 3 or 5 open auctions; a second one scheduled, in Coming next.
+const LIVE_SHOW = { key: 'live-night', title: 'Sample: Live show, toy night', blurb: 'Lots sell one at a time on camera, each on a short clock.' }
+const NEXT_SHOW = { key: 'live-next', title: 'Sample: Live show, records', blurb: 'A live show of records from one shop, sold on camera.', label: 'Record', day: 3 }
 const UPCOMING = { key: 'comics', title: 'Sample: Comic books', blurb: 'Bagged and boarded newsstand comics from one reader\'s long boxes.', label: 'Comic', day: 8, lots: 9 }
 
 const iso = ms => new Date(ms).toISOString()
@@ -68,6 +71,7 @@ export function sampleHome(open, nowMs = Date.now(), timezone = 'America/New_Yor
     sample: true,
     server_now: iso(nowMs),
     timezone,
+    live_now: open > 0 ? { id: `sample-${LIVE_SHOW.key}`, title: LIVE_SHOW.title, blurb: LIVE_SHOW.blurb, on_air_at: iso(nowMs - 12 * MIN), image_url: null, thumb_url: null, also_on_air: 0 } : null,
     open_auctions: auctions.map(a => {
       const own = lots.filter(l => l.auction_id === `sample-${a.key}`)
       return {
@@ -85,6 +89,10 @@ export function sampleHome(open, nowMs = Date.now(), timezone = 'America/New_Yor
       first_bid: lots.filter(l => l.bid_count === 0).sort(byEnds).slice(0, 12),
     },
     upcoming: [{
+      id: `sample-${NEXT_SHOW.key}`, title: NEXT_SHOW.title, blurb: NEXT_SHOW.blurb,
+      starts_at: iso(closeAt(NEXT_SHOW.day, nowMs) - HOUR), ends_at: null,
+      image_url: null, thumb_url: null, placeholder_label: NEXT_SHOW.label, live: true,
+    }, {
       id: `sample-${UPCOMING.key}`, title: UPCOMING.title, blurb: UPCOMING.blurb,
       starts_at: iso(upcomingStart(nowMs)), ends_at: iso(upcomingEnd(nowMs)),
       image_url: null, thumb_url: null, placeholder_label: UPCOMING.label,
@@ -101,6 +109,8 @@ export function sampleAuctions(open, nowMs = Date.now()) {
     })),
     { id: `sample-${UPCOMING.key}`, title: UPCOMING.title, description: UPCOMING.blurb, image_url: null, placeholder_label: UPCOMING.label,
       category: null, status: 'upcoming', mode: 'standard', starts_at: iso(upcomingStart(nowMs)), ends_at: iso(upcomingEnd(nowMs)) },
+    { id: `sample-${NEXT_SHOW.key}`, title: NEXT_SHOW.title, description: NEXT_SHOW.blurb, image_url: null, placeholder_label: NEXT_SHOW.label,
+      category: null, status: 'upcoming', mode: 'live', starts_at: iso(closeAt(NEXT_SHOW.day, nowMs) - HOUR), ends_at: null },
   ]
 }
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api'
 import { useRoomSocket, useServerNow, fmtMoney, secondsLeft } from './useRoomSocket'
 import LiveVideo from './LiveVideo'
+import PhoneAlerts from '../push/PhoneAlerts'
 import TermsAcknowledgementModal from '../components/TermsAcknowledgementModal'
 import { FollowButton } from '../watch/WatchButtons'
 import './LiveViewer.css'
@@ -221,6 +222,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
             <h1 className="vr-panel-title">{st.title}</h1>
             <p className="vr-muted">Each lot sells on a short clock. No buyer's premium: your winning bid is the price. You can pre-bid on any lot now.</p>
             <p className="vr-ship">{SHIP_LINE}</p>
+            {!st.rehearsal && <PhoneAlerts compact />}
           </section>
         )}
         {st.ended && (

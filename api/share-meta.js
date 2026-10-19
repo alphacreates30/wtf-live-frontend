@@ -66,11 +66,20 @@ export function lotCard(d, site) {
 }
 
 // a: the public GET /auction/:id answer; firstPhoto: the first lot's full photo when the auction has no cover.
+// A live show (phase 6) says so: "Live now" while it is on air, else when it starts. (A draft never gets here: the
+// public answer is a 404, so it keeps the default card.)
+const showWhen = iso => new Date(iso).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
+export function showLine(a) {
+  if (a.status === 'live') return 'Live now on What The Find: watch and bid as each lot sells.'
+  if (a.status === 'ended') return 'A live show on What The Find.'
+  return a.starts_at ? `A live show on What The Find, ${showWhen(a.starts_at)}. Watch and bid as each lot sells.` : 'A live show on What The Find. Watch and bid as each lot sells.'
+}
 export function auctionCard(a, firstPhoto, site) {
   const photo = a.image_url || firstPhoto
+  const live = a.mode === 'live'
   return {
-    title: a.title,
-    description: storyLine(a.description) || 'An auction at What The Find. Every collection has a story.',
+    title: live ? `${a.status === 'live' ? 'Live now' : 'Live show'}: ${a.title}` : a.title,
+    description: live ? showLine(a) : storyLine(a.description) || 'An auction at What The Find. Every collection has a story.',
     url: `${site}/auction/${a.id}`,
     type: 'website',
     ...(photo ? { image: photo, imageAlt: a.title } : defaultImage(site)),

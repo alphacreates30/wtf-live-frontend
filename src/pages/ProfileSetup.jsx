@@ -1,3 +1,4 @@
+import LiveAlertsCard from '../push/LiveAlertsCard'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
@@ -110,6 +111,7 @@ function ProfileForm() {
         <p>You can join and bid in auctions.</p>
         <button className="btn-primary" onClick={() => navigate('/')}>Browse Auctions</button>
         <CardOnFile profile={profileRow} onSaved={reload} />
+        <LiveAlertsCard />
       </StatusScreen>
     )
   }

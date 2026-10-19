@@ -49,6 +49,23 @@ function OpenNow({ auctions, now, sample }) {
   )
 }
 
+// A published live show on air (GET /home live_now; phase 6): one banner above everything, to the room. Red is
+// "act now" here. Never a draft or a rehearsal (the server leaves them out).
+function LiveNow({ show }) {
+  return (
+    <section className="live-now" aria-labelledby="live-now-h">
+      <Link to={`/auction/${show.id}`} className="live-now-link">
+        <span className="live-now-tag"><span className="live-now-dot" aria-hidden="true" />Live now</span>
+        <span className="live-now-text">
+          <span id="live-now-h" className="live-now-title">{show.title}</span>
+          {show.blurb && <span className="live-now-blurb">{show.blurb}</span>}
+        </span>
+        <span className="live-now-cta">Watch now <span aria-hidden="true">→</span></span>
+      </Link>
+    </section>
+  )
+}
+
 function Asleep({ sample }) {
   return (
     <section className="asleep" aria-labelledby="asleep-h">
@@ -106,15 +123,16 @@ export default function Home() {
     )
   }
 
-  const { open_auctions: open = [], closing_schedule: schedule = [], rails, upcoming, premium_pct: prem = {}, timezone } = home
+  const { open_auctions: open = [], closing_schedule: schedule = [], rails, upcoming, premium_pct: prem = {}, timezone, live_now: liveNow = null } = home
   const isSample = !!home.sample
   const cards = lots => lots.map(l => <LotCard key={l.id} lot={l} premiumPct={prem[l.auction_id]} now={now} extra={<div className="lc-watch"><WatchButton itemId={l.id} disabled={isSample} /></div>} />)
 
   return (
     <div className="home" onClickCapture={preview.blockSampleClick}>
       <PreviewSwitch />
-      {open.length > 0 && <h1 className="visually-hidden">What The Find: online auctions of collections</h1>}
-      {open.length ? <OpenNow auctions={open} now={now} sample={isSample} /> : <Asleep sample={isSample} />}
+      {liveNow && <LiveNow show={liveNow} />}
+      {(open.length > 0 || liveNow) && <h1 className="visually-hidden">What The Find: online auctions of collections</h1>}
+      {open.length ? <OpenNow auctions={open} now={now} sample={isSample} /> : !liveNow && <Asleep sample={isSample} />}
 
       {open.length > 1 && <ClosingSchedule entries={schedule} timezone={timezone} now={now} />}
 
@@ -137,9 +155,10 @@ export default function Home() {
                   : <PhotoPlaceholder label={a.placeholder_label || 'Photo coming soon'} seed={a.id} />}
               </div>
               <div className="lc-body">
+                {a.live && <span className="lc-live-tag">Live show</span>}
                 <h3 className="lc-title lc-title-auction">{a.title}</h3>
                 {a.blurb && <p className="lc-blurb">{a.blurb}</p>}
-                <p className="lc-opens">Opens {fmtDateTime(a.starts_at)}</p>
+                <p className="lc-opens">{a.live ? 'Live' : 'Opens'} {fmtDateTime(a.starts_at)}</p>
               </div>
             </Link>
             <div className="lc-watch"><FollowButton auctionId={a.id} upcoming disabled={isSample} /></div>
