@@ -68,6 +68,8 @@
 .vr-bottom { background: var(--panel); color: var(--on-panel); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); max-height: 46dvh; overflow-y: auto; }
 .vr-bidrow { display: flex; gap: var(--space-2); }
 .vr-bid { flex: 2; min-height: 56px; font-size: var(--fs-20); }
+.vr-watch-only { flex-direction: column; align-items: stretch; }
+.vr-finish { display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; }
 .vr-max { flex: 1; min-height: 56px; background: transparent; color: var(--on-panel); border-color: var(--on-panel-muted); }
 .vr-max:hover:not(:disabled) { color: var(--on-panel); border-color: var(--on-panel); }
 .vr-winning { flex: 2; display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: var(--radius-control); background: var(--success); color: var(--on-dark); font-weight: var(--fw-semibold); font-size: var(--fs-16); }

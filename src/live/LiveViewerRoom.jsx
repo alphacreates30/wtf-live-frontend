@@ -12,7 +12,8 @@ import './LiveViewer.css'
 // amount (the server's lot rules send it: next_bid; the first bid in a show asks to confirm, as on the lot page), Max
 // bid, Up next (3 lots, pre-bid while they wait), Follow, and the chat. Banners: you're winning, outbid, you won (the
 // Glint and confetti; none with reduced motion), card declined (the card form in a sheet). The terms open when the
-// server asks for them (bid_error code). Logged out: watch; Bid goes to login and back here.
+// server asks for them (bid_error code). Logged out: watch; Bid goes to login and back here. Logged in without an
+// approved profile (the server's watch_only): watch like a guest, with "Finish your profile to bid" instead of Bid.
 // Live shows have no buyer's premium: the bid is the price.
 // The card form loads Stripe.js: only when a buyer opens it, never for every viewer.
 const CardOnFileStandalone = lazy(() => import('../components/CardOnFile').then(m => ({ default: m.CardOnFileStandalone })))
@@ -30,6 +31,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
   const [st, setSt] = useState(null)
   const [viewers, setViewers] = useState(0)
   const [blocked, setBlocked] = useState(null)        // auction_error: { code, message }
+  const [watchOnly, setWatchOnly] = useState(null)    // watch_only: { code: 'no_profile' | 'pending', message }
   const [banner, setBanner] = useState(null)          // { kind: 'winning' | 'outbid' | 'declined' | 'ok' | 'info', text }
   const [won, setWon] = useState(null)                // { lot_number, amount, title }
   const [confirm, setConfirm] = useState(null)        // { amount, kind: 'tap' | 'max' | 'prebid', lot }
@@ -95,6 +97,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
     new_chat: m => setChat(list => [...list, m].slice(-100)),
     messages_flagged: ({ username: u }) => setHidden(h => new Set([...h, u])),
     auction_error: e => setBlocked(e),
+    watch_only: w => setWatchOnly(w),
     user_blocked: e => setBlocked({ code: 'blocked', message: e.message }),
   })
 
@@ -252,6 +255,12 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
         {open && (
           <>
             {showShipLine && <p className="vr-ship">{SHIP_LINE}</p>}
+            {watchOnly ? (
+              <div className="vr-bidrow vr-watch-only">
+                <Link className="btn-bid vr-bid vr-finish" to="/profile-setup">Finish your profile to bid</Link>
+                {watchOnly.code === 'pending' && <p className="vr-muted vr-small">{watchOnly.message}</p>}
+              </div>
+            ) : (
             <div className="vr-bidrow">
               {leading
                 ? <span className="vr-winning" role="status">You're winning</span>
@@ -260,6 +269,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
                   </button>}
               <button type="button" className="btn-ghost vr-max" disabled={placing || left === 0} onClick={() => (token ? setMaxOpen(open) : navigate(loginHref))}>{leading ? 'Raise max' : 'Max bid'}</button>
             </div>
+            )}
           </>
         )}
         {st.up_next.length > 0 && !st.ended && (
@@ -270,7 +280,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
                 <li key={l.id} className="vr-next-item">
                   {l.image_url ? <img src={l.image_url} alt="" className="vr-next-img" /> : <span className="vr-next-img" aria-hidden="true" />}
                   <span className="vr-next-text"><span className="tabular">Lot {l.lot_number}</span> {l.title}</span>
-                  <button type="button" className="vr-chip" onClick={() => (token ? setMaxOpen({ ...l, prebid: true }) : navigate(loginHref))}>Pre-bid</button>
+                  <button type="button" className="vr-chip" onClick={() => (!token ? navigate(loginHref) : watchOnly ? navigate('/profile-setup') : setMaxOpen({ ...l, prebid: true }))}>Pre-bid</button>
                 </li>
               ))}
             </ul>
@@ -278,7 +288,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
         )}
         {st.on_air && (
           <div className="vr-tools">
-            <button type="button" className="vr-chip" onClick={() => (token ? setChatOpen(true) : navigate(loginHref))}>{token ? 'Chat' : 'Log in to chat'}</button>
+            <button type="button" className="vr-chip" onClick={() => (!token ? navigate(loginHref) : watchOnly ? navigate('/profile-setup') : setChatOpen(true))}>{!token ? 'Log in to chat' : watchOnly ? 'Finish your profile to chat' : 'Chat'}</button>
           </div>
         )}
       </footer>
