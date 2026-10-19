@@ -7,7 +7,8 @@
   font-family: var(--font-ui);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.lh-loading { align-items: center; justify-content: center; }
+.lh-loading { align-items: center; justify-content: center; gap: var(--space-3); }
+.lh-loading-out { color: var(--on-panel); font-size: var(--fs-14); min-height: var(--tap); display: inline-flex; align-items: center; }
 .lh-muted { color: var(--muted); }
 
 /* Top strip */
@@ -137,6 +138,22 @@
 .lh-end { width: 100%; margin-top: var(--space-4); }
 .lh-chat { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-14); min-height: 120px; }
 .lh-chat-form { display: flex; gap: var(--space-2); }
+.lh-pinned { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; padding: var(--space-2) var(--space-3); background: var(--surface-2); border-radius: var(--radius-control); margin-bottom: var(--space-2); font-size: var(--fs-14); }
+.lh-pinned p { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.lh-chat-tools { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
+.lh-small-label { font-size: var(--fs-12); align-self: center; }
+.lh-msg-text { background: none; color: var(--ink); text-align: left; padding: 4px 0; min-height: 36px; width: 100%; overflow-wrap: anywhere; font: inherit; }
+.lh-msg-open .lh-msg-text { font-weight: var(--fw-semibold); }
+.lh-msg-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 6px; }
+.lh-sheet .lh-chip-danger { color: var(--danger); border-color: var(--danger); }
+.lh-host-tag, .lh-mod-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: var(--radius-pill); font-size: var(--fs-12); border: 1px solid var(--line-strong); color: var(--muted); }
+.lh-replies { margin-bottom: var(--space-3); display: flex; flex-direction: column; gap: 6px; }
+.lh-replies-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.lh-reply { display: inline-flex; align-items: center; max-width: 100%; }
+.lh-reply .lh-chip { white-space: normal; text-align: left; max-width: 100%; }
+.lh-reply-x { background: none; color: var(--muted); min-width: 32px; min-height: 36px; font-size: var(--fs-20); }
+.lh-reply-add { display: flex; gap: 6px; width: 100%; }
+.lh-reply-add input { flex: 1; min-width: 0; }
 .lh-dialog { color: var(--ink); max-width: 420px; margin: auto var(--space-4); }
 .lh-dialog-title { font-size: var(--fs-20); margin: 0 0 var(--space-2); }
 .lh-dialog-actions { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }

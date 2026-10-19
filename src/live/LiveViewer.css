@@ -6,7 +6,8 @@
   background: var(--media-ground); color: var(--on-photo); font-family: var(--font-ui);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.vr-loading { align-items: center; justify-content: center; }
+.vr-loading { align-items: center; justify-content: center; gap: var(--space-3); }
+.vr-loading-out { color: var(--on-panel); font-size: var(--fs-14); min-height: var(--tap); display: inline-flex; align-items: center; }
 .vr-muted { color: var(--muted); }
 .vr-small { font-size: var(--fs-12); }
 
@@ -91,6 +92,11 @@
 .vr-x { background: none; color: var(--ink); font-size: var(--fs-24); min-width: var(--tap); min-height: var(--tap); }
 .vr-chat-list { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-14); min-height: 120px; max-height: 50dvh; overflow-y: auto; }
 .vr-chat-form { display: flex; gap: var(--space-2); }
+.vr-pinned { position: absolute; left: var(--space-3); right: var(--space-3); top: var(--space-3); z-index: 2; margin: 0; padding: 6px 10px; background: var(--scrim); color: var(--on-photo); border-radius: var(--radius-control); font-size: var(--fs-14); overflow-wrap: anywhere; }
+.vr-pinned .wtf-label, .vr-pinned-sheet .wtf-label { margin-right: 4px; }
+.vr-pinned-sheet { margin: 0 0 var(--space-2); padding: 6px 10px; background: var(--surface-2); border-radius: var(--radius-control); font-size: var(--fs-14); overflow-wrap: anywhere; }
+.vr-host-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: var(--radius-pill); font-size: var(--fs-12); border: 1px solid currentColor; opacity: 0.8; }
+.vr-blocked-note { flex: 1; margin: 0; }
 
 /* You won */
 .vr-won { position: fixed; inset: 0; z-index: 230; background: var(--scrim); display: flex; align-items: center; justify-content: center; padding: var(--space-4); overflow: hidden; }

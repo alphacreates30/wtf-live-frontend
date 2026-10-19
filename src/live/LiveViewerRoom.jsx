@@ -45,6 +45,9 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
   const [chat, setChat] = useState([])
   const [chatOpen, setChatOpen] = useState(false)
   const [hidden, setHidden] = useState(() => new Set())   // usernames whose messages were removed
+  const [chatCfg, setChatCfg] = useState({ slow_mode_seconds: 0, pinned: null })
+  const [chatErr, setChatErr] = useState(null)        // why the server refused MY message (only I see it)
+  const [mod, setMod] = useState(null)                // the host muted / blocked me in this show: { mute, block, message }
   const [confirmed, setConfirmed] = useState(() => { try { return sessionStorage.getItem(`wtf_live_confirmed_${auction.id}`) === '1' } catch { return false } })
   const pending = useRef(null)
   const placingTimer = useRef(null)
@@ -95,6 +98,10 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
     lot_rerun: r => { if (r.you) { cardDeclined.current = true; say('declined', r.message, 0) } },
     chat_history: rows => setChat(rows || []),
     new_chat: m => setChat(list => [...list, m].slice(-100)),
+    chat_deleted: ({ id }) => setChat(list => list.filter(m => m.id !== id)),
+    chat_settings: c => setChatCfg(c),
+    chat_error: e => setChatErr({ ...e, at: Date.now() }),
+    you_moderated: m => { setMod(m.mute || m.block ? m : null); if (m.block) say('info', m.message, 0) },
     messages_flagged: ({ username: u }) => setHidden(h => new Set([...h, u])),
     auction_error: e => setBlocked(e),
     watch_only: w => setWatchOnly(w),
@@ -170,7 +177,8 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
       </div>
     )
   }
-  if (!st) return <div className="vr vr-loading" aria-busy="true"><p>{connected ? 'Loading the show…' : 'Connecting…'}</p></div>
+  // Opened from the Home Screen there is no browser Back button, so even this state has a way out.
+  if (!st) return <div className="vr vr-loading" aria-busy="true"><p>{connected ? 'Loading the show…' : 'Connecting…'}</p><Link to="/" className="vr-loading-out">Back to the homepage</Link></div>
 
   const open = st.open
   const shown = !open && st.shown ? st.shown : null
@@ -223,9 +231,12 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
           </section>
         )}
 
+        {st.on_air && chatCfg.pinned && (
+          <p className="vr-pinned" role="status"><span className="wtf-label">Pinned</span> <strong>@{chatCfg.pinned.username}</strong> {chatCfg.pinned.text}</p>
+        )}
         {st.on_air && messages.length > 0 && (
           <ul className="vr-chat" aria-label="Chat" aria-live="off">
-            {messages.slice(-4).map((m, i) => <li key={m.id || i}><strong>@{m.username}</strong> {m.text}</li>)}
+            {messages.slice(-4).map((m, i) => <li key={m.id || i}><strong>@{m.username}</strong>{m.role === 'host' && <span className="vr-host-tag">Host</span>} {m.text}</li>)}
           </ul>
         )}
 
@@ -262,12 +273,14 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
               </div>
             ) : (
             <div className="vr-bidrow">
-              {leading
+              {mod?.block
+                ? <p className="vr-muted vr-blocked-note" role="status">{mod.message}</p>
+                : leading
                 ? <span className="vr-winning" role="status">You're winning</span>
                 : <button type="button" className="btn-bid vr-bid" disabled={placing || left === 0 || nextBid == null} onClick={() => startBid(nextBid, 'tap', open)}>
                     {placing ? 'Bidding…' : token ? `Bid ${fmtMoney(nextBid)}` : 'Log in to bid'}
                   </button>}
-              <button type="button" className="btn-ghost vr-max" disabled={placing || left === 0} onClick={() => (token ? setMaxOpen(open) : navigate(loginHref))}>{leading ? 'Raise max' : 'Max bid'}</button>
+              {!mod?.block && <button type="button" className="btn-ghost vr-max" disabled={placing || left === 0} onClick={() => (token ? setMaxOpen(open) : navigate(loginHref))}>{leading ? 'Raise max' : 'Max bid'}</button>}
             </div>
             )}
           </>
@@ -300,7 +313,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
           onCancel={() => setMaxOpen(null)}
           onConfirm={amount => { const l = maxOpen; setMaxOpen(null); startBid(amount, l.prebid ? 'prebid' : 'max', l) }} />
       )}
-      {chatOpen && <ChatSheet messages={messages} onClose={() => setChatOpen(false)} onSend={text => emit('send_chat', { text })} />}
+      {chatOpen && <ChatSheet messages={messages} cfg={chatCfg} mod={mod} error={chatErr} onClose={() => setChatOpen(false)} onSend={text => { setChatErr(null); emit('send_chat', { text }) }} />}
       {cardOpen && (
         <div className="vr-sheet-backdrop" onClick={() => setCardOpen(false)}>
           <div className="vr-sheet card" role="dialog" aria-modal="true" aria-label="Update your card" onClick={e => e.stopPropagation()}>
@@ -369,23 +382,35 @@ function MaxSheet({ lot, prebid, leading, min, onCancel, onConfirm }) {
   )
 }
 
-function ChatSheet({ messages, onClose, onSend }) {
+// The chat: the pinned message on top; slow mode said up front; a refused message comes back into the box with the
+// reason (nobody else saw it). Muted or blocked by the host: the box is replaced by the note.
+function ChatSheet({ messages, cfg, mod, error, onClose, onSend }) {
   const [text, setText] = useState('')
+  const lastSent = useRef('')
   const end = useRef(null)
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [messages.length])
+  useEffect(() => { if (error && lastSent.current) { setText(t => t || lastSent.current); lastSent.current = '' } }, [error])
+  const silenced = mod?.mute || mod?.block
   return (
     <div className="vr-sheet-backdrop" onClick={onClose}>
       <div className="vr-sheet card" role="dialog" aria-modal="true" aria-labelledby="vr-chat-h" onClick={e => e.stopPropagation()}>
         <div className="vr-sheet-head"><h2 id="vr-chat-h" className="vr-sheet-title">Chat</h2><button type="button" className="vr-x" onClick={onClose} aria-label="Close">×</button></div>
+        {cfg.pinned && <p className="vr-pinned-sheet"><span className="wtf-label">Pinned</span> <strong>@{cfg.pinned.username}</strong> {cfg.pinned.text}</p>}
         <ul className="vr-chat-list">
           {messages.length === 0 && <li className="vr-muted">No messages yet.</li>}
-          {messages.map((m, i) => <li key={m.id || i}><strong>@{m.username}</strong> {m.text}</li>)}
+          {messages.map((m, i) => <li key={m.id || i}><strong>@{m.username}</strong>{m.role === 'host' && <span className="vr-host-tag">Host</span>} {m.text}</li>)}
           <li ref={end} aria-hidden="true" />
         </ul>
-        <form className="vr-chat-form" onSubmit={e => { e.preventDefault(); if (text.trim()) { onSend(text.trim()); setText('') } }}>
-          <input value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Say something" aria-label="Message" />
-          <button type="submit" className="btn-primary">Send</button>
-        </form>
+        {silenced
+          ? <p className="vr-muted vr-small" role="status">{mod.message}</p>
+          : <>
+              {cfg.slow_mode_seconds > 0 && <p className="vr-muted vr-small">Slow mode: one message every {cfg.slow_mode_seconds} seconds.</p>}
+              {error && <p className="error-msg vr-small" role="alert">{error.message}</p>}
+              <form className="vr-chat-form" onSubmit={e => { e.preventDefault(); if (text.trim()) { lastSent.current = text.trim(); onSend(text.trim()); setText('') } }}>
+                <input value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Say something" aria-label="Message" />
+                <button type="submit" className="btn-primary">Send</button>
+              </form>
+            </>}
       </div>
     </div>
   )

@@ -12,7 +12,14 @@ import './LiveHost.css'
 // it, the lineup and chat in sheets. Everything it shows comes from the server's show_state; every tap is a host
 // socket event the server checks (the state machine refuses steps out of order).
 // controller: a second device (?controller=1): the same controls, no camera.
+// The chat sheet (phase 5, audit §5): All / Questions (messages ending in "?"), the pinned message, one-tap pinned
+// replies (three built in, from the server; the host's own are kept on this device), slow mode (off / 10 s / 30 s),
+// and per message: Pin, Delete (for everyone), Mute or Block the account for this show. The server checks each one.
+const OWN_REPLIES_KEY = 'wtf_host_pinned_replies'
+const loadOwnReplies = () => { try { const v = JSON.parse(localStorage.getItem(OWN_REPLIES_KEY) || '[]'); return Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 10) : [] } catch { return [] } }
 const ACTION_TIMEOUT_MS = 4000
+const CHAT_ACTIONS = ['delete_message', 'pin_message', 'set_slow_mode', 'mute_user', 'block_user_show']
+const SLOW_MODES = [0, 10, 30]
 const isTyping = el => !!el?.closest?.('input, textarea, select, [contenteditable="true"]')
 
 export default function LiveHostRoom({ auction, rehearsal, controller = false }) {
@@ -25,6 +32,8 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
   const [sheet, setSheet] = useState(null)            // 'lineup' | 'chat' | null
   const [chat, setChat] = useState([])
   const [seenChat, setSeenChat] = useState(0)
+  const [chatCfg, setChatCfg] = useState({ slow_mode_seconds: 0, pinned: null, pinned_replies: [] })
+  const [moderation, setModeration] = useState({ mute: [], block: [] })
   const [lineupTick, setLineupTick] = useState(0)
   const [video, setVideo] = useState({ phase: 'idle', publishing: false, muted: false })
   const [confirmEnd, setConfirmEnd] = useState(false)
@@ -42,7 +51,14 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
   const { connected, emit } = useRoomSocket(auction.id, { token, rehearsal }, {
     show_state: s => setSt(s),
     viewer_count: n => setViewers(n),
-    host_ok: () => { setBusy(null); clearTimeout(busyTimer.current) },
+    host_ok: ({ action, username, on }) => {
+      if (CHAT_ACTIONS.includes(action)) {
+        if (action === 'mute_user') say(on ? `@${username} is muted in this show.` : `@${username} can chat again.`)
+        if (action === 'block_user_show') say(on ? `@${username} is blocked from this show.` : `@${username} is unblocked.`)
+        return
+      }
+      setBusy(null); clearTimeout(busyTimer.current)
+    },
     host_error: ({ message }) => { setBusy(null); clearTimeout(busyTimer.current); say(message, 'error') },
     item_extended: ({ ends_at, server_now }) => setSt(s => (s?.open ? { ...s, open: { ...s.open, ends_at }, server_now } : s)),
     new_bid: b => setSt(s => (s?.open && s.open.id === b.item_id ? { ...s, open: { ...s.open, current_bid: b.amount, bid_count: b.bid_count, leader: b.username, ends_at: b.ends_at || s.open.ends_at }, server_now: b.server_now || s.server_now } : s)),
@@ -52,6 +68,10 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
     lineup_changed: () => setLineupTick(t => t + 1),
     chat_history: rows => setChat(rows || []),
     new_chat: m => setChat(list => [...list, m].slice(-200)),
+    chat_deleted: ({ id }) => setChat(list => list.filter(m => m.id !== id)),
+    chat_settings: c => setChatCfg(c),
+    moderation_list: l => setModeration({ mute: l.mute || [], block: l.block || [] }),
+    chat_error: e => say(e.message || 'That message was not sent.', 'error'),
     auction_error: e => say(e.message || 'This show could not be opened.', 'error'),
   })
 
@@ -111,7 +131,8 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
   const ended = st?.ended
 
   if (!st) {
-    return <div className="lh lh-loading" aria-busy="true"><p>{connected ? 'Loading the show…' : 'Connecting…'}</p></div>
+    // Opened from the Home Screen there is no browser Back button, so even this state has a way out.
+    return <div className="lh lh-loading" aria-busy="true"><p>{connected ? 'Loading the show…' : 'Connecting…'}</p><Link to="/host" className="lh-loading-out">Back to the host dashboard</Link></div>
   }
 
   return (
@@ -201,7 +222,9 @@ export default function LiveHostRoom({ auction, rehearsal, controller = false })
         <LiveLineup auctionId={auction.id} rehearsal={rehearsal} st={st} refreshKey={lineupTick} busy={!!busy}
           onClose={() => setSheet(null)} act={act} onEnd={() => { setSheet(null); setConfirmEnd(true) }} />
       )}
-      {sheet === 'chat' && <ChatSheet chat={chat} onClose={() => setSheet(null)} onSend={text => emit('send_chat', { text })} />}
+      {sheet === 'chat' && <ChatSheet chat={chat} cfg={chatCfg} moderation={moderation} me={localStorage.getItem('wtf_username')} onClose={() => setSheet(null)}
+        onSend={(text, pin) => emit('send_chat', { text, ...(pin ? { pin: true } : {}) })} onMod={(event, payload) => emit(event, payload)}
+        onOpen={() => emit('get_moderation')} />}
       {confirmEnd && (
         <div className="lh-sheet-backdrop" onClick={() => setConfirmEnd(false)}>
           <div className="lh-dialog card" role="dialog" aria-modal="true" aria-labelledby="lh-end-h" onClick={e => e.stopPropagation()}>
@@ -269,12 +292,21 @@ function DeclineAlert({ a, onAir, disabled, onRerun, onDismiss }) {
   )
 }
 
-function ChatSheet({ chat, onClose, onSend }) {
+function ChatSheet({ chat, cfg, moderation, me, onClose, onSend, onMod, onOpen }) {
   const [text, setText] = useState('')
   const [tab, setTab] = useState('all')
+  const [picked, setPicked] = useState(null)          // the message whose actions are open
+  const [own, setOwn] = useState(loadOwnReplies)
+  const [adding, setAdding] = useState(false)
+  const [draft, setDraft] = useState('')
   const end = useRef(null)
   const rows = chat.filter(m => m.type === 'msg' && (tab === 'all' || /\?\s*$/.test(m.text || '')))
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [rows.length])
+  useEffect(() => { onOpen?.() }, [])   // eslint-disable-line react-hooks/exhaustive-deps
+  const saveOwn = list => { setOwn(list); try { localStorage.setItem(OWN_REPLIES_KEY, JSON.stringify(list)) } catch { /* private mode */ } }
+  const muted = u => moderation.mute.includes(u)
+  const blocked = u => moderation.block.includes(u)
+  const replies = [...(cfg.pinned_replies || []), ...own]
   return (
     <div className="lh-sheet-backdrop" onClick={onClose}>
       <div className="lh-sheet card" role="dialog" aria-modal="true" aria-labelledby="lh-chat-h" onClick={e => e.stopPropagation()}>
@@ -286,11 +318,63 @@ function ChatSheet({ chat, onClose, onSend }) {
           </div>
           <button type="button" className="lh-close" onClick={onClose} aria-label="Close">×</button>
         </div>
+        {cfg.pinned && (
+          <div className="lh-pinned" role="status">
+            <span className="wtf-label">Pinned</span>
+            <p><strong>@{cfg.pinned.username}</strong> {cfg.pinned.text}</p>
+            <button type="button" className="lh-chip" onClick={() => onMod('pin_message', { messageId: null })}>Unpin</button>
+          </div>
+        )}
+        <div className="lh-chat-tools">
+          <div className="lh-tabs" role="group" aria-label="Slow mode">
+            <span className="lh-muted lh-small-label">Slow mode</span>
+            {SLOW_MODES.map(sec => (
+              <button key={sec} type="button" className={`lh-chip${cfg.slow_mode_seconds === sec ? ' lh-chip-on' : ''}`} aria-pressed={cfg.slow_mode_seconds === sec}
+                onClick={() => onMod('set_slow_mode', { seconds: sec })}>{sec ? `${sec} s` : 'Off'}</button>
+            ))}
+          </div>
+        </div>
         <ul className="lh-chat">
           {rows.length === 0 && <li className="lh-muted">{tab === 'q' ? 'No questions yet.' : 'No messages yet.'}</li>}
-          {rows.map((m, i) => <li key={m.id || i}><strong>@{m.username}</strong> {m.text}</li>)}
+          {rows.map((m, i) => (
+            <li key={m.id || i} className={`lh-msg${picked === m.id ? ' lh-msg-open' : ''}`}>
+              <button type="button" className="lh-msg-text" aria-expanded={picked === m.id} onClick={() => setPicked(p => (p === m.id ? null : m.id))}>
+                <strong>@{m.username}</strong>{m.role === 'host' && <span className="lh-host-tag">Host</span>} {m.text}
+                {(muted(m.username) || blocked(m.username)) && <span className="lh-mod-tag">{blocked(m.username) ? 'Blocked' : 'Muted'}</span>}
+              </button>
+              {picked === m.id && (
+                <div className="lh-msg-actions">
+                  <button type="button" className="lh-chip" onClick={() => { onMod('pin_message', { messageId: m.id }); setPicked(null) }}>Pin</button>
+                  <button type="button" className="lh-chip" onClick={() => { onMod('delete_message', { messageId: m.id }); setPicked(null) }}>Delete</button>
+                  {m.role !== 'host' && m.username !== me && (
+                    <>
+                      <button type="button" className="lh-chip" onClick={() => { onMod('mute_user', { username: m.username, on: !muted(m.username) }); setPicked(null) }}>{muted(m.username) ? 'Unmute' : 'Mute'}</button>
+                      <button type="button" className="lh-chip lh-chip-danger" onClick={() => { onMod('block_user_show', { username: m.username, on: !blocked(m.username) }); setPicked(null) }}>{blocked(m.username) ? 'Unblock' : 'Block'}</button>
+                    </>
+                  )}
+                </div>
+              )}
+            </li>
+          ))}
           <li ref={end} aria-hidden="true" />
         </ul>
+        <div className="lh-replies" role="group" aria-label="Pinned replies">
+          <span className="lh-muted lh-small-label">Pinned replies: one tap posts and pins</span>
+          <div className="lh-replies-list">
+            {replies.map((r, i) => (
+              <span key={i} className="lh-reply">
+                <button type="button" className="lh-chip" onClick={() => onSend(r, true)}>{r}</button>
+                {i >= (cfg.pinned_replies || []).length && <button type="button" className="lh-reply-x" aria-label={`Remove "${r}"`} onClick={() => saveOwn(own.filter(x => x !== r))}>×</button>}
+              </span>
+            ))}
+            {adding
+              ? <form className="lh-reply-add" onSubmit={e => { e.preventDefault(); const v = draft.trim(); if (v) saveOwn([...own.filter(x => x !== v), v].slice(-10)); setDraft(''); setAdding(false) }}>
+                  <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={200} placeholder="Your reply" aria-label="Your reply" autoFocus />
+                  <button type="submit" className="lh-chip lh-chip-on">Save</button>
+                </form>
+              : <button type="button" className="lh-chip" onClick={() => setAdding(true)}>+ Add your own</button>}
+          </div>
+        </div>
         <form className="lh-chat-form" onSubmit={e => { e.preventDefault(); if (text.trim()) { onSend(text.trim()); setText('') } }}>
           <input value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Say something to the room" aria-label="Message" />
           <button type="submit" className="btn-primary">Send</button>
