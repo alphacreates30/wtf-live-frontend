@@ -10,8 +10,8 @@
 .ao-list { display: flex; flex-direction: column; gap: 1rem; }
 .ao-group { border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--line); }
 .ao-bundled { border: 2px solid var(--ink); }
-.ao-bundle-header { background: var(--surface-2); padding: 0.6rem 1rem; display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--ink); }
-.ao-bundle-footer { background: var(--surface); padding: 0.6rem 1rem; display: flex; gap: 0.75rem; border-top: 1px solid var(--line); }
+.ao-bundle-header { background: var(--surface-2); padding: 0.6rem 1rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+.ao-bundle-footer { background: var(--surface); padding: 0.6rem 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem; border-top: 1px solid var(--line); }
 .ao-order { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--surface); border-bottom: 1px solid var(--line); transition: background 0.15s; }
 .ao-order:last-child { border-bottom: none; }
 .ao-order-selected { background: var(--surface-2); }

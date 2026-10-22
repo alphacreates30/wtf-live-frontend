@@ -78,6 +78,7 @@
 }
 .rf-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .rf-consent { font-size: var(--fs-12); color: var(--muted); }
+.rf-consent a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .rf-submit { align-self: flex-start; min-width: 140px; }
 .rf-done { font-size: var(--fs-16); padding: var(--space-4); }
 .rf-done:focus { outline: none; }

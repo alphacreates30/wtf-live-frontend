@@ -72,3 +72,5 @@
 .login-forgot { align-self: center; font-size: 0.9rem; color: var(--muted); text-decoration: underline; }
 .login-forgot:hover { color: var(--ink); }
 .login-link-btn { display: block; text-align: center; text-decoration: none; }
+.login-agree { text-align: center; line-height: 1.5; }
+.login-agree a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }

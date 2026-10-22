@@ -14,6 +14,10 @@
 .lpk-num { flex: none; min-width: 52px; }
 .lpk-lot-title { flex: 1; overflow-wrap: anywhere; }
 .lpk-flag { color: var(--danger); font-size: var(--fs-12); font-weight: var(--fw-semibold); }
+.lpk-boxed { color: var(--muted); font-size: var(--fs-12); flex: none; }
+.lpk-left { margin: 0 0 var(--space-2); font-size: var(--fs-14); font-weight: var(--fw-semibold); }
+.lpk-left-done { color: var(--muted); font-weight: normal; }
+.lpk-note { color: var(--muted); font-size: var(--fs-14); margin: 0 0 var(--space-3); max-width: 70ch; }
 .lpk-winners { margin-top: var(--space-6); }
 .lpk-table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
 .lpk-table th, .lpk-table td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }

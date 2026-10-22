@@ -14,6 +14,21 @@ function storeAuction(v) {
   try { localStorage.setItem(AUCTION_KEY, v) } catch { /* per-viewer convenience only */ }
 }
 
+// One box = one label bought. Lots with no label yet are still to ship.
+const boxKey = o => o.shippo_transaction_id || o.label_url || null
+const stillToShip = o => o.status === 'pending' && !boxKey(o)
+function boxesOf(items) {
+  const boxes = []
+  for (const o of items) {
+    const k = boxKey(o)
+    if (!k) continue
+    const b = boxes.find(x => x.key === k)
+    if (b) b.count++
+    else boxes.push({ key: k, label_url: o.label_url, count: 1 })
+  }
+  return boxes
+}
+
 export default function AdminOrders({ auctionId } = {}) {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -96,8 +111,8 @@ export default function AdminOrders({ auctionId } = {}) {
     })
   }
 
-  function selectGroup(groupId) {
-    const ids = orders.filter(o => o.group_id === groupId).map(o => o.id)
+  function selectGroup(groupId, { unshippedOnly = false } = {}) {
+    const ids = orders.filter(o => o.group_id === groupId && (!unshippedOnly || stillToShip(o))).map(o => o.id)
     setSelected(new Set(ids))
   }
 
@@ -192,13 +207,15 @@ export default function AdminOrders({ auctionId } = {}) {
   }
   const silentReload = () => loadOrders({ silent: true })
 
-  // Group orders visually: group_id groups together, null = standalone
+  // Group orders visually: group_id groups together, null = standalone. A group can go out in more than one box
+  // (as few as possible): each label bought is one box, and the lots without one are still to ship.
   const groups = []
   const seen = new Set()
   for (const o of orders) {
     if (o.group_id && !seen.has(o.group_id)) {
       seen.add(o.group_id)
-      groups.push({ key: o.group_id, items: orders.filter(x => x.group_id === o.group_id), grouped: true })
+      const items = orders.filter(x => x.group_id === o.group_id)
+      groups.push({ key: o.group_id, items, grouped: true, boxes: boxesOf(items), still: items.filter(stillToShip).length })
     } else if (!o.group_id) {
       groups.push({ key: o.id, items: [o], grouped: false })
     }
@@ -321,7 +338,11 @@ export default function AdminOrders({ auctionId } = {}) {
             <div key={group.key} className={`ao-group ${group.grouped ? 'ao-bundled' : ''}`}>
               {group.grouped && (
                 <div className="ao-bundle-header">
-                  <span>📦 Bundle — {group.items.length} items · {group.items[0].ship_name}</span>
+                  <span>
+                    📦 Bundle — {group.items.length} items · {group.items[0].ship_name}
+                    {group.boxes.length > 0 && <> · {group.boxes.length} {group.boxes.length === 1 ? 'box' : 'boxes'} labelled</>}
+                    {group.boxes.length > 0 && group.still > 0 && <strong className="ao-still"> · {group.still} {group.still === 1 ? 'lot' : 'lots'} still to ship</strong>}
+                  </span>
                   <span className="ao-bundle-total">
                     {/* total_cents (hammer + premium) is what's actually charged - final_bid alone
                         undercounts a bundle's real total by the premium on every item in it. */}
@@ -355,7 +376,9 @@ export default function AdminOrders({ auctionId } = {}) {
                       </span>
                       <span className="ao-date">{new Date(order.created_at).toLocaleDateString()}</span>
                       {order.tracking_number && (
-                        <span className="ao-tracking">Tracking: {order.tracking_number}</span>
+                        <span className="ao-tracking">
+                          {group.grouped && group.boxes.length > 1 && `Box ${group.boxes.findIndex(b => b.key === boxKey(order)) + 1} · `}Tracking: {order.tracking_number}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -415,12 +438,14 @@ export default function AdminOrders({ auctionId } = {}) {
               ))}
               {group.grouped && (
                 <div className="ao-bundle-footer">
-                  <button className="btn-sm" onClick={() => selectGroup(group.key)}>Select all in bundle</button>
-                  {group.items[0].label_url && (
-                    <a href={group.items[0].label_url} target="_blank" rel="noreferrer" className="btn-sm">
-                      Print Bundle Label
+                  {group.boxes.length > 0 && group.still > 0
+                    ? <button className="btn-sm" onClick={() => selectGroup(group.key, { unshippedOnly: true })}>Select the {group.still} still to ship</button>
+                    : group.boxes.length === 0 && <button className="btn-sm" onClick={() => selectGroup(group.key)}>Select all in bundle</button>}
+                  {group.boxes.map((b, i) => (
+                    <a key={b.key} href={b.label_url} target="_blank" rel="noreferrer" className="btn-sm">
+                      {group.boxes.length === 1 && group.still === 0 ? 'Print Bundle Label' : `Print box ${i + 1} label (${b.count} ${b.count === 1 ? 'lot' : 'lots'})`}
                     </a>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
@@ -431,7 +456,7 @@ export default function AdminOrders({ auctionId } = {}) {
       {shipModal && (
         <div className="ao-ship-backdrop" onClick={shipModal.working ? undefined : closeShipModal}>
           <div className="ao-ship-modal card" onClick={e => e.stopPropagation()}>
-            <h2 className="ao-ship-title">Ship {shipModal.orderIds.length > 1 ? `${shipModal.orderIds.length} items` : 'item'}</h2>
+            <h2 className="ao-ship-title">Ship {shipModal.orderIds.length > 1 ? `a box of ${shipModal.orderIds.length} lots` : 'item'}</h2>
 
             {shipModal.step === 'input' && (
               <>
@@ -477,19 +502,25 @@ export default function AdminOrders({ auctionId } = {}) {
                   </div>
                   <div className="ao-ship-quote-row ao-ship-quote-total">
                     <span>Postage to charge the buyer</span>
-                    <strong>${(shipModal.quote.amount_cents / 100).toFixed(2)}</strong>
+                    <strong>{shipModal.quote.buyer_pays_cents === 0 ? 'Free (offer)' : `$${(shipModal.quote.amount_cents / 100).toFixed(2)}`}</strong>
                   </div>
                 </div>
+                {shipModal.quote.buyer_pays_cents === 0 ? (
+                  <p className="ao-ship-sub">
+                    This box ships free for the buyer ({shipModal.quote.shipping_promo === 'bundle_free_shipping' ? 'bundle bonus' : 'free-shipping offer'}). Confirming buys this <strong>${(shipModal.quote.amount_cents / 100).toFixed(2)}</strong> label; the buyer isn't charged.
+                  </p>
+                ) : (
                 <p className="ao-ship-sub">
                   Confirming will charge the buyer's card on file <strong>${(shipModal.quote.amount_cents / 100).toFixed(2)}</strong> for postage, and only on a successful charge, buy this label.
                 </p>
+                )}
                 {shipModal.error && <p className="ao-error">{shipModal.error}</p>}
                 <div className="ao-ship-actions">
                   <button className="btn-ghost" onClick={() => setShipModal(m => ({ ...m, step: 'input', quote: null }))} disabled={shipModal.working}>
                     Back
                   </button>
                   <button className="btn-primary" onClick={handleConfirmChargeAndBuy} disabled={shipModal.working}>
-                    {shipModal.working ? 'Charging…' : `Charge $${(shipModal.quote.amount_cents / 100).toFixed(2)} and buy label`}
+                    {shipModal.working ? 'Charging…' : shipModal.quote.buyer_pays_cents === 0 ? 'Buy label (free for the buyer)' : `Charge $${(shipModal.quote.amount_cents / 100).toFixed(2)} and buy label`}
                   </button>
                 </div>
               </>

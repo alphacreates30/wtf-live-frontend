@@ -313,3 +313,10 @@
 .live-now-cta { font-weight: var(--fw-semibold); flex: none; }
 @keyframes live-now-pulse { 50% { opacity: 0.35; } }
 @media (prefers-reduced-motion: reduce) { .live-now-dot { animation: none; } }
+
+/* "More on how it works" under the steps (and, while live shows are on, how they work). */
+.how-more { margin: var(--space-5) 0 0; text-align: center; font-size: var(--fs-14); color: var(--muted); }
+.how-more a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* The /how-it-works page: the steps, then the live-shows copy. */
+.how-steps-page { padding: 0; margin: 0; }
+.how-live { margin-top: var(--space-8); }

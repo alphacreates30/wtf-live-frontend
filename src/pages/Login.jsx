@@ -111,6 +111,11 @@ export default function Login() {
           <button type="submit" className="btn-primary login-submit" disabled={loading}>
             {loading ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}
           </button>
+          {mode === 'register' && (
+            <p className="login-hint login-agree">
+              By creating an account you agree to our <Link to="/terms" target="_blank">Terms of Sale</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link>.
+            </p>
+          )}
           {mode === 'login' && <Link to="/forgot-password" className="login-forgot">Forgot password?</Link>}
         </form>
       </div>

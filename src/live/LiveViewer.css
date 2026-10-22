@@ -44,6 +44,7 @@
 .vr-panel-title { font-size: var(--fs-24); margin: 4px 0 var(--space-2); }
 .vr-ship { font-size: var(--fs-14); margin: var(--space-2) 0 0; }
 .vr-bottom .vr-ship { color: var(--on-panel-muted); margin: 0 0 var(--space-2); }
+.vr-how { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 
 .vr-chat { position: absolute; left: var(--space-3); right: 30%; bottom: 120px; max-height: 30%; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28px); mask-image: linear-gradient(to bottom, transparent, #000 28px); list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; font-size: var(--fs-14); pointer-events: none; }
 /* A short stack over the video: two lines a message at most, the newest at the bottom (the whole chat is in the sheet). */

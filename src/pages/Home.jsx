@@ -12,6 +12,7 @@ import { usePreview, PreviewSwitch } from '../preview/PreviewContext'
 import '../components/home/home.css'
 import PhotoPlaceholder from '../components/PhotoPlaceholder'
 import { usePointsConfig, pointsSentence } from '../points/points'
+import { HOW_STEPS as STEPS } from '../content/howItWorks'
 
 const HOME_REFRESH_MS = 30_000
 
@@ -21,14 +22,6 @@ function viewAll(lots) {
   const ids = [...new Set(lots.map(l => l.auction_id))]
   return ids.length === 1 ? `/auction/${ids[0]}` : '/auctions'
 }
-
-const STEPS = [
-  ['Set your max', 'We bid for you, only as high as needed.'],
-  // "two minutes" = the backend's SOFT_CLOSE_MINUTES (server.js). Change both together.
-  ['Watch the clock', 'A late bid adds two minutes. No sniping.'],
-  ['Win & pay', 'One invoice per auction, charged automatically.'],
-  ['Ship or pick up', 'Packed with care, tracked to your door.'],
-]
 
 // Several auctions can be open at once, ending on different days. The
 // homepage features none over the others: one card each (1 = wide, 2-3 side
@@ -79,6 +72,9 @@ function Asleep({ sample }) {
 
 export default function Home() {
   const pointsCfg = usePointsConfig()
+  // The "How live shows work" link only while live shows are switched on.
+  const [liveOn, setLiveOn] = useState(false)
+  useEffect(() => { api.getConfig().then(c => setLiveOn(!!c.live_enabled)).catch(() => {}) }, [])
   const [real, setHome] = useState(null)
   const [error, setError] = useState('')
   const location = useLocation()
@@ -179,6 +175,7 @@ export default function Home() {
         </ol>
         {/* G2: one line about points, only while they are switched on. Wording: Cowork drafts, Albert approves. */}
         {pointsCfg?.enabled && <p className="how-points">{pointsSentence(pointsCfg)}</p>}
+        <p className="how-more"><Link to="/how-it-works">More on how it works</Link>{liveOn && <> · <Link to="/how-it-works#live-shows">How live shows work</Link></>}</p>
       </section>
 
       <section className="consign" aria-labelledby="consign-h">

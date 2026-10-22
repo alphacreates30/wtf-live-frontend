@@ -7,7 +7,7 @@ import '../pages/Login.css'
 // Accounts made before that was required are stopped here, once, until they
 // add one. Fails open: if the check itself can't run (offline, server
 // mid-deploy), the site stays usable and the gate asks again next visit.
-const EXEMPT = ['/login', '/terms', '/forgot-password', '/reset-password']
+const EXEMPT = ['/login', '/terms', '/privacy', '/forgot-password', '/reset-password']
 
 export default function EmailGate({ children }) {
   const token = localStorage.getItem('wtf_token')

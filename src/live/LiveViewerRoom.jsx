@@ -19,7 +19,17 @@ import './LiveViewer.css'
 // The card form loads Stripe.js: only when a buyer opens it, never for every viewer.
 const CardOnFileStandalone = lazy(() => import('../components/CardOnFile').then(m => ({ default: m.CardOnFileStandalone })))
 const BID_TIMEOUT_MS = 6000
-const SHIP_LINE = 'Everything you win in this show ships together in one box. Postage is charged once, after packing.'
+const SHIP_LINE = 'We combine your wins from this show into as few boxes as possible. Postage is charged at cost after packing.'
+const fmtWhen = iso => new Date(iso).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+// What this show offers (the host sets it per show; default ship only). The pickup town only, never the street (B6).
+function fulfilmentLine(a) {
+  const town = a.pickup_town ? ` in ${a.pickup_town}` : ''
+  const when = a.pickup_starts_at && a.pickup_ends_at ? `, ${fmtWhen(a.pickup_starts_at)} to ${fmtWhen(a.pickup_ends_at)}` : ''
+  if (a.fulfillment_mode === 'pickup') return `Pickup only for this show${town}${when}. The exact address is sent to winners.`
+  if (a.fulfillment_mode === 'both') return `Ship or pick up${town}: you choose before your first bid. ${SHIP_LINE}`
+  return SHIP_LINE
+}
+const HOW_LIVE = '/how-it-works#live-shows'
 const CARD_CODES = ['no_card', 'card_not_verified', 'payment_failed']
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
@@ -188,6 +198,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
   const leading = !!open && st.you_lead
   const nextBid = open?.next_bid ?? null
   const showShipLine = !confirmed
+  const shipLine = fulfilmentLine(auction)
   const messages = chat.filter(m => m.type === 'msg' && !hidden.has(m.username))
 
   return (
@@ -221,7 +232,8 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
             <p className="wtf-label">{st.starts_at ? `Starts ${new Date(st.starts_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : 'Starting soon'}</p>
             <h1 className="vr-panel-title">{st.title}</h1>
             <p className="vr-muted">Each lot sells on a short clock. No buyer's premium: your winning bid is the price. You can pre-bid on any lot now.</p>
-            <p className="vr-ship">{SHIP_LINE}</p>
+            <p className="vr-ship">{shipLine}</p>
+            <p className="vr-ship"><Link to={HOW_LIVE} className="vr-how">How live shows work</Link></p>
             {!st.rehearsal && <PhoneAlerts compact />}
           </section>
         )}
@@ -267,7 +279,7 @@ export default function LiveViewerRoom({ auction, rehearsal }) {
       <footer className="vr-bottom">
         {open && (
           <>
-            {showShipLine && <p className="vr-ship">{SHIP_LINE}</p>}
+            {showShipLine && <p className="vr-ship">{shipLine} <Link to={HOW_LIVE} className="vr-how">How live shows work</Link></p>}
             {watchOnly ? (
               <div className="vr-bidrow vr-watch-only">
                 <Link className="btn-bid vr-bid vr-finish" to="/profile-setup">Finish your profile to bid</Link>

@@ -183,9 +183,9 @@ export default function RequestForm({ service = 'general', about = '' }) {
         <input id="rf-website" tabIndex={-1} autoComplete="off" value={f.website} onChange={set('website')} />
       </div>
 
-      {/* TODO(Privacy: A4): link the privacy policy here when its page exists. */}
       <p className="rf-consent">
         By sending this, you agree we can use these details and photos to answer your request. We never share them or show them on the site.
+        {' '}<a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
       </p>
 
       {formError && <p className="error-msg" role="alert">{formError}</p>}

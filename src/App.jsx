@@ -27,6 +27,8 @@ const AdminOrders = lazy(() => import('./pages/AdminOrders'))
 const MyBids = lazy(() => import('./pages/MyBids'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Terms = lazy(() => import('./pages/Terms'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const HowItWorks = lazy(() => import('./pages/HowItWorks'))
 const AccountDeleted = lazy(() => import('./pages/AccountDeleted'))
 const Watching = lazy(() => import('./pages/Watching'))
 const NotificationPrefs = lazy(() => import('./pages/NotificationPrefs'))
@@ -81,6 +83,8 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
         {/* Services (F5): the overview, one page per service, and Contact. Public, no login. */}
         <Route path="/services" element={<Services />} />
         <Route path="/services/:slug" element={<Services />} />

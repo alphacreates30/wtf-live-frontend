@@ -13,9 +13,11 @@ function toDateTimeLocal(iso) {
 }
 
 export default function AuctionDetails({ auction, onSaved }) {
-  // An auction that offers pickup but has no window yet gets the default (its close -> close + 7 days), shown here
-  // and saved with the settings. A window already saved, or edited here, is left alone.
-  const closeLocal = toDateTimeLocal(auction.ends_at)
+  // An auction that offers pickup but has no window yet gets the default (its close -> close + 7 days; a live show,
+  // which has no close, from its start), shown here and saved with the settings. A window already saved, or edited
+  // here, is left alone.
+  const live = auction.mode === 'live'
+  const closeLocal = toDateTimeLocal(live ? auction.starts_at : auction.ends_at)
   const offersPickup = m => m === 'pickup' || m === 'both'
   const savedWindow = !!(auction.pickup_starts_at || auction.pickup_ends_at)
   const [pickupEdited, setPickupEdited] = useState(savedWindow)
@@ -109,7 +111,7 @@ export default function AuctionDetails({ auction, onSaved }) {
           <div className="form-group">
             <label>Pickup Town</label>
             <input name="pickup_town" value={form.pickup_town} onChange={handleChange} placeholder="Miami, FL" maxLength={80} required />
-            <p className="form-hint">What everyone else sees before the auction ends.</p>
+            <p className="form-hint">What everyone else sees{live ? ' on the show page' : ' before the auction ends'}.</p>
           </div>
           <div className="form-group">
             <label>Pickup Window Starts</label>
@@ -118,7 +120,7 @@ export default function AuctionDetails({ auction, onSaved }) {
           <div className="form-group">
             <label>Pickup Window Ends</label>
             <input name="pickup_ends_at" type="datetime-local" value={form.pickup_ends_at} onChange={handleChange} required />
-            {!pickupEdited && closeLocal && <p className="form-hint">Pre-filled from the auction's close to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>}
+            {!pickupEdited && closeLocal && <p className="form-hint">Pre-filled from {live ? "the show's start" : "the auction's close"} to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>}
           </div>
         </>
       )}

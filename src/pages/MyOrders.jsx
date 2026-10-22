@@ -104,18 +104,41 @@ export default function MyOrders() {
     }
   }
 
-  function renderShippingBlock(o, showLabel) {
-    if (o.fulfillment_choice !== 'shipping') return null
+  // One box = one label = one tracking number. Your wins can go in more than one box (as few as possible): each box
+  // shows its own postage and tracking, once, with the lots in it.
+  const boxSize = new Map()
+  for (const o of orders) if (o.tracking_number) boxSize.set(o.tracking_number, (boxSize.get(o.tracking_number) || 0) + 1)
+  function shippingChunks(list) {
+    const chunks = new Map()
+    for (const o of list) {
+      if (o.fulfillment_choice !== 'shipping') continue
+      const key = o.tracking_number ? `box:${o.tracking_number}` : `left:${o.shipping_payment_status || 'unpaid'}`
+      if (!chunks.has(key)) chunks.set(key, [])
+      chunks.get(key).push(o)
+    }
+    return [...chunks.values()]
+  }
+
+  function renderShippingBlock(chunk, showLabel, boxNo) {
+    const o = chunk[0]
+    const inBox = o.tracking_number ? boxSize.get(o.tracking_number) || 1 : 1
+    const postage = o.shipping_promo ? ' — free (offer)'
+      : o.shipping_cost_cents != null ? ` — ${fmt(o.shipping_cost_cents)}${inBox > 1 ? ` for this box of ${inBox} lots` : ''}`
+      : ' — charged separately once packed'
     const shipStatusKey = o.shipping_payment_status || 'unpaid'
     const shipClass = PAYMENT_STATUS_CLASS[shipStatusKey] || PAYMENT_STATUS_CLASS.unpaid
     const shipLabel = SHIPPING_STATUS_LABEL[shipStatusKey] || shipStatusKey
     const link = trackingLink(o)
     return (
       <div key={o.id} className="order-block">
-        {showLabel && <div className="order-ship-lot">{o.item_title}</div>}
+        {showLabel && (
+          <div className="order-ship-lot">
+            {boxNo ? `Box ${boxNo}: ` : !o.tracking_number && boxNo === 0 ? 'Still to ship: ' : ''}{chunk.map(x => x.item_title).join(', ')}
+          </div>
+        )}
         <div className="order-line">
           <span className="muted">
-            Postage{o.shipping_promo ? ' — free (offer)' : o.shipping_cost_cents != null ? ` — ${fmt(o.shipping_cost_cents)}` : ' — charged separately once packed'}
+            Postage{postage}
           </span>
           <span className={`badge pay-badge ${shipClass}`}>{shipLabel}</span>
         </div>
@@ -233,9 +256,13 @@ export default function MyOrders() {
               <p className="error-msg inline-error">{changeError.message}</p>
             )}
 
-            {/* Shipping/tracking stays per lot - a bundle can be split across
-                different shipments, so it can't be rolled up like payment. */}
-            {group.orders.map(o => renderShippingBlock(o, group.invoice))}
+            {/* Shipping/tracking is per box, not per invoice - an invoice's lots can go out in more than one box. */}
+            {(() => {
+              const chunks = shippingChunks(group.orders)
+              const boxed = chunks.filter(c => c[0].tracking_number)
+              return chunks.map(c => renderShippingBlock(c, group.invoice,
+                boxed.length > 1 && c[0].tracking_number ? boxed.indexOf(c) + 1 : boxed.length ? 0 : null))
+            })()}
           </div>
         )
       })}

@@ -98,6 +98,8 @@ export default function HostDashboard() {
     if (name === 'pickup_starts_at' || name === 'pickup_ends_at') setPickupEdited(true)
     setForm(prev => {
       const next = { ...prev, [name]: value }
+      // A live show starts as ship only (the host can still choose pickup only or both for this show).
+      if (name === 'kind' && value === 'live' && !prev.fulfillment_mode) next.fulfillment_mode = 'shipping'
       const offersPickup = next.fulfillment_mode === 'pickup' || next.fulfillment_mode === 'both'
       // A live show's pickup window follows its start (it has no end time); a timed auction's, its close.
       const anchor = next.kind === 'live' ? next.starts_at : next.ends_at
@@ -398,10 +400,10 @@ export default function HostDashboard() {
                     <div className="form-group">
                       <label>Pickup Window Ends *</label>
                       <input name="pickup_ends_at" type="datetime-local" value={form.pickup_ends_at} onChange={handleChange} required />
-                      <p className="form-hint">Pre-filled from the auction's close to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>
+                      <p className="form-hint">Pre-filled from {isLive ? "the show's start" : "the auction's close"} to {PICKUP_DAYS} days after (the Terms of Sale window). You can change it.</p>
                     </div>
                   </div>
-                  <p style={{fontSize:'0.8rem',opacity:0.7}}>Pickup must end after the auction closes.</p>
+                  <p style={{fontSize:'0.8rem',opacity:0.7}}>{isLive ? 'Viewers see the pickup town on the show page; winners who chose pickup get the address.' : 'Pickup must end after the auction closes.'}</p>
                 </>
               )}
 

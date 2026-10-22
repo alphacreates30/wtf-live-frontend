@@ -29,7 +29,7 @@ export default function Footer() {
         <nav className="footer-col" aria-labelledby="footer-buy">
           <h2 id="footer-buy" className="footer-col-title">Buy</h2>
           <Link to="/auctions" className="footer-link">Live auctions</Link>
-          <Link to="/#how-it-works" className="footer-link">How bidding works</Link>
+          <Link to="/how-it-works" className="footer-link">How bidding works</Link>
           {/* TODO(Results): past results page, when built. */}
         </nav>
 
@@ -44,8 +44,9 @@ export default function Footer() {
         <nav className="footer-col" aria-labelledby="footer-help">
           <h2 id="footer-help" className="footer-col-title">Help</h2>
           <Link to="/terms" className="footer-link">Terms of sale</Link>
+          <Link to="/privacy" className="footer-link">Privacy policy</Link>
           <Link to="/contact" className="footer-link">Contact</Link>
-          {/* TODO(FAQ), TODO(Privacy: A4 privacy policy), TODO(About): link each when its page exists. */}
+          {/* TODO(FAQ), TODO(About): link each when its page exists. */}
         </nav>
       </div>
     </footer>

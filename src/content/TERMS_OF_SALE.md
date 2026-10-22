@@ -3,9 +3,9 @@
 **Effective [EFFECTIVE DATE]**
 
 These Terms of Sale govern all purchases made through WhatTheFind Live
-(whatthefind.live), operated by [LEGAL ENTITY NAME] ("we," "us," "the
-auctioneer"). By registering an account or placing a bid, you agree to these
-terms.
+(whatthefind.live), operated by [LEGAL ENTITY NAME], doing business as What The
+Find ("we," "us," "the auctioneer"). By registering an account or placing a bid,
+you agree to these terms.
 
 We are the seller of every lot offered on this site. This is not a marketplace
 listing other people's goods — you are buying directly from us.
@@ -84,7 +84,35 @@ may result in account suspension.
 
 ## 5. Collection and shipping
 
-At the close of each auction you choose **local pickup** or **shipping**.
+**You choose local pickup or shipping before you place your first bid**, and
+that choice applies to every lot you win in that auction. You cannot split an
+order — all your lots from one auction travel the same way.
+
+Where an auction offers only one method, that method is stated on the auction
+page and applies automatically.
+
+You may change your choice at any time until the auction closes. After that,
+contact us.
+
+### Shipping
+
+Shipping is by USPS with tracking.
+
+**You pay the actual postage cost. We do not add a handling, packing or
+processing fee.** All lots you win in one auction are combined into as few
+parcels as possible.
+
+**Postage is charged separately from your lots.** Your card is charged for the
+hammer price and buyer's premium when the auction closes. Once your lots are
+packed and weighed, we charge the exact postage as a separate payment and then
+send them. If your lots need more than one parcel, each parcel's postage is
+charged separately at cost. You will be emailed each postage amount. Nothing is
+shipped before its postage payment succeeds.
+
+Tracking details are emailed when the label is created. Risk of loss passes to
+the buyer on delivery to the carrier. We are not responsible for carrier delays.
+
+We ship within the United States only.
 
 ### Local pickup
 
@@ -95,25 +123,16 @@ and times shown on the auction page before you bid and repeated in your
 winning-bid email.
 
 If you cannot collect within the window, contact us **before it closes** and we
-will arrange shipping at your cost, provided the item is shippable. We would far
-rather ship you your lot than have anyone lose it.
+will ship your lots at cost instead, provided they are shippable. We would far
+rather ship you your lots than have anyone lose them.
 
 **Lots not collected within the pickup window, and for which no shipping
 arrangement has been made, are forfeited.** Forfeited lots may be resold or
 disposed of, and no refund is due. We will send at least one reminder before the
 window closes.
 
-We understand this is strict. It exists because we do not have storage, and it
-is disclosed before you bid so you can decide accordingly. If you are unsure you
-can collect in time, choose shipping.
-
-### Shipping
-
-Shipping is by USPS with tracking, at the buyer's cost. Tracking details are
-emailed when the label is created. Risk of loss passes to the buyer on delivery
-to the carrier. We are not responsible for carrier delays.
-
-We ship within the United States only.
+This is strict, and it is why we ask you to choose before bidding rather than
+after: if you are not confident you can collect within 7 days, choose shipping.
 
 ---
 
@@ -186,7 +205,37 @@ These terms are governed by the laws of [STATE].
 
 ---
 
-## 11. Changes
+## 11. Live shows
+
+These terms apply to live shows as well, with these differences:
+
+**Bidding.** Each lot is offered on a countdown chosen by us. A bid placed with 5 seconds or less remaining extends
+the countdown by 5 seconds, unless the lot is marked "Sudden death". When the countdown ends, the lot is sold to the
+highest bidder. Where two maximum bids are equal, the bidder who reached that amount first wins. We may pass a lot
+(end it without a sale) at any time before it sells. Every bid is binding.
+
+**Price.** There is **no buyer's premium** and **no reserve** in live shows. The price of a lot is the winning bid,
+plus sales tax where applicable (section 7).
+
+**Usernames.** In live shows, your username is shown to viewers with your bids, wins and chat messages. Your maximum
+bid and personal details are never shown.
+
+**Payment.** Your card is charged for each lot when it sells. If a charge is declined, you may not bid in that show
+until you provide a card that we can verify, and we may charge the new card for the lot. If payment is not completed,
+we may cancel that sale and offer the lot again, during the show or later; if we do, you will not be charged for
+that lot.
+
+**Pre-bids.** Pre-bids placed before a show apply automatically when the lot is offered. A lot never opens at your
+maximum. If a show has not started within 24 hours of its scheduled time, pre-bids for it are cancelled.
+
+**Shipping.** Lots you win in one show are combined into as few parcels as practical; some orders may need more
+than one. Postage for each parcel is charged at cost after packing (section 5).
+
+**Conduct.** We may remove chat messages and mute or remove any participant from a show at our discretion. We may run giveaways
+and special offers during a show; each one's rules are announced at the time, and no purchase is necessary to enter a
+giveaway. Viewers may not arrange sales with each other or post contact details in chat.
+
+## 12. Changes
 
 We may update these terms. The version in force for any lot is the version
 displayed and acknowledged at the time you bid.
