@@ -109,7 +109,7 @@ send them. If your lots need more than one parcel, each parcel's postage is
 charged separately at cost. You will be emailed each postage amount. Nothing is
 shipped before its postage payment succeeds.
 
-Tracking details are emailed when the label is created. Risk of loss passes to
+Tracking details are emailed once the carrier has your parcel. Risk of loss passes to
 the buyer on delivery to the carrier. We are not responsible for carrier delays.
 
 We ship within the United States only.
